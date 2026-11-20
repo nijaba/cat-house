@@ -18,8 +18,8 @@ if [[ "$what" == stl || "$what" == all ]]; then
     while (( $(jobs -r | wc -l) >= jobs_max )); do sleep 1; done
     run "$p" -D "part=\"$p\"" &
   done
-  # back corners with the mount bolt holes (tree or fence)
-  for p in corner_bl corner_br; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
+  # mount-side (right) corners and roof panels: bolt holes, no windows, short eave (tree or fence)
+  for p in corner_fr corner_br roof_fr roof_br; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
   wait
 fi
 
@@ -27,8 +27,8 @@ if [[ "$what" == png || "$what" == all ]]; then
   common=(--colorscheme=Tomorrow)
   "$OS" -o renders/assembly_front.png --imgsize=1600,1300 --camera=0,0,110,72,0,330,1650 "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_front_gable.png --imgsize=1600,1300 --camera=0,0,120,68,0,8,1750 "${common[@]}" cat_house.scad
-  "$OS" -o renders/assembly_back_fence.png --imgsize=1600,1300 --camera=0,60,60,74,0,140,2100 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
-  "$OS" -o renders/assembly_back_tree.png --imgsize=1600,1300 --camera=0,60,60,74,0,140,2200 -D 'mount="tree"' -D 'show_legs=false' "${common[@]}" cat_house.scad
+  "$OS" -o renders/assembly_fence_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2200 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
+  "$OS" -o renders/assembly_tree_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2300 -D 'mount="tree"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/exploded.png --imgsize=1600,1400 --camera=0,0,150,68,0,330,2500 -D 'part="exploded"' "${common[@]}" cat_house.scad
   # single-part views from the exported STL (needs ./build.sh stl first)
   if [[ -f stl/corner_fl.stl ]]; then

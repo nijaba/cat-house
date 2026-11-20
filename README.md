@@ -14,7 +14,7 @@ none needs supports.
 
 | Fence mount | Tree mount |
 |---|---|
-| ![Fence](renders/assembly_back_fence.png) | ![Tree](renders/assembly_back_tree.png) |
+| ![Fence](renders/assembly_fence_mount.png) | ![Tree](renders/assembly_tree_mount.png) |
 
 ## The cushion it is sized for
 
@@ -40,13 +40,17 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 - **Ridge cap (two pieces) and a saddle** over the joint between them.
 - **Door surround** (hood, step and keystone) and an **inner ring**, which clamp the wall between them.
 - **Four tapered corner legs and a centre leg.** They hold the floor 60 mm off the ground.
-- **Optional mount**, chosen with `mount = "none" | "tree" | "fence"`:
+- **Optional mount**, chosen with `mount = "none" | "tree" | "fence"`. It goes on a long (eave) wall,
+  the right one by default (`mount_side = "right" | "left"`). That leaves the door in the front gable, on
+  the side next to the post or trunk, so a cat coming along the fence or down the tree can reach it.
   - *fence*: a French cleat. One half bolts to the house and the other screws to a post or rail. A
     standoff keeps the house plumb, and two long screws through it stop the house from lifting off in a
     storm.
   - *tree*: two rails with a V-groove that centres them on the trunk, and a channel each for a 25 mm
     ratchet strap or hose clamps.
-  - Either mount needs the two `_mount` versions of the back corners, which add the bolt holes.
+  - A mounted house uses the `_mount` versions of the two right-hand corner modules and the two right-hand
+    roof panels. Those corners have flat pads and bolt holes for the rails and no windows. Those roof
+    panels have a 15 mm eave instead of 50 mm, so the roof clears the post or trunk.
 
 ### Weather details
 
@@ -80,9 +84,9 @@ To export one part from the command line:
 
 | STL | Qty | Size (mm) | Orientation |
 |---|---|---|---|
-| `corner_fl`, `corner_fr` | 1 each | 239 × 236 × 317 | as exported: floor down |
-| `corner_bl`, `corner_br` (or `_mount` versions) | 1 each | 239 × 225 × 317 | as exported: floor down |
-| `roof_fl`, `roof_fr`, `roof_bl`, `roof_br` | 1 each | 315 × 272 × 20 | as exported: shingles up |
+| `corner_fl`, `corner_fr` (or `corner_fr_mount`) | 1 each | 239 × 236 × 317 | as exported: floor down |
+| `corner_bl`, `corner_br` (or `corner_br_mount`) | 1 each | 239 × 225 × 317 | as exported: floor down |
+| `roof_fl`, `roof_bl`, `roof_fr`, `roof_br` (or `roof_fr_mount`, `roof_br_mount`, 275 long) | 1 each | 315 × 272 × 20 | as exported: shingles up |
 | `ridge_front`, `ridge_back` | 1 each | 69 × 272 × 42 | as exported: one leg flat |
 | `ridge_saddle` | 1 | 63 × 50 × 39 | as exported |
 | `door_surround` | 1 | Ø216 × 50 | as exported: flange down, hood up |
@@ -161,13 +165,16 @@ straps with stainless hardware (or stainless worm-drive hose clamps chained to t
    a thin bead of neutral-cure outdoor silicone along the panel tops before fitting the caps.
 8. **Mount (optional).**
    - *Fence:* screw the post cleat level to the post or rail, with its bevel up and facing out. Bolt the
-     house cleat (top) and standoff (bottom) to the back wall. Hang the house on the cleat, then drive the
-     two long screws from inside, through the back wall and standoff, into the post.
-   - *Tree:* bolt both rails to the back wall. Thread a strap through each rail's channel, set the V-grooves
+     house cleat (top) and standoff (bottom) to the right-hand wall. Hang the house on the cleat, then
+     drive the two long screws from inside, through the wall and standoff, into the post.
+   - *Tree:* bolt both rails to the right-hand wall. Thread a strap through each rail's channel, set the V-grooves
      against the trunk and tighten the straps. Loosen them each season so the tree can grow.
 
 To take the roof off for cleaning, remove the 20 roofing screws and lift the roof off as one piece. The
 ridge caps and standing seams hold it together.
+
+For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, `corner_bl`, `roof_fl` and
+`roof_bl` with `-D 'mount="fence"' -D 'mount_side="left"'`. Either mount type gives the same parts.
 
 ## Placing it in Florida
 

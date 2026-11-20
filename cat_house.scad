@@ -14,8 +14,12 @@
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
 part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_rail]
-// Optional mount on the back wall. Anything but "none" adds bolt holes to the two back corner modules.
+// Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
+// tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
+// windows there and shortens the roof overhang on that side.
 mount = "none"; // [none, tree, fence]
+// Which eave wall carries the mount, seen from the front
+mount_side = "right"; // [right, left]
 // Preview only: show the cushion inside
 show_cushion = true;
 // Preview only: show the legs (you can use legs and a mount together)
@@ -79,7 +83,8 @@ drain_d = 6;
 
 /* [Mount] */
 rail_len = 300;
-rail_upper_z = 158;
+rail_upper_z = 118;
+mount_eave_ov = 15; // roof overhang on the mount side, so the eave clears the post or trunk
 rail_lower_z = 40;
 cleat_t = 24;
 tree_rail_t = 35;
@@ -117,6 +122,16 @@ R_out = door_r + surround_w;
 Lu = (x_eave + roof_t + shingle_t)/cos(pitch) + 2;
 Lsh = x_eave/cos(pitch) - ridge_leg - 4;
 u_ridge = Lsh + 4 + ridge_leg/2;
+// per-side eave (the mount side gets a short overhang)
+mount_sx = mount_side == "left" ? -1 : 1;
+function eave_of(sx) = (mount != "none" && sx == mount_sx) ? mount_eave_ov : eave_ov;
+function xe(e) = hx + e;
+function ze(e) = wall_h - e*tp;
+function Lu_e(e) = (xe(e) + roof_t + shingle_t)/cos(pitch) + 2;
+function Lsh_e(e) = xe(e)/cos(pitch) - ridge_leg - 4;
+function u_ridge_e(e) = Lsh_e(e) + 4 + ridge_leg/2;
+function roof_len_e(e) = (xe(e) + roof_t*sin(pitch))/cos(pitch) + 1;
+function win_on(f) = windows && !(mount != "none" && f == (mount_sx > 0 ? 2 : 3));
 rib_xs = [for (k = [1:30]) if (5 + k*rib_pitch < iw/2 - 6) 5 + k*rib_pitch];
 leg_xy = [iw/2 - 35, idp/2 - 35];
 key_xk = iw/4;
@@ -148,9 +163,11 @@ echo(str("Interior ", iw, " x ", idp, " mm; corner module ", module_w, " x ", mo
 // =====================================================================
 //  Helpers
 // =====================================================================
-module slope_frame() translate([-x_eave, 0, z_eave]) rotate([0, -pitch, 0]) children();
-module unslope_left() rotate([0, pitch, 0]) translate([x_eave, 0, -z_eave]) children();
-module unslope_right() rotate([0, -pitch, 0]) translate([-x_eave, 0, -z_eave]) children();
+module slope_frame(e = eave_ov) translate([-xe(e), 0, ze(e)]) rotate([0, -pitch, 0]) children();
+module unslope_left(e = eave_ov) rotate([0, pitch, 0]) translate([xe(e), 0, -ze(e)]) children();
+module unslope_right(e = eave_ov) rotate([0, -pitch, 0]) translate([-xe(e), 0, -ze(e)]) children();
+// mount frame: local y = outward from the mount wall, local x = along it
+module mount_xf() translate([mount_sx*hx, 0, 0]) rotate([0, 0, mount_sx > 0 ? -90 : 90]) children();
 module screw_xf(p) translate([p[0], p[1], roof_z(p[0])]) rotate([0, -pitch, 0]) children();
 
 // Face frame: local x = along the wall, local y = outward, z = up.
@@ -274,10 +291,10 @@ module face_dressing(f) {
       base_band(len);
       corner_trims(f, len);
     }
-    if (f >= 2 && windows) for (ac = [-hy/2, hy/2]) window_clear(ac);
+    if (f >= 2 && win_on(f)) for (ac = [-hy/2, hy/2]) window_clear(ac);
     if (f == 1) for (ac = [-75, 75]) vent_clear(ac);
   }
-  if (f >= 2 && windows) for (ac = [-hy/2, hy/2]) window(ac);
+  if (f >= 2 && win_on(f)) for (ac = [-hy/2, hy/2]) window(ac);
   if (f == 1) for (ac = [-75, 75]) vent_frame(ac);
 }
 
@@ -353,13 +370,13 @@ module module_cuts(sx, sy) {
   // room for the neighbour's seam batten
   if (sx > 0) translate([-0.01, sy < 0 ? -hy - 12 : hy + 0.01, zb - 1]) cube([seam_cover + 0.4, 12 - 0.01, 600]);
   if (sy > 0) translate([sx > 0 ? hx + 0.01 : -hx - 12, -0.01, zb - 1]) cube([12 - 0.01, seam_cover + 0.4, 600]);
-  // mount rails on the back wall
-  if (sy > 0 && mount_holes) {
+  // mount rails on the eave wall
+  if (mount_holes && sx == mount_sx) mount_xf() {
     for (c = [rail_upper_z, rail_lower_z]) {
-      translate([-rail_len/2 - 2, hy + 0.01, c - 31]) cube([rail_len + 4, 12, 62]);
-      for (x = rail_xs, dz = [-20, 20]) translate([x, hy - wt - 1, c + dz]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20);
+      translate([-rail_len/2 - 2, 0.01, c - 31]) cube([rail_len + 4, 12, 62]);
+      for (x = rail_xs, dz = [-20, 20]) translate([x, -wt - 1, c + dz]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20);
     }
-    for (x = [-95, 95]) translate([x, hy - wt - 1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = wt + 20);
+    for (x = [-95, 95]) translate([x, -wt - 1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = wt + 20);
   }
 }
 
@@ -374,7 +391,7 @@ module corner(sx, sy) difference() {
 // =====================================================================
 //  Roof
 // =====================================================================
-module shingles(vA, vB) {
+module shingles(vA, vB, Lsh) {
   r = (shingle_w - 2)/2;
   for (k = [0 : ceil(Lsh/shingle_e) - 1]) {
     u0 = k*shingle_e;
@@ -396,11 +413,13 @@ module shingles(vA, vB) {
   }
 }
 
-module panel_local(v0, v1, front) {
+module panel_local(v0, v1, front, e) {
+  Lu = Lu_e(e);
+  Lsh = Lsh_e(e);
   vA = front ? v0 + rake_w : v0 + seam_t;
   vB = front ? v1 - seam_t : v1 - rake_w;
   translate([0, v0, 0]) cube([Lu, v1 - v0, roof_t]);
-  shingles(vA, vB);
+  shingles(vA, vB, Lsh);
   // rake board along the gable edge
   translate([0, front ? v0 : v1 - rake_w, roof_t - 0.01]) cube([Lsh, rake_w, shingle_t + 1]);
   // standing seam
@@ -420,17 +439,18 @@ module roof_panel(sx, sy) {
   front = sy < 0;
   v0 = front ? yf : ysplit + gap;
   v1 = front ? ysplit - gap : yb;
+  e = eave_of(sx);
   scale([-sx, 1, 1]) difference() {
     union() {
       intersection() {
-        slope_frame() panel_local(v0, v1, front);
+        slope_frame(e) panel_local(v0, v1, front, e);
         translate([-600, -600, -100]) cube([600, 1200, 900]);
       }
       for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5)
         screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
     }
     for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
-    for (v = ridge_hole_vs(front)) slope_frame() translate([u_ridge, v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
+    for (v = ridge_hole_vs(front)) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
   }
 }
 
@@ -439,14 +459,13 @@ module ridge_cap(sy, saddle = false) {
   v0 = saddle ? ysplit - 25 : (front ? yf : ysplit + gap);
   v1 = saddle ? ysplit + 25 : (front ? ysplit - gap : yb);
   t0 = saddle ? roof_t + ridge_t + 0.2 : roof_t + 0.2;
-  u0 = Lsh + 4 + (saddle ? 6 : 0);
   difference() {
-    for (s = [-1, 1]) scale([s, 1, 1]) intersection() {
-      slope_frame() translate([u0, v0, t0]) cube([Lu + 40 - u0, v1 - v0, ridge_t]);
+    for (s = [-1, 1]) let(e = eave_of(s), u0 = Lsh_e(e) + 4 + (saddle ? 6 : 0)) scale([s, 1, 1]) intersection() {
+      slope_frame(e) translate([u0, v0, t0]) cube([Lu_e(e) + 40 - u0, v1 - v0, ridge_t]);
       translate([-600, -600, -100]) cube([600, 1200, 900]);
     }
     for (s = [-1, 1], v = (saddle ? [ysplit - 14, ysplit + 14] : ridge_hole_vs(front)))
-      scale([s, 1, 1]) slope_frame() translate([u_ridge, v, -1]) cylinder(d = m4, h = 40, $fn = 16);
+      let(e = eave_of(s)) scale([s, 1, 1]) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = 40, $fn = 16);
   }
 }
 
@@ -508,26 +527,26 @@ module center_leg() difference() {
 module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) offset(delta = -0.15) bowtie2d();
 
 // =====================================================================
-//  Mount rails (world coordinates, on the back wall)
+//  Mount rails (mount frame: wall face at y = 0, outward +y; placed with mount_xf)
 // =====================================================================
 module rail_section(pts, c) translate([-rail_len/2, 0, c]) rotate([90, 0, 90]) linear_extrude(rail_len) polygon(pts);
 
 module rail_bolts(c, from_y, nut = "hex") for (x = rail_xs, dz = [-20, 20]) translate([x, 0, c + dz]) {
-  translate([0, hy - 1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
-  translate([0, hy + from_y, 0]) rotate([-90, 0, 0]) cylinder(r = 8/sqrt(3) + 0.3, h = 80, $fn = 6);
+  translate([0, -1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
+  translate([0, from_y, 0]) rotate([-90, 0, 0]) cylinder(r = 8/sqrt(3) + 0.3, h = 80, $fn = 6);
 }
 
 module fence_house_cleat() difference() {
-  rail_section([[hy, 30], [hy + cleat_t, 30], [hy + cleat_t, -10], [hy + 4, -30], [hy, -30]], rail_upper_z);
+  rail_section([[0, 30], [cleat_t, 30], [cleat_t, -10], [4, -30], [0, -30]], rail_upper_z);
   rail_bolts(rail_upper_z, 8);
 }
 
 module fence_post_cleat() {
   c = rail_upper_z;
   difference() {
-    rail_section([[hy + 5, -70], [hy + cleat_t + 20, -70], [hy + cleat_t + 20, 9.5], [hy + 5, -29.5]], c);
-    for (x = [-110, 0, 110]) translate([x, 0, c - 50]) screw_hole_y(hy + 5);
-    for (x = [-60, 60]) translate([x, 0, c - 22]) screw_hole_y(hy + 14);
+    rail_section([[5, -70], [cleat_t + 20, -70], [cleat_t + 20, 9.5], [5, -29.5]], c);
+    for (x = [-110, 0, 110]) translate([x, 0, c - 50]) screw_hole_y(5);
+    for (x = [-60, 60]) translate([x, 0, c - 22]) screw_hole_y(14);
   }
 }
 // countersunk wood-screw hole along +y, head on the side facing the house
@@ -537,20 +556,20 @@ module screw_hole_y(y0) {
 }
 
 module fence_standoff() difference() {
-  rail_section([[hy, -30], [hy + cleat_t + 20, -30], [hy + cleat_t + 20, 30], [hy, 30]], rail_lower_z);
+  rail_section([[0, -30], [cleat_t + 20, -30], [cleat_t + 20, 30], [0, 30]], rail_lower_z);
   for (x = rail_xs, dz = [-20, 20]) translate([x, 0, rail_lower_z + dz]) {
-    translate([0, hy - 1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
-    translate([0, hy + 10, 0]) rotate([-90, 0, 0]) cylinder(d = 12, h = 80, $fn = 24);
+    translate([0, -1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
+    translate([0, 10, 0]) rotate([-90, 0, 0]) cylinder(d = 12, h = 80, $fn = 24);
   }
-  for (x = [-95, 95]) translate([x, hy - 1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = 80, $fn = 16);
+  for (x = [-95, 95]) translate([x, -1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = 80, $fn = 16);
 }
 
 module tree_rail(c = rail_upper_z) difference() {
-  rail_section([[hy, -30], [hy + tree_rail_t, -30], [hy + tree_rail_t, 30], [hy, 30]], c);
+  rail_section([[0, -30], [tree_rail_t, -30], [tree_rail_t, 30], [0, 30]], c);
   // strap channel along the rail
-  translate([-rail_len/2 - 1, hy + 6, c - strap_w/2]) cube([rail_len + 2, strap_t, strap_w]);
+  translate([-rail_len/2 - 1, 6, c - strap_w/2]) cube([rail_len + 2, strap_t, strap_w]);
   // V groove that centres the rail on the trunk
-  translate([0, 0, c - 31]) linear_extrude(62) polygon([[-14, hy + tree_rail_t + 0.01], [14, hy + tree_rail_t + 0.01], [0, hy + tree_rail_t - 14]]);
+  translate([0, 0, c - 31]) linear_extrude(62) polygon([[-14, tree_rail_t + 0.01], [14, tree_rail_t + 0.01], [0, tree_rail_t - 14]]);
   rail_bolts(c, 16);
 }
 
@@ -561,23 +580,25 @@ module corner_print(sx, sy) translate([0, 0, -zb]) corner(sx, sy);
 
 module roof_print(sx, sy) {
   v0 = sy < 0 ? yf : ysplit + gap;
-  if (sx < 0) translate([0, -v0, 0]) unslope_left() roof_panel(sx, sy);
-  else translate([roof_len + 1, -v0, 0]) unslope_right() roof_panel(sx, sy);
+  e = eave_of(sx);
+  if (sx < 0) translate([0, -v0, 0]) unslope_left(e) roof_panel(sx, sy);
+  else translate([roof_len_e(e) + 1, -v0, 0]) unslope_right(e) roof_panel(sx, sy);
 }
 
 module ridge_print(sy, saddle = false) {
   v0 = saddle ? ysplit - 25 : (sy < 0 ? yf : ysplit + gap);
   t0 = saddle ? roof_t + ridge_t + 0.2 : roof_t + 0.2;
-  u0 = Lsh + 4 + (saddle ? 6 : 0);
+  e = eave_of(-1);
+  u0 = Lsh_e(e) + 4 + (saddle ? 6 : 0);
   // outer face of one leg on the bed, the other leg rises at 2 x pitch
-  translate([0, 0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left() ridge_cap(sy, saddle);
+  translate([0, 0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
 }
 
 module rail_print(which) {
-  if (which == "fence_house_cleat") rotate([90, 0, 0]) translate([0, -hy, -rail_upper_z]) fence_house_cleat();
-  if (which == "fence_post_cleat") rotate([-90, 0, 0]) translate([0, -(hy + cleat_t + 20), -rail_upper_z]) fence_post_cleat();
-  if (which == "fence_standoff") rotate([90, 0, 0]) translate([0, -hy, -rail_lower_z]) fence_standoff();
-  if (which == "tree_rail") rotate([90, 0, 0]) translate([0, -hy, -rail_upper_z]) tree_rail();
+  if (which == "fence_house_cleat") rotate([90, 0, 0]) translate([0, 0, -rail_upper_z]) fence_house_cleat();
+  if (which == "fence_post_cleat") rotate([-90, 0, 0]) translate([0, -(cleat_t + 20), -rail_upper_z]) fence_post_cleat();
+  if (which == "fence_standoff") rotate([90, 0, 0]) translate([0, 0, -rail_lower_z]) fence_standoff();
+  if (which == "tree_rail") rotate([90, 0, 0]) translate([0, 0, -rail_upper_z]) tree_rail();
 }
 
 module print_part(p) {
@@ -626,18 +647,18 @@ module assembly(e = 0) {
   if (show_cushion && e == 0) color("#B5524A") translate([0, 0, 0])
     hull() for (sx = [-1, 1], sy = [-1, 1]) translate([sx*(cushion_w/2 - 40), sy*(cushion_d/2 - 40), 0])
       scale([1, 1, cushion_h/80]) translate([0, 0, 40]) sphere(r = 40, $fn = 24);
-  translate([0, e*120, 0]) mount_parts_world();
+  mount_xf() translate([0, e*120, 0]) mount_parts_local();
 }
 
-module mount_parts_world() {
+module mount_parts_local() {
   if (mount == "fence") {
     color(c_trim) { fence_house_cleat(); fence_standoff(); }
     color("#C9B79C") fence_post_cleat();
-    color("#7A5C3E") translate([-45, hy + cleat_t + 20, -900]) cube([90, 90, 1400]);  // a fence post, for scale
+    color("#7A5C3E") translate([-45, cleat_t + 20, -900]) cube([90, 90, 1400]);  // a fence post, for scale
   }
   if (mount == "tree") {
     color(c_trim) { tree_rail(rail_upper_z); tree_rail(rail_lower_z); }
-    color("#6B4F35") translate([0, hy + tree_rail_t + 130 - 6, -900]) cylinder(r = 130, h = 1500, $fn = 64);
+    color("#6B4F35") translate([0, tree_rail_t + 130 - 6, -900]) cylinder(r = 130, h = 1500, $fn = 64);
   }
 }
 
