@@ -108,6 +108,8 @@ To export one part from the command line:
 | `latch_keeper` | 2 | 36 × 34 × 12 | flat |
 | `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
 | `window_retainer` | 1 | 90 × 110 × 3 | flat |
+| `hatch_frame` | 1 | 170 × 174 × 43 | as exported: wall side down, hood and cheeks up |
+| `hatch_flap` | 1 | 157 × 164 × 12 | as exported: inside face down |
 | `fence_house_cleat`, `fence_standoff` | 1 each | 300 long | as exported (either mount) |
 | `fence_post_cleat` | 1 | 300 × 58 × 26 | as exported (fence mount) |
 | `tree_plate` | 1 | 300 × 308 × 51 | as exported: trunk side down (tree mount) |
@@ -178,6 +180,10 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 4 | #8 × 1" roofing screws with EPDM washers | Latch keepers to the lid (2 each) |
 | (10) | #8 × 1" roofing screws, as above | Optional: screw the lid down too for hurricane season (drill out the bosses first) |
 | 4 | M3 × 12 pan head + nut | Peek-window retainer |
+| 4 | M4 × 20 countersunk + washer + nyloc nut | Escape-hatch frame (heads flush in the frame, nuts inside) |
+| 1 | M4 stainless threaded rod, 175 mm, + 2 acorn nuts | Escape-hatch hinge pin |
+| 4 | 6 × 2 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
+| 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
 | 1 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Peek-window pane |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
 | | Clear neutral-cure outdoor silicone | Window pane bead |
@@ -214,24 +220,28 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
 5. **Peek window.** Run a thin bead of silicone round the pocket inside the front-left window, press
    the polycarbonate pane in, and clamp it with the printed retainer (4 × M3 × 12, heads outside in the
    window frame, nuts in the retainer's pockets). Wipe off any silicone that squeezes out.
-6. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
+6. **Escape hatch.** Glue two magnets into the frame's pockets and two into the flap's (check the polarity so
+   they attract). Stick the foam gasket on the frame round the opening. Bolt the frame over the back-wall
+   opening (4 × M4 × 20 countersunk from outside, nuts inside). Hang the flap between the cheeks on the M4
+   rod and cap it with acorn nuts.
+7. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
    through the wall with 6 × M4 × 25. They also lock the front seam.
-7. **Roof.** On each slope, bolt the front and back panels together through the standing seam
+8. **Roof.** On each slope, bolt the front and back panels together through the standing seam
    (3 × M4 × 16). The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
    screws through the bosses into the pilot holes (3 into each gable top, 2 into the eave corbels per panel).
    Snug them so the EPDM washers just compress; don't crush them. The left slope is the lid: set it in
    place, but don't screw it down.
-8. **Ridge and hinge.** Lay the two ridge caps along the peak so their knuckles mesh with the knuckles on
+9. **Ridge and hinge.** Lay the two ridge caps along the peak so their knuckles mesh with the knuckles on
    the right slope. Slide a hinge pin (threaded rod) through each set from the gable end and cap both ends
    with washers and acorn nuts. Bolt the caps to the lid (left) slope only (4 × M4 × 16). Put the saddle
    over the joint between them and bolt its left leg (2 × M4 × 20).
-9. **Seal and latches.** Stick the EPDM foam tape along the tops of the left-hand gable rafters and the
+10. **Seal and latches.** Stick the EPDM foam tape along the tops of the left-hand gable rafters and the
    left eave plate, where the lid rests. Screw each latch keeper under the lid's gable overhang, front and back (2 × #8 × 1"
    roofing screws each, through the bosses). Bolt a turn button to each gable wall, below and beside its
    keeper (M4 × 20, head inside the house, nyloc snug enough that the button stays where you turn it).
    Turned flat, the button's tongue presses the keeper's foot down about 1.5 mm, which compresses the foam
    and holds the lid down. Use a rubber or EPDM washer under each button and under each pivot bolt head.
-10. **Mount (optional).**
+11. **Mount (optional).**
      - Bolt the house cleat (top) and the standoff (bottom) to the right-hand wall, and the landing ledge to
       the front wall (3 bolts). No legs: print and fit none of them. The brackets use the centre-leg holes, and
       the four corner-leg holes stay open as extra drains.
@@ -277,6 +287,24 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
   rubber washers.
 - **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them
   leads indoors.
+
+## Escape hatch
+
+A second way out, in the back wall opposite the door, so a cat can't be cornered inside. It is a 140 × 140 mm
+opening with a flap hung from a pin at the top. The flap sits *outside* its frame and overlaps it by 10 mm
+all round, so:
+
+- **It only opens outwards.** From inside, a push swings it up and out. From outside, pushing only presses
+  it harder against the frame, and the flap sits recessed 14 mm between side cheeks under a hood, so there is
+  no edge to grab.
+- **Wind can't blow through it.** Wind from outside presses the flap onto the foam gasket and seals it
+  shut. Suction from wind passing the house is held by two pairs of small magnets at the bottom. The pull
+  is enough for an ordinary gusty storm and still easy for a cat to push. If it rattles in your spot, swap to
+  8 × 3 mm magnets. The hood and cheeks keep rain and side wind off the flap's edges.
+- **Leave room behind it.** The flap swings out about 15 cm. If the house stands near a wall, keep the back
+  15 cm or more away.
+
+Turn it off with `hatch = false`. It sits in the back-left corner module; `hatch_x` moves it.
 
 ## Is the cat home?
 

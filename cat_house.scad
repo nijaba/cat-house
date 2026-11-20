@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing, latch_keeper, latch_button, window_retainer]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -84,11 +84,23 @@ latch_pivot_x = 115; // turn-button pivot
 latch_pivot_z = 204.5; // the tongue presses the keeper down 1.5 mm, compressing the foam seal under the lid
 rib_u = 14;          // weather rib on the fixed slope, under the ridge cap, this far up-slope from the hinge axis
 
+/* [Escape hatch] */
+// One-way flap in the back wall: the cat can push it open from inside; from outside it only closes
+// harder against its frame. Magnets and a gasket keep wind from rattling or lifting it.
+hatch = true;
+hatch_w = 140;       // clear opening
+hatch_h = 140;
+hatch_x = -100;      // centre of the opening (left half of the back wall)
+hatch_z0 = 25;       // sill height above the floor
+hatch_gasket = 1.5;  // closed-cell foam strip between the frame and the flap
+hatch_magnet = [6.3, 2.2]; // pocket for 6 x 2 mm neodymium discs (use 8 x 3 if wind lifts the flap)
+
 /* [Peek window] */
 // The front window on the lid side is glazed, so you can see the cushion from outside.
 peek_window = true;
 pane_t = 2;          // 2 mm UV-stable polycarbonate, cut to (win_w + 7) x (win_h + 7)
 open_angle = 0;      // preview only: show the lid opened by this many degrees
+hatch_open_angle = 0; // preview only: show the escape flap opened by this many degrees
 
 /* [Entrance] */
 door_d = 160;      // clear opening, fine for a 5 kg cat
@@ -430,6 +442,12 @@ module module_cuts(sx, sy) {
     for (dx = [-1, 1], dz = [-1, 1]) translate([ac + dx*(win_w/2 + 3), -wt - 1, win_zc + dz*(win_h/2 - 10)])
       rotate([-90, 0, 0]) cylinder(d = 3.4, h = wt + relief + 3, $fn = 12);
   }
+  // escape hatch: opening, flat pad for the frame, frame bolts
+  if (hatch && sy > 0 && sx * hatch_x > 0) {
+    translate([hx0, hy - wt - 1, hatch_z0]) cube([hatch_w, wt + 20, hatch_h]);
+    translate([hf[0] - 1, hy + 0.01, hatch_z0 - 13]) cube([hf[1] - hf[0] + 2, 12, hz1 + 23 - (hatch_z0 - 13)]);
+    for (b = hatch_bolts) translate([b[0], hy - wt - 1, b[1]]) rotate([-90, 0, 0]) cylinder(d = m4, h = wt + 10, $fn = 16);
+  }
   // turn-button pivots on the lid side of both gables
   if (hinge_on && sx == lid_sx) translate([sx*latch_pivot_x, sy*hy, latch_pivot_z]) rotate([90, 0, 0])
     cylinder(d = m4, h = 3*wt + 10, center = true, $fn = 16);
@@ -602,6 +620,56 @@ module peek_window_world() face_xf(lid_sx < 0 ? 3 : 2) let(ac = lid_sx < 0 ? -hy
   color("#BFE3F0", 0.45) translate([ac - win_w/2 - 3.5, -wt + 0.01, win_zc - win_h/2 - 3.5]) cube([win_w + 7, pane_t - 0.02, win_h + 7]);
   color(c_trim) translate([ac, -wt, win_zc]) rotate([90, 0, 0]) window_retainer();
 }
+
+// ---- escape hatch (world coordinates, back wall outer face at y = hy) ----
+hx0 = hatch_x - hatch_w/2; hx1 = hatch_x + hatch_w/2; hz1 = hatch_z0 + hatch_h;
+hf = [hx0 - 15, hx1 + 15];            // frame x range
+hyf = hy + 5;                          // frame plate outer face
+hyl = hyf + hatch_gasket;              // flap inner face when closed
+hax = [hyl + 4 + 4, hz1 + 10];         // hinge axis [y, z]
+hatch_bolts = [for (x = [hf[0] + 10, hf[1] - 10], z = [hatch_z0 + 5, hz1 - 15]) [x, z]];
+
+module hatch_frame_world() difference() {
+  union() {
+    // plate round the opening
+    translate([hf[0], hy, hatch_z0 - 12]) cube([hf[1] - hf[0], 5, hz1 + 21 - (hatch_z0 - 12)]);
+    // side cheeks: the flap sits recessed between them, out of the wind and with no edge to grab
+    for (x = [hf[0], hf[1] - 5]) translate([x, hyf - 0.01, hatch_z0 - 12]) cube([5, hax[0] + 5 - hyf, hz1 + 21 - (hatch_z0 - 12)]);
+    // hinge lugs at the flap's top corners
+    for (x = [hf[0] + 5, hf[1] - 13]) hull() {
+      translate([x, hyf - 0.01, hax[1] - 6]) cube([8, 0.1, 18]);
+      translate([x, hax[0], hax[1]]) rotate([0, 90, 0]) cylinder(r = 5, h = 8, $fn = 24);
+      translate([x, hax[0] - 5, hz1 + 21 - 5]) cube([8, 10, 5]);
+    }
+    // rain hood, sloping outwards
+    translate([hf[0], 0, 0]) rotate([90, 0, 90]) linear_extrude(hf[1] - hf[0])
+      polygon([[hyf - 0.01, hz1 + 16], [hyf - 0.01, hz1 + 21], [hyf + 38, hz1 + 15], [hyf + 38, hz1 + 12]]);
+  }
+  translate([hx0, hy - 1, hatch_z0]) cube([hatch_w, 10, hatch_h]);
+  translate([hf[0] - 1, hax[0], hax[1]]) rotate([0, 90, 0]) cylinder(d = hinge_pin, h = hf[1] - hf[0] + 2, $fn = 16);
+  for (b = hatch_bolts) translate([b[0], hy - 1, b[1]]) rotate([-90, 0, 0]) {
+    cylinder(d = m4, h = 20, $fn = 16);
+    translate([0, 0, 1 + 5 - 2.6]) cylinder(d1 = m4, d2 = 8.6, h = 2.61, $fn = 24);  // countersunk, flush
+  }
+  for (x = [hx0 + 2, hx1 - 2]) translate([x, hyf - hatch_magnet[1], hatch_z0 - 3]) rotate([-90, 0, 0]) cylinder(d = hatch_magnet[0], h = hatch_magnet[1] + 1, $fn = 24);
+}
+
+module hatch_flap_world() difference() {
+  union() {
+    translate([hf[0] + 6.5, hyl, hatch_z0 - 10]) cube([hf[1] - hf[0] - 13, 4, hatch_h + 20]);
+    hull() {
+      translate([hf[0] + 14, hax[0], hax[1]]) rotate([0, 90, 0]) cylinder(r = 4, h = hf[1] - hf[0] - 28, $fn = 24);
+      translate([hf[0] + 14, hyl, hax[1] - 8]) cube([hf[1] - hf[0] - 28, 4, 1]);
+    }
+  }
+  // clear the lugs at the top corners
+  for (x = [hf[0] + 4, hf[1] - 14.5]) translate([x, hyl - 1, hax[1] - 7]) cube([10.5, 20, 20]);
+  translate([hf[0] - 1, hax[0], hax[1]]) rotate([0, 90, 0]) cylinder(d = hinge_pin, h = hf[1] - hf[0] + 2, $fn = 16);
+  for (x = [hx0 + 2, hx1 - 2]) translate([x, hyl - 1, hatch_z0 - 3]) rotate([-90, 0, 0]) cylinder(d = hatch_magnet[0], h = hatch_magnet[1] + 1, $fn = 24);
+}
+
+// preview: swing the flap open by a degrees (it only opens outwards)
+module hatch_open(a) translate([0, hax[0], hax[1]]) rotate([a, 0, 0]) translate([0, -hax[0], -hax[1]]) children();
 
 module latch_keeper_print() translate([latch_x + 12, roof_z(latch_x - 12), 0]) rotate([90, 0, 0]) translate([0, hy + 16, 0]) latch_keeper_world(true);
 
@@ -850,6 +918,8 @@ module print_part(p) {
   if (p == "latch_keeper") latch_keeper_print();
   if (p == "latch_button") latch_button_local();
   if (p == "window_retainer") window_retainer();
+  if (p == "hatch_frame") translate([-hf[0], 0, 0]) rotate([90, 0, 0]) translate([0, -hy, -(hatch_z0 - 12)]) hatch_frame_world();
+  if (p == "hatch_flap") translate([-hf[0], 0, 0]) rotate([90, 0, 0]) translate([0, -hyl, -(hatch_z0 - 10)]) hatch_flap_world();
   if (p == "fence_house_cleat" || p == "fence_post_cleat" || p == "fence_standoff" || p == "tree_plate") rail_print(p);
 }
 
@@ -868,6 +938,7 @@ module assembly(e = 0) {
   color(c_trim) translate([0, 0, e*260]) lid_open(hinge_on ? open_angle : 0) { ridge_cap(-1); ridge_cap(1); }
   color(c_trim) translate([0, 0, e*300]) lid_open(hinge_on ? open_angle : 0) ridge_cap(-1, true);
   if (peek_window && windows && e == 0) peek_window_world();
+  if (hatch) color(c_trim) translate([0, e*100, 0]) { hatch_frame_world(); hatch_open(hatch_open_angle) hatch_flap_world(); }
   if (hinge_on) color(c_trim) for (f = [true, false]) {
     translate([0, 0, e*200]) lid_open() latch_keeper_world(f);
     translate([0, (f ? -1 : 1)*e*60, 0]) latch_button_world(f, open_angle > 0);

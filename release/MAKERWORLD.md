@@ -85,6 +85,7 @@ H2D, large format, OpenSCAD, parametric, customizable, cottage, tree mount, fenc
 > **Opening roof:** one slope lifts on a ridge hinge and stays open on its own, held shut by two
 > turn-button latches, so you can swap the cushion without tools. A rib under the ridge cap and foam
 > under the lid keep it watertight. A glazed peek window shows whether the cat is home.
+> A one-way escape flap in the back wall lets the cat out but stays shut against wind.
 > **Print time:** about 130 h with a 0.4 mm nozzle; a 0.6 mm nozzle is much faster on the big parts.
 > **Hardware:** stainless M4/M5/M6 bolts and #8 roofing screws with EPDM washers (full list in the
 > BOM).
