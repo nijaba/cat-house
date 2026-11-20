@@ -21,9 +21,9 @@ on 2026-11-20.
 | Printer compatibility | The upload page lists the printers to check. | ⚠️ The corner modules are 317 mm tall, so only the H2 series fits (H2D and H2S). Untick the X1, P1, A1 and P2S. |
 | Title, description, category, tags | Required, and they must match the files. Profile titles must not say "fast", "best", "perfect", "guaranteed" or "official". | ✅ Drafted in section 3. |
 | Licence | Choose one: Standard Digital File License, CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND or CC0. (CC0 additionally needs a photo of your own print.) | ✅ **CC BY-NC-SA 4.0** (decided 2026-11-20). |
-| AI-generated content | MakerWorld asks creators to label models that are "mostly or entirely AI-generated" as AIGC; mislabelled models can lose visibility or be removed. AI-generated images are not allowed as model photos. | ❓ **Your call.** The design and OpenSCAD code were written by Claude at your direction, so I recommend **ticking the AIGC label** and saying so in one line of the description. The OpenSCAD renders are not AI images, but keep them in the gallery after the real photos, not as the cover. |
+| AI-generated content | MakerWorld asks creators to label models that are "mostly or entirely AI-generated" as AIGC; mislabelled models can lose visibility or be removed. AI-generated images are not allowed as model photos. | ✅ **Tick the AIGC label** (decided 2026-11-20) and keep the one-line note at the end of the description. The OpenSCAD renders are not AI images, but keep them in the gallery after the real photos, not as the cover. |
 | Bill of materials | Optional. A BOM field lists filaments and non-printed parts. | ✅ Add the stainless hardware and Bambu ASA. The list is in the README. |
-| Off-platform links | The guidelines forbid using the account to "redirect users off-platform". | ⚠️ Keep everything on the page. If the GitHub repo becomes public, one plain "source" link at the end is the most to add. |
+| Off-platform links | The guidelines forbid using the account to "redirect users off-platform". | ✅ The repo is public: https://github.com/nijaba/cat-house. Keep the page self-contained, with one plain "Source" link at the end of the description. |
 | Customize button (Parametric Model Maker) | Uploading the `.scad` adds a **Customize** button. It runs OpenSCAD with the Customizer parameters on Bambu's servers. | ✅ Plain OpenSCAD with no libraries. ⚠️ Rendering takes about 35 s per corner module and longer for a roof panel, so check that MakerWorld's renderer doesn't time out. If it does, mention it in the description. |
 | Exclusive programme | Needs 100 cumulative prints across your models first. | ➖ Not eligible yet; leaves us free to post elsewhere too. |
 
@@ -89,6 +89,8 @@ H2D, large format, OpenSCAD, parametric, customizable, cottage, tree mount, fenc
 >
 > *Designed in OpenSCAD with the help of an AI assistant (Claude); every part was test-sliced, and the
 > photos show my own print.*
+>
+> Source (OpenSCAD, build script, guide): https://github.com/nijaba/cat-house
 
 **Print profile titles:**
 - `H2D 0.4 · ASA · On legs · 10 plates`
@@ -171,7 +173,7 @@ for the first two days, because early engagement drives MakerWorld's ranking.
 - [ ] Print and assemble the house; take ≥ 3 real photos (plus a cat, plus the mounted version if
       publishing profile 2)
 - [x] Licence: CC BY-NC-SA 4.0
-- [ ] Decide the AIGC label (recommended: on)
+- [x] AIGC label: on
 - [ ] Name the plates in both 3MFs in Bambu Studio, slice, save
-- [ ] Decide whether to make the GitHub repo public and link it
+- [x] GitHub repo public and linked in the description
 - [ ] Publish on MakerWorld with Community Post on, then work down section 4
