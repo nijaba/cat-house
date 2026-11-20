@@ -16,6 +16,8 @@ none needs supports.
 |---|---|
 | ![Fence](renders/assembly_fence_mount.png) | ![Tree](renders/assembly_tree_mount.png) |
 
+![Landing ledge](renders/landing.png)
+
 ## The cushion it is sized for
 
 The defaults assume a **40 × 40 cm (16 in) square cushion or a 40 cm round pet bed**, up to about 10 cm
@@ -51,6 +53,12 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
   - A mounted house uses the `_mount` versions of the two right-hand corner modules and the two right-hand
     roof panels. Those corners have flat pads and bolt holes for the rails and no windows. Those roof
     panels have a 15 mm eave instead of 50 mm, so the roof clears the post or trunk.
+  - **Landing ledge** (`landing = true`, on by default with a mount): a 95 mm wide shelf along the front
+    wall at door-sill height. It runs from the mounting surface to the middle of the doorway, so the cat
+    walks straight in. It never sticks out past the mounting surface, so the house still sits flat against
+    a wall or fence board. Slots drain it and give paws some grip, and gussets underneath carry a landing
+    cat. It bolts through the front wall with 3 × M5. With the ledge fitted, print `door_surround_mount`,
+    which has no separate step.
 
 ### Weather details
 
@@ -96,10 +104,36 @@ To export one part from the command line:
 | `bowtie_key` | 4 | 50 × 30 × 10 | flat |
 | `fence_house_cleat`, `fence_post_cleat`, `fence_standoff` | 1 each | 300 long | as exported (fence mount only) |
 | `tree_rail` | 2 | 300 × 60 × 35 | as exported (tree mount only) |
+| `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
+| `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
 
-That is 13 plates in all; see `renders/plate_layout.png`. The corner modules are the long prints. Each one
-runs very roughly 12–20 hours with a 0.4 mm nozzle, or about half that with a 0.6 mm nozzle. Expect about
-5–6 kg of filament for the house, plus about 0.8 kg for a mount. Let Bambu Studio give you the real times.
+See `renders/plate_layout.png` for how the parts fit on the plates.
+
+### How much ASA to buy
+
+These weights come from slicing every STL in Bambu Studio 2.x. The settings were the H2D 0.4 mm nozzle,
+"0.20mm Standard @BBL H2D" with 4 walls, 5 top and 5 bottom layers, 15 % gyroid infill and a 5 mm brim, and
+Bambu ASA on the textured PEI plate. Times are for that profile; a 0.6 mm nozzle on the big parts roughly
+halves them.
+
+| Build | Filament | Print time | Buy (1 kg spools, one colour) |
+|---|---|---|---|
+| On its legs (no mount) | 4.0 kg | ≈ 130 h | **5 spools** |
+| Fence mount + landing ledge | 4.4 kg | ≈ 142 h | **5 spools** (6 to be safe) |
+| Tree mount + landing ledge | 4.3 kg | ≈ 136 h | **5 spools** (6 to be safe) |
+
+Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
+
+| Colour | Parts | On legs | Fence + ledge | Tree + ledge |
+|---|---|---|---|---|
+| Walls (cream) | 4 corner modules | 2.33 kg → 3 spools | 2.29 kg → 3 spools | 2.29 kg → 3 spools |
+| Roof (light sage) | 4 roof panels | 1.23 kg → 2 spools | 1.15 kg → 2 spools | 1.15 kg → 2 spools |
+| Trim (white) | ridge, door, keys, legs, ledge, mount | 0.47 kg → 1 spool | 1.00 kg → 2 spools | 0.86 kg → 1 spool |
+
+The heaviest single print is a back corner module at about 615 g and 18 h, so start each corner on a spool
+with at least 700 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
+runs out. The margins above cover a failed print or two and the purge lines. They don't cover a full
+reprint of a corner module.
 
 ![Plates](renders/plate_layout.png)
 
@@ -140,6 +174,8 @@ Fence mount: 16 × M5 × 20 button head + washers + nyloc nut, 5 × #10 × 1½" 
 deck screws for the post cleat, and 2 × #10 × 3" (5 × 80 mm) stainless wood screws for the anti-lift
 screws.
 
+Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the house).
+
 Tree mount: 16 × M5 × 25 button head + washers + nyloc nut, and two 25 mm UV-resistant ratchet or cam
 straps with stainless hardware (or stainless worm-drive hose clamps chained to the trunk's circumference).
 
@@ -167,6 +203,8 @@ straps with stainless hardware (or stainless worm-drive hose clamps chained to t
    - *Fence:* screw the post cleat level to the post or rail, with its bevel up and facing out. Bolt the
      house cleat (top) and standoff (bottom) to the right-hand wall. Hang the house on the cleat, then
      drive the two long screws from inside, through the wall and standoff, into the post.
+   - *Landing:* bolt the ledge to the front-right corner module through the flat pad on the front wall
+     (3 bolts) before you hang the house.
    - *Tree:* bolt both rails to the right-hand wall. Thread a strap through each rail's channel, set the V-grooves
      against the trunk and tighten the straps. Loosen them each season so the tree can grow.
 

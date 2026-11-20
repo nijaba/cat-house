@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_rail]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_rail, landing]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -85,6 +85,12 @@ drain_d = 6;
 rail_len = 300;
 rail_upper_z = 118;
 mount_eave_ov = 15; // roof overhang on the mount side, so the eave clears the post or trunk
+// L-shaped landing ledge at door-sill height, from beside the mount around the front corner to the door
+landing = true;      // only used when mount is not "none"
+landing_w = 95;      // walking width
+landing_t = 8;
+landing_x0 = 8;      // runs to the middle of the door (the lowest point of the opening); replaces the door step
+// the ledge ends flush with the mounting surface (wall, fence board, post or trunk), never past it
 rail_lower_z = 40;
 cleat_t = 24;
 tree_rail_t = 35;
@@ -131,6 +137,10 @@ function Lu_e(e) = (xe(e) + roof_t + shingle_t)/cos(pitch) + 2;
 function Lsh_e(e) = xe(e)/cos(pitch) - ridge_leg - 4;
 function u_ridge_e(e) = Lsh_e(e) + 4 + ridge_leg/2;
 function roof_len_e(e) = (xe(e) + roof_t*sin(pitch))/cos(pitch) + 1;
+landing_on = landing && mount != "none";
+landing_bolt_xs = [115, 170, 196];
+landing_x_end = hx + min(cleat_t + 20, tree_rail_t) - 1;
+landing_bolt_z = 12;
 function win_on(f) = windows && !(mount != "none" && f == (mount_sx > 0 ? 2 : 3));
 rib_xs = [for (k = [1:30]) if (5 + k*rib_pitch < iw/2 - 6) 5 + k*rib_pitch];
 leg_xy = [iw/2 - 35, idp/2 - 35];
@@ -370,6 +380,11 @@ module module_cuts(sx, sy) {
   // room for the neighbour's seam batten
   if (sx > 0) translate([-0.01, sy < 0 ? -hy - 12 : hy + 0.01, zb - 1]) cube([seam_cover + 0.4, 12 - 0.01, 600]);
   if (sy > 0) translate([sx > 0 ? hx + 0.01 : -hx - 12, -0.01, zb - 1]) cube([12 - 0.01, seam_cover + 0.4, 600]);
+  // landing ledge: flat pads and bolt holes on the front-corner module of the mount side
+  if (landing_on && sx == mount_sx && sy < 0) scale([mount_sx, 1, 1]) {
+    translate([76, -hy - 15, zb - 1]) cube([hx + 20 - 76, 15 - 0.01, door_sill + 1 - zb + 1]);
+    for (x = landing_bolt_xs) translate([x, -hy - 10, landing_bolt_z]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20, $fn = 16);
+  }
   // mount rails on the eave wall
   if (mount_holes && sx == mount_sx) mount_xf() {
     for (c = [rail_upper_z, rail_lower_z]) {
@@ -473,7 +488,7 @@ module ridge_cap(sy, saddle = false) {
 //  Entrance
 // =====================================================================
 // local frame: wall-side face at z = 0, outward +z, y up
-module door_surround() difference() {
+module door_surround(step = true) difference() {
   union() {
     cylinder(r = R_out, h = 5, $fn = 120);
     // rain hood: top half of a tube
@@ -486,8 +501,8 @@ module door_surround() difference() {
     }
     // keystone
     linear_extrude(7.5) polygon([[-8, door_r + 1], [8, door_r + 1], [12, R_out - 8], [-12, R_out - 8]]);
-    // step / drip ledge, sloped 8 degrees outward and down
-    multmatrix([[1, 0, 0, 0], [0, 1, -tan(8), 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    // step / drip ledge, sloped 8 degrees outward and down (the landing ledge replaces it)
+    if (step) multmatrix([[1, 0, 0, 0], [0, 1, -tan(8), 0], [0, 0, 1, 0], [0, 0, 0, 1]])
       translate([-55, -door_r - 6, 0]) cube([110, 6, sill_depth]);
   }
   translate([0, 0, -1]) cylinder(r = door_r, h = 100, $fn = 120);
@@ -574,6 +589,40 @@ module tree_rail(c = rail_upper_z) difference() {
 }
 
 // =====================================================================
+//  Landing ledge (world coordinates, built for the right side and mirrored for the left)
+// =====================================================================
+module landing_world() scale([mount_sx, 1, 1]) {
+  zt = door_sill; zp = zt - landing_t; zf = zb + 2;
+  yi = -hy - 6;
+  difference() {
+    union() {
+      // walking plate, outer corners rounded
+      translate([0, 0, zp]) linear_extrude(landing_t) offset(r = 10) offset(delta = -10)
+        polygon([[landing_x0, yi], [landing_x_end, yi], [landing_x_end, yi - landing_w], [landing_x0, yi - landing_w]]);
+      // bolting flange against the front wall
+      translate([76, yi, zf]) cube([hx - 76, 6, zt - zf]);
+      // web under the stretch in front of the door, kept 6 mm off the wall so it clears the door surround
+      translate([landing_x0 + 4, yi - 6, zf]) cube([76 + 1 - landing_x0 - 4, 6, zt - zf]);
+      // gussets
+      for (x = [landing_x0 + 4, 48, 92, 140, 188, hx - 6]) translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(6)
+        polygon([[yi + 0.01, zf], [yi + 0.01, zp + 0.01], [yi - landing_w + 8, zp + 0.01]]);
+      // end gusset past the corner, under the part that reaches out to the mounting surface
+      translate([landing_x_end - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(6)
+        polygon([[yi - 0.01, zp - 30], [yi - 0.01, zp + 0.01], [yi - landing_w + 8, zp + 0.01]]);
+      translate([hx, yi - 0.01, zp - 30]) cube([landing_x_end - hx - 2, 6, 30.02]);
+    }
+    // drain and grip slots, square to the wall
+    for (x = [landing_x0 + 14 : 16 : landing_x_end - 12]) translate([x - 2.5, yi - landing_w + 12, zp - 1]) cube([5, landing_w - 24, landing_t + 2]);
+    // bolts to the house
+    for (x = landing_bolt_xs) translate([x, yi - 20, landing_bolt_z]) rotate([-90, 0, 0]) cylinder(d = m5, h = 40, $fn = 16);
+  }
+}
+
+// print upside down: the walking surface goes on the bed
+module landing_print() translate([mount_sx > 0 ? -landing_x0 : landing_x_end, -hy, door_sill])
+  rotate([180, 0, 0]) landing_world();
+
+// =====================================================================
 //  Printable parts (print orientation)
 // =====================================================================
 module corner_print(sx, sy) translate([0, 0, -zb]) corner(sx, sy);
@@ -613,11 +662,12 @@ module print_part(p) {
   if (p == "ridge_front") ridge_print(-1);
   if (p == "ridge_back") ridge_print(1);
   if (p == "ridge_saddle") ridge_print(-1, true);
-  if (p == "door_surround") door_surround();
+  if (p == "door_surround") door_surround(step = !landing_on);
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();
   if (p == "center_leg") center_leg();
   if (p == "bowtie_key") bowtie_key();
+  if (p == "landing") landing_print();
   if (p == "fence_house_cleat" || p == "fence_post_cleat" || p == "fence_standoff" || p == "tree_rail") rail_print(p);
 }
 
@@ -634,20 +684,21 @@ module assembly(e = 0) {
   for (sx = [-1, 1], sy = [-1, 1]) color(c_roof) translate([sx*e*90, sy*e*40, e*170]) roof_panel(sx, sy);
   color(c_trim) translate([0, 0, e*260]) { ridge_cap(-1); ridge_cap(1); }
   color(c_trim) translate([0, 0, e*300]) ridge_cap(-1, true);
-  color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround();
+  color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
   color(c_trim) translate([0, -idp/2 + e*80, door_z]) rotate([-90, 0, 0]) door_inner_ring();
   if (show_legs) color(c_leg) translate([0, 0, -e*80]) {
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx*leg_xy[0], sy*leg_xy[1], zb - leg_h]) leg();
     translate([0, 0, zb]) rotate([180, 0, 0]) center_leg();
   }
-  if (e > 0) color(c_trim) for (s = [-1, 1]) {
-    translate([0, s*key_yk, zb + 150]) bowtie_key();
-    translate([s*key_xk, 0, zb + 150]) rotate([0, 0, 90]) bowtie_key();
+  color(c_trim) for (s = [-1, 1]) {
+    translate([0, s*key_yk, zb + e*150]) bowtie_key();
+    translate([s*key_xk, 0, zb + e*150]) rotate([0, 0, 90]) bowtie_key();
   }
   if (show_cushion && e == 0) color("#B5524A") translate([0, 0, 0])
     hull() for (sx = [-1, 1], sy = [-1, 1]) translate([sx*(cushion_w/2 - 40), sy*(cushion_d/2 - 40), 0])
       scale([1, 1, cushion_h/80]) translate([0, 0, 40]) sphere(r = 40, $fn = 24);
   mount_xf() translate([0, e*120, 0]) mount_parts_local();
+  if (landing_on) color(c_trim) translate([e*120, -e*120, 0]) landing_world();
 }
 
 module mount_parts_local() {
@@ -698,6 +749,7 @@ module layout() {
     translate([162, 160, 0]) rail_print("fence_post_cleat");
     translate([162, 250, 0]) rail_print("fence_standoff");
   }
+  plate(3, 2) color(c_trim) translate([10, 10, 0]) landing_print();
   plate(2, 2) color(c_trim) {
     translate([162, 40, 0]) rail_print("tree_rail");
     translate([162, 160, 0]) rail_print("tree_rail");
