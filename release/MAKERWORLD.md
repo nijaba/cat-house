@@ -20,7 +20,7 @@ on 2026-11-20.
 | Cloud slicing check | Each profile is re-sliced in the cloud: 5 min per plate, 15 min per file. It must use Bambu printer and filament presets only, and parts must stay clear of the plate edges and avoidance zones. | ✅ Local slicing with the stock Bambu ASA / H2D presets takes about 20–60 s per plate. Re-check the edge clearance in Bambu Studio after naming the plates. |
 | Printer compatibility | The upload page lists the printers to check. | ⚠️ The corner modules are 317 mm tall, so only the H2 series fits (H2D and H2S). Untick the X1, P1, A1 and P2S. |
 | Title, description, category, tags | Required, and they must match the files. Profile titles must not say "fast", "best", "perfect", "guaranteed" or "official". | ✅ Drafted in section 3. |
-| Licence | Choose one: Standard Digital File License, CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND or CC0. (CC0 additionally needs a photo of your own print.) | ❓ **Your call.** I suggest **CC BY-NC-SA**: people can remix it, for example for other cushion sizes, but nobody can sell it, and remixes stay open. |
+| Licence | Choose one: Standard Digital File License, CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND or CC0. (CC0 additionally needs a photo of your own print.) | ✅ **CC BY-NC-SA 4.0** (decided 2026-11-20). |
 | AI-generated content | MakerWorld asks creators to label models that are "mostly or entirely AI-generated" as AIGC; mislabelled models can lose visibility or be removed. AI-generated images are not allowed as model photos. | ❓ **Your call.** The design and OpenSCAD code were written by Claude at your direction, so I recommend **ticking the AIGC label** and saying so in one line of the description. The OpenSCAD renders are not AI images, but keep them in the gallery after the real photos, not as the cover. |
 | Bill of materials | Optional. A BOM field lists filaments and non-printed parts. | ✅ Add the stainless hardware and Bambu ASA. The list is in the README. |
 | Off-platform links | The guidelines forbid using the account to "redirect users off-platform". | ⚠️ Keep everything on the page. If the GitHub repo becomes public, one plain "source" link at the end is the most to add. |
@@ -170,7 +170,8 @@ for the first two days, because early engagement drives MakerWorld's ranking.
 
 - [ ] Print and assemble the house; take ≥ 3 real photos (plus a cat, plus the mounted version if
       publishing profile 2)
-- [ ] Decide the licence (suggested: CC BY-NC-SA) and the AIGC label (recommended: on)
+- [x] Licence: CC BY-NC-SA 4.0
+- [ ] Decide the AIGC label (recommended: on)
 - [ ] Name the plates in both 3MFs in Bambu Studio, slice, save
 - [ ] Decide whether to make the GitHub repo public and link it
 - [ ] Publish on MakerWorld with Community Post on, then work down section 4

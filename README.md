@@ -229,3 +229,9 @@ For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, 
 - Target printer: Bambu Lab H2D, single-nozzle build volume 325 × 320 × 325 mm (dual-nozzle printing
   shrinks X to 300 mm). The file checks every part against `bed`.
 - Made with OpenSCAD 2021.01, no libraries.
+
+## Licence
+
+Cat Cottage is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/). You may print it,
+share it and remix it with credit. You may not use it commercially, and remixes must use the same licence.
