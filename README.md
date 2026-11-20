@@ -45,14 +45,16 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 - **Optional mount**, chosen with `mount = "none" | "tree" | "fence"`. It goes on a long (eave) wall,
   the right one by default (`mount_side = "right" | "left"`). That leaves the door in the front gable, on
   the side next to the post or trunk, so a cat coming along the fence or down the tree can reach it.
-  - *fence*: a French cleat. One half bolts to the house and the other screws to a post or rail. A
-    standoff keeps the house plumb, and two long screws through it stop the house from lifting off in a
-    storm.
-  - *tree*: two rails with a V-groove that centres them on the trunk, and a channel each for a 25 mm
-    ratchet strap or hose clamps.
+  - The house carries a **house cleat** (top) and a **standoff** (bottom). It hangs on a 45° French cleat,
+    then 4 lock screws, driven from inside, fix it to the mounting surface.
+  - *fence*: the **mount cleat** screws to a fence post, rail or wall.
+  - *tree*: the **tree plate** (the mount cleat on a tall backing board) straps to the trunk with 3 ratchet
+    straps or hose clamps. A V-groove on its back centres it on the trunk.
+  - **Two steel shelf brackets under the floor are required when mounted.** Without them the floor centre
+    is overstressed (see [STRUCTURAL.md](STRUCTURAL.md)). The brackets bolt through the centre-leg holes.
   - A mounted house uses the `_mount` versions of the two right-hand corner modules and the two right-hand
-    roof panels. Those corners have flat pads and bolt holes for the rails and no windows. Those roof
-    panels have a 15 mm eave instead of 50 mm, so the roof clears the post or trunk.
+    roof panels. Those corners have flat pads and bolt holes for the cleat and standoff, and no windows.
+    Those roof panels have a 15 mm eave instead of 50 mm, so the roof clears the post or trunk.
   - **Landing ledge** (`landing = true`, on by default with a mount): a 95 mm wide shelf along the front
     wall at door-sill height. It runs from the mounting surface to the middle of the doorway, so the cat
     walks straight in. It never sticks out past the mounting surface, so the house still sits flat against
@@ -92,8 +94,8 @@ To export one part from the command line:
 
 | STL | Qty | Size (mm) | Orientation |
 |---|---|---|---|
-| `corner_fl`, `corner_fr` (or `corner_fr_mount`) | 1 each | 239 × 236 × 317 | as exported: floor down |
-| `corner_bl`, `corner_br` (or `corner_br_mount`) | 1 each | 239 × 225 × 317 | as exported: floor down |
+| `corner_fl`, `corner_fr` (or `corner_fr_mount`) | 1 each | 239 × 236 × 320 | as exported: floor down |
+| `corner_bl`, `corner_br` (or `corner_br_mount`) | 1 each | 239 × 225 × 320 | as exported: floor down |
 | `roof_fl`, `roof_bl`, `roof_fr`, `roof_br` (or `roof_fr_mount`, `roof_br_mount`, 275 long) | 1 each | 315 × 272 × 20 | as exported: shingles up |
 | `ridge_front`, `ridge_back` | 1 each | 69 × 272 × 42 | as exported: one leg flat |
 | `ridge_saddle` | 1 | 63 × 50 × 39 | as exported |
@@ -101,9 +103,10 @@ To export one part from the command line:
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
 | `leg` | 4 | Ø40 × 60 | narrow end down |
 | `center_leg` | 1 | Ø100 × 60 | as exported: plate down |
-| `bowtie_key` | 4 | 50 × 30 × 10 | flat |
-| `fence_house_cleat`, `fence_post_cleat`, `fence_standoff` | 1 each | 300 long | as exported (fence mount only) |
-| `tree_rail` | 2 | 300 × 60 × 35 | as exported (tree mount only) |
+| `bowtie_key` | 4 | 50 × 30 × 13 | flat |
+| `fence_house_cleat`, `fence_standoff` | 1 each | 300 long | as exported (either mount) |
+| `fence_post_cleat` | 1 | 300 × 58 × 26 | as exported (fence mount) |
+| `tree_plate` | 1 | 300 × 308 × 51 | as exported: trunk side down (tree mount) |
 | `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
 | `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
 
@@ -118,20 +121,20 @@ halves them.
 
 | Build | Filament | Print time | Buy (1 kg spools, one colour) |
 |---|---|---|---|
-| On its legs (no mount) | 4.0 kg | ≈ 130 h | **5 spools** |
-| Fence mount + landing ledge | 4.4 kg | ≈ 142 h | **5 spools** (6 to be safe) |
-| Tree mount + landing ledge | 4.3 kg | ≈ 136 h | **5 spools** (6 to be safe) |
+| On its legs (no mount) | 4.1 kg | ≈ 133 h | **5 spools** |
+| Fence mount + landing ledge | 4.4 kg | ≈ 141 h | **5 spools** (6 to be safe) |
+| Tree mount + landing ledge | 5.0 kg | ≈ 162 h | **6 spools** |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
 | Colour | Parts | On legs | Fence + ledge | Tree + ledge |
 |---|---|---|---|---|
-| Walls (cream) | 4 corner modules | 2.33 kg → 3 spools | 2.29 kg → 3 spools | 2.29 kg → 3 spools |
-| Roof (light sage) | 4 roof panels | 1.23 kg → 2 spools | 1.15 kg → 2 spools | 1.15 kg → 2 spools |
-| Trim (white) | ridge, door, keys, legs, ledge, mount | 0.47 kg → 1 spool | 1.00 kg → 2 spools | 0.86 kg → 1 spool |
+| Walls (cream) | 4 corner modules | 2.41 kg → 3 spools | 2.39 kg → 3 spools | 2.39 kg → 3 spools |
+| Roof (light sage) | 4 roof panels | 1.25 kg → 2 spools | 1.17 kg → 2 spools | 1.17 kg → 2 spools |
+| Trim (white) | ridge, door, keys, legs, ledge, mount | 0.47 kg → 1 spool | 0.88 kg → 1 spool | 1.45 kg → 2 spools |
 
-The heaviest single print is a back corner module at about 615 g and 18 h, so start each corner on a spool
-with at least 700 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
+The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-left corner module
+(about 640 g, 18.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
 runs out. The margins above cover a failed print or two and the purge lines. They don't cover a full
 reprint of a corner module.
 
@@ -170,14 +173,20 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 4 | M6 × 20 flat head + M6 nut | Centre leg |
 | | Outdoor CA glue or epoxy | Bowtie keys (optional, they are a snug press fit) |
 
-Fence mount: 16 × M5 × 20 button head + washers + nyloc nut, 5 × #10 × 1½" stainless countersunk
-deck screws for the post cleat, and 2 × #10 × 3" (5 × 80 mm) stainless wood screws for the anti-lift
-screws.
+Either mount: 16 × M5 × 20 button head + washers + nyloc nut (house cleat and standoff), and **2 steel
+shelf brackets, 12 × 8 in (305 × 200 mm), heavy duty, each rated for at least 45 kg**, in stainless or
+hot-dip galvanised steel. They bolt to the floor with 4 × M6 × 25 flat head + washers + nuts through the
+centre-leg holes. Drill each bracket arm 6.5 mm at 216 and 276 mm from the inside face of its upright.
+
+Fence mount: 4 × #10 × 1½" stainless countersunk screws for the mount cleat, 6 × #10 × 2" for the bracket
+uprights, and 4 × #10 × 3" (5 × 80 mm) stainless wood screws as lock screws. Use large (25 mm) fender
+washers inside the house.
+
+Tree mount: 6 × M5 × 35 + nuts for the bracket uprights (the nuts sit in pockets on the trunk side), and
+4 × #10 × 2¼" stainless screws as lock screws into the plate. Add three 25 mm UV-resistant ratchet straps
+with stainless hardware, or stainless worm-drive hose clamps chained to the trunk's circumference.
 
 Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the house).
-
-Tree mount: 16 × M5 × 25 button head + washers + nyloc nut, and two 25 mm UV-resistant ratchet or cam
-straps with stainless hardware (or stainless worm-drive hose clamps chained to the trunk's circumference).
 
 ## Assembly
 
@@ -200,19 +209,33 @@ straps with stainless hardware (or stainless worm-drive hose clamps chained to t
    saddle over the joint between them with the four M4 × 20 bolts. If you want the ridge fully sealed, run
    a thin bead of neutral-cure outdoor silicone along the panel tops before fitting the caps.
 8. **Mount (optional).**
-   - *Fence:* screw the post cleat level to the post or rail, with its bevel up and facing out. Bolt the
-     house cleat (top) and standoff (bottom) to the right-hand wall. Hang the house on the cleat, then
-     drive the two long screws from inside, through the wall and standoff, into the post.
-   - *Landing:* bolt the ledge to the front-right corner module through the flat pad on the front wall
-     (3 bolts) before you hang the house.
-   - *Tree:* bolt both rails to the right-hand wall. Thread a strap through each rail's channel, set the V-grooves
-     against the trunk and tighten the straps. Loosen them each season so the tree can grow.
+   - Bolt the house cleat (top) and the standoff (bottom) to the right-hand wall, and the landing ledge to
+     the front wall (3 bolts). Leave the centre leg off.
+   - *Fence:* screw the mount cleat level to the post, rail or wall, bevel up, with its high edge facing
+     out.
+   - *Tree:* put the bracket nuts into their pockets, then strap the tree plate to the trunk with the
+     V-groove against the bark. Tension the 3 straps. Loosen them each season so the tree can grow.
+   - Screw the two steel brackets' uprights to the post or plate, 60 mm apart and centred under where the
+     cleat will be. Their arms' top edges must sit 61 mm below the bottom edge of the mount cleat
+     (that's where the floor's underside lands). Easiest: hang the house first and mark.
+   - Hang the house on the cleat, so the house cleat's lip drops behind the mount cleat. Bolt the bracket
+     arms to the floor (4 × M6 × 25 through the centre-leg holes).
+   - From inside, drive the 4 lock screws, with fender washers, through the wall into the post or plate:
+     2 through the house cleat and 2 through the standoff.
+   - Do the proof test in [STRUCTURAL.md](STRUCTURAL.md) before letting the cat in.
 
 To take the roof off for cleaning, remove the 20 roofing screws and lift the roof off as one piece. The
 ridge caps and standing seams hold it together.
 
-For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, `corner_bl`, `roof_fl` and
-`roof_bl` with `-D 'mount="fence"' -D 'mount_side="left"'`. Either mount type gives the same parts.
+For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, `corner_bl`, `roof_fl`,
+`roof_bl`, `landing` and `door_surround` with `-D 'mount="fence"' -D 'mount_side="left"'`. Either mount
+type gives the same house parts.
+
+## Strength
+
+Checked by hand for a 20 kg load: on the floor, on the roof and on the ledge, standing on legs or mounted.
+See [STRUCTURAL.md](STRUCTURAL.md). In short: on its legs it is fine as printed. **Mounted, it needs the two
+steel brackets underneath.** Do the 20 kg proof test before first use.
 
 ## Placing it in Florida
 

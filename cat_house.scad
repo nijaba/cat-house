@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_rail, landing]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -39,8 +39,8 @@ wall_h = 180;
 
 /* [Shell] */
 wt = 5;          // wall core thickness
-slab_t = 4;      // floor slab thickness
-rib_h = 6;       // floor ribs: the cushion sits on these, water drains under it
+slab_t = 5;      // floor slab thickness
+rib_h = 8;       // floor ribs: the cushion sits on these, water drains under it; they also stiffen the floor
 rib_w = 3;
 rib_pitch = 35;
 flange_d = 10;   // inner bolt flanges at the module seams
@@ -64,7 +64,7 @@ back_ov = 35;
 shingle_e = 26;  // fish-scale shingle exposure
 shingle_w = 30;
 shingle_t = 2.6;
-seam_h = 14;     // standing seam that joins the front and back roof panels
+seam_h = 20;     // standing seam (20 mm makes it a rib that carries a 20 kg point load at mid-slope) that joins the front and back roof panels
 seam_t = 4;
 ridge_leg = 40;
 ridge_t = 4;
@@ -83,7 +83,24 @@ drain_d = 6;
 
 /* [Mount] */
 rail_len = 300;
-rail_upper_z = 118;
+// French cleat: the house cleat (on the house) hooks over the mount cleat (on the fence, or on the tree plate).
+// Stack from the house wall to the mounting surface:
+cleat_t = 30;
+cleat_zh = 110;      // top of the 45 degree bevel at the house side
+cleat_top = 148;     // top of the house cleat (just under the eave louvres)
+standoff_z = [2, 46]; // lower standoff that bears on the mounting surface
+cleat_bolt_z = [120, 138];
+standoff_bolt_z = [12, 36];
+lock_xs = [-95, 95]; // lock screws from inside: top through the house cleat, bottom through the standoff
+lock_z = [129, 24];
+tree_back_t = 25;    // tree plate backing behind the cleat; V-groove and strap channels on its back
+tree_plate_bottom = -160; // the plate runs below the house so the support brackets can bolt to it
+strap_w = 26;        // 25 mm ratchet strap or hose clamps
+strap_t = 6;
+// Support brackets (bought, steel) under the floor when mounted: see STRUCTURAL.md
+show_brackets = true;
+bracket_arm = 305;   // 12 in shelf bracket
+bracket_leg = 200;   // 8 in
 mount_eave_ov = 15; // roof overhang on the mount side, so the eave clears the post or trunk
 // L-shaped landing ledge at door-sill height, from beside the mount around the front corner to the door
 landing = true;      // only used when mount is not "none"
@@ -91,11 +108,6 @@ landing_w = 95;      // walking width
 landing_t = 8;
 landing_x0 = 8;      // runs to the middle of the door (the lowest point of the opening); replaces the door step
 // the ledge ends flush with the mounting surface (wall, fence board, post or trunk), never past it
-rail_lower_z = 40;
-cleat_t = 24;
-tree_rail_t = 35;
-strap_w = 26;    // 25 mm ratchet strap or hose clamps
-strap_t = 6;
 
 /* [Hardware clearances] */
 m4 = 4.5;
@@ -138,9 +150,9 @@ function Lsh_e(e) = xe(e)/cos(pitch) - ridge_leg - 4;
 function u_ridge_e(e) = Lsh_e(e) + 4 + ridge_leg/2;
 function roof_len_e(e) = (xe(e) + roof_t*sin(pitch))/cos(pitch) + 1;
 landing_on = landing && mount != "none";
-landing_bolt_xs = [115, 170, 196];
-landing_x_end = hx + min(cleat_t + 20, tree_rail_t) - 1;
-landing_bolt_z = 12;
+landing_bolt_xs = [115, 165, 201];
+landing_x_end = hx + cleat_t - 1;
+landing_bolt_z = 26;
 function win_on(f) = windows && !(mount != "none" && f == (mount_sx > 0 ? 2 : 3));
 rib_xs = [for (k = [1:30]) if (5 + k*rib_pitch < iw/2 - 6) 5 + k*rib_pitch];
 leg_xy = [iw/2 - 35, idp/2 - 35];
@@ -385,13 +397,12 @@ module module_cuts(sx, sy) {
     translate([76, -hy - 15, zb - 1]) cube([hx + 20 - 76, 15 - 0.01, door_sill + 1 - zb + 1]);
     for (x = landing_bolt_xs) translate([x, -hy - 10, landing_bolt_z]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20, $fn = 16);
   }
-  // mount rails on the eave wall
+  // mount on the eave wall: flat pads for the house cleat and the standoff, bolt and lock-screw holes
   if (mount_holes && sx == mount_sx) mount_xf() {
-    for (c = [rail_upper_z, rail_lower_z]) {
-      translate([-rail_len/2 - 2, 0.01, c - 31]) cube([rail_len + 4, 12, 62]);
-      for (x = rail_xs, dz = [-20, 20]) translate([x, -wt - 1, c + dz]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20);
-    }
-    for (x = [-95, 95]) translate([x, -wt - 1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = wt + 20);
+    for (b = [[standoff_z[0] - 1, standoff_z[1] + 1], [cleat_zh - 1, cleat_top + 1]])
+      translate([-rail_len/2 - 2, 0.01, b[0]]) cube([rail_len + 4, 12, b[1] - b[0]]);
+    for (x = rail_xs, z = concat(cleat_bolt_z, standoff_bolt_z)) translate([x, -wt - 1, z]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20);
+    for (x = lock_xs, z = lock_z) translate([x, -wt - 1, z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = wt + 20);
   }
 }
 
@@ -443,7 +454,7 @@ module panel_local(v0, v1, front, e) {
       translate([6, 0, 0]) cube([Lsh - 8, seam_t, seam_h]);
       cube([1, seam_t, 2]);
     }
-    for (u = [40, Lsh/2, Lsh - 30]) translate([u, front ? v1 : v0, roof_t + 8])
+    for (u = [40, Lsh/2, Lsh - 30]) translate([u, front ? v1 : v0, roof_t + 10])
       rotate([90, 0, 0]) cylinder(d = m4, h = 3*seam_t, center = true);
   }
 }
@@ -544,48 +555,66 @@ module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) offset(delta = -0.15) b
 // =====================================================================
 //  Mount rails (mount frame: wall face at y = 0, outward +y; placed with mount_xf)
 // =====================================================================
-module rail_section(pts, c) translate([-rail_len/2, 0, c]) rotate([90, 0, 90]) linear_extrude(rail_len) polygon(pts);
-
-module rail_bolts(c, from_y, nut = "hex") for (x = rail_xs, dz = [-20, 20]) translate([x, 0, c + dz]) {
-  translate([0, -1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
-  translate([0, from_y, 0]) rotate([-90, 0, 0]) cylinder(r = 8/sqrt(3) + 0.3, h = 80, $fn = 6);
-}
-
-module fence_house_cleat() difference() {
-  rail_section([[0, 30], [cleat_t, 30], [cleat_t, -10], [4, -30], [0, -30]], rail_upper_z);
-  rail_bolts(rail_upper_z, 8);
-}
-
-module fence_post_cleat() {
-  c = rail_upper_z;
-  difference() {
-    rail_section([[5, -70], [cleat_t + 20, -70], [cleat_t + 20, 9.5], [5, -29.5]], c);
-    for (x = [-110, 0, 110]) translate([x, 0, c - 50]) screw_hole_y(5);
-    for (x = [-60, 60]) translate([x, 0, c - 22]) screw_hole_y(14);
-  }
-}
+module rail_section(pts) translate([-rail_len/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(rail_len) polygon(pts);
+module y_hole(x, z, d, y0 = -1, h = 120) translate([x, y0, z]) rotate([-90, 0, 0]) cylinder(d = d, h = h, $fn = 16);
+module y_hex(x, z, y0, h, af) translate([x, y0, z]) rotate([-90, 0, 0]) cylinder(r = af/sqrt(3) + 0.3, h = h, $fn = 6);
 // countersunk wood-screw hole along +y, head on the side facing the house
-module screw_hole_y(y0) {
-  translate([0, y0 - 1, 0]) rotate([-90, 0, 0]) cylinder(d = 5, h = 80, $fn = 16);
-  translate([0, y0 - 6, 0]) rotate([-90, 0, 0]) cylinder(d1 = 16, d2 = 5, h = 5.5 + 6, $fn = 24);
+module screw_hole_y(x, z, y0) {
+  y_hole(x, z, 5, y0 - 1);
+  translate([x, y0 - 6, z]) rotate([-90, 0, 0]) cylinder(d1 = 16, d2 = 5, h = 5.5 + 6, $fn = 24);
+}
+// bevel line shared by both cleats: z = cleat_zh - y (lower at the mounting-surface side)
+module fence_house_cleat() difference() {
+  rail_section([[0, cleat_top], [cleat_t - 0.3, cleat_top], [cleat_t - 0.3, cleat_zh - cleat_t + 0.3], [0, cleat_zh]]);
+  for (x = rail_xs, z = cleat_bolt_z) { y_hole(x, z, m5); y_hex(x, z, 10, 40, 8); }
+  for (x = lock_xs) y_hole(x, lock_z[0], 5.2);
+}
+
+// mount cleat profile: below the bevel, bevel high at the house side so the house cleat is pulled in
+function mount_cleat_pts(y_back) = [[4, cleat_zh - 4 - 0.4], [cleat_t, cleat_zh - cleat_t - 0.4], [y_back, cleat_zh - cleat_t - 0.4],
+                                    [y_back, 48], [4, 48]];
+
+module fence_post_cleat() difference() {
+  rail_section(mount_cleat_pts(cleat_t));
+  for (x = [-110, -40, 40, 110]) screw_hole_y(x, 64, 4);
 }
 
 module fence_standoff() difference() {
-  rail_section([[0, -30], [cleat_t + 20, -30], [cleat_t + 20, 30], [0, 30]], rail_lower_z);
-  for (x = rail_xs, dz = [-20, 20]) translate([x, 0, rail_lower_z + dz]) {
-    translate([0, -1, 0]) rotate([-90, 0, 0]) cylinder(d = m5, h = 80, $fn = 16);
-    translate([0, 10, 0]) rotate([-90, 0, 0]) cylinder(d = 12, h = 80, $fn = 24);
-  }
-  for (x = [-95, 95]) translate([x, -1, rail_lower_z]) rotate([-90, 0, 0]) cylinder(d = 5.2, h = 80, $fn = 16);
+  rail_section([[0, standoff_z[0]], [cleat_t, standoff_z[0]], [cleat_t, standoff_z[1]], [0, standoff_z[1]]]);
+  for (x = rail_xs, z = standoff_bolt_z) { y_hole(x, z, m5); y_hole(x, z, 12, 10); }
+  for (x = lock_xs) y_hole(x, lock_z[1], 5.2);
 }
 
-module tree_rail(c = rail_upper_z) difference() {
-  rail_section([[0, -30], [tree_rail_t, -30], [tree_rail_t, 30], [0, 30]], c);
-  // strap channel along the rail
-  translate([-rail_len/2 - 1, 6, c - strap_w/2]) cube([rail_len + 2, strap_t, strap_w]);
-  // V groove that centres the rail on the trunk
-  translate([0, 0, c - 31]) linear_extrude(62) polygon([[-14, tree_rail_t + 0.01], [14, tree_rail_t + 0.01], [0, tree_rail_t - 14]]);
-  rail_bolts(c, 16);
+// Tree plate: the mount cleat on a backing board that straps to the trunk. The standoff and the house
+// cleat bear on its front face, and the support brackets bolt to its lower part.
+module tree_plate() {
+  yb = cleat_t + tree_back_t;
+  difference() {
+    union() {
+      rail_section(mount_cleat_pts(cleat_t + 1));
+      translate([-rail_len/2, cleat_t, tree_plate_bottom]) cube([rail_len, tree_back_t, cleat_top - tree_plate_bottom]);
+    }
+    // strap channels along the plate
+    for (z = [cleat_top - 22, 24, tree_plate_bottom + 40]) translate([-rail_len/2 - 1, cleat_t + 6, z - strap_w/2]) cube([rail_len + 2, strap_t, strap_w]);
+    // V-groove that centres it on the trunk
+    translate([0, 0, tree_plate_bottom - 1]) linear_extrude(cleat_top - tree_plate_bottom + 2)
+      polygon([[-14, yb + 0.01], [14, yb + 0.01], [0, yb - 10]]);
+    // pilot holes for the lock screws
+    for (x = lock_xs, z = lock_z) y_hole(x, z, 3.5, cleat_t - 1, tree_back_t - 4);
+    // bracket bolts: M5 with the nut in a pocket on the trunk side (fit them before strapping)
+    for (x = [-30, 30], z = [-40, -95, -145]) { y_hole(x, z, m5, cleat_t - 1, 40); y_hex(x, z, yb - 5, 6, 8); }
+  }
+}
+
+// Steel shelf brackets (bought), shown for reference: two under the floor centre, bolted through the
+// centre-leg holes. Mount frame: arm runs from the mounting surface back under the house.
+module support_brackets() color("#8A8F94") for (x = [-30, 30]) translate([x - 15, 0, 0]) {
+  translate([0, cleat_t - 4, zb - bracket_leg]) cube([30, 4, bracket_leg]);
+  translate([0, cleat_t - bracket_arm, zb - 4]) cube([30, bracket_arm, 4]);
+  hull() {
+    translate([13, cleat_t - 4.5, zb - bracket_leg + 20]) cube([4, 0.5, 0.5]);
+    translate([13, cleat_t - bracket_arm + 40, zb - 4.5]) cube([4, 0.5, 0.5]);
+  }
 }
 
 // =====================================================================
@@ -640,14 +669,16 @@ module ridge_print(sy, saddle = false) {
   e = eave_of(-1);
   u0 = Lsh_e(e) + 4 + (saddle ? 6 : 0);
   // outer face of one leg on the bed, the other leg rises at 2 x pitch
-  translate([0, 0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
+  v1 = saddle ? ysplit + 25 : (sy < 0 ? ysplit - gap : yb);
+  translate([0, v1 - v0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
 }
 
 module rail_print(which) {
-  if (which == "fence_house_cleat") rotate([90, 0, 0]) translate([0, 0, -rail_upper_z]) fence_house_cleat();
-  if (which == "fence_post_cleat") rotate([-90, 0, 0]) translate([0, -(cleat_t + 20), -rail_upper_z]) fence_post_cleat();
-  if (which == "fence_standoff") rotate([90, 0, 0]) translate([0, 0, -rail_lower_z]) fence_standoff();
-  if (which == "tree_rail") rotate([90, 0, 0]) translate([0, 0, -rail_upper_z]) tree_rail();
+  // house-side face down for the parts bolted to the house, mounting-surface face down for the others
+  if (which == "fence_house_cleat") rotate([90, 0, 0]) translate([0, 0, -cleat_top]) fence_house_cleat();
+  if (which == "fence_post_cleat") rotate([-90, 0, 0]) translate([0, -cleat_t, -48]) fence_post_cleat();
+  if (which == "fence_standoff") rotate([90, 0, 0]) translate([0, 0, -standoff_z[1]]) fence_standoff();
+  if (which == "tree_plate") rotate([-90, 0, 0]) translate([0, -(cleat_t + tree_back_t), -tree_plate_bottom]) tree_plate();
 }
 
 module print_part(p) {
@@ -668,7 +699,7 @@ module print_part(p) {
   if (p == "center_leg") center_leg();
   if (p == "bowtie_key") bowtie_key();
   if (p == "landing") landing_print();
-  if (p == "fence_house_cleat" || p == "fence_post_cleat" || p == "fence_standoff" || p == "tree_rail") rail_print(p);
+  if (p == "fence_house_cleat" || p == "fence_post_cleat" || p == "fence_standoff" || p == "tree_plate") rail_print(p);
 }
 
 // =====================================================================
@@ -702,14 +733,15 @@ module assembly(e = 0) {
 }
 
 module mount_parts_local() {
+  if (mount != "none") color(c_trim) { fence_house_cleat(); fence_standoff(); }
+  if (mount != "none" && show_brackets) support_brackets();
   if (mount == "fence") {
-    color(c_trim) { fence_house_cleat(); fence_standoff(); }
     color("#C9B79C") fence_post_cleat();
-    color("#7A5C3E") translate([-45, cleat_t + 20, -900]) cube([90, 90, 1400]);  // a fence post, for scale
+    color("#7A5C3E") translate([-45, cleat_t, -900]) cube([90, 90, 1400]);  // a fence post, for scale
   }
   if (mount == "tree") {
-    color(c_trim) { tree_rail(rail_upper_z); tree_rail(rail_lower_z); }
-    color("#6B4F35") translate([0, tree_rail_t + 130 - 6, -900]) cylinder(r = 130, h = 1500, $fn = 64);
+    color("#C9B79C") tree_plate();
+    color("#6B4F35") translate([0, cleat_t + tree_back_t + 130 - 10, -900]) cylinder(r = 130, h = 1500, $fn = 64);
   }
 }
 
@@ -745,15 +777,12 @@ module layout() {
     translate([260, 70, 0]) center_leg();
   }
   plate(1, 2) color(c_trim) {
-    translate([162, 20, 0]) rail_print("fence_house_cleat");
-    translate([162, 160, 0]) rail_print("fence_post_cleat");
-    translate([162, 250, 0]) rail_print("fence_standoff");
+    translate([162, 50, 0]) rail_print("fence_house_cleat");
+    translate([162, 150, 0]) rail_print("fence_post_cleat");
+    translate([162, 220, 0]) rail_print("fence_standoff");
   }
   plate(3, 2) color(c_trim) translate([10, 10, 0]) landing_print();
-  plate(2, 2) color(c_trim) {
-    translate([162, 40, 0]) rail_print("tree_rail");
-    translate([162, 160, 0]) rail_print("tree_rail");
-  }
+  plate(2, 2) color(c_trim) translate([162, 6, 0]) rail_print("tree_plate");
 }
 
 if (part == "assembly") assembly();

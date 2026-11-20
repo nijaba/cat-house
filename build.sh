@@ -9,7 +9,7 @@ mkdir -p stl renders
 
 parts=(corner_fl corner_fr corner_bl corner_br roof_fl roof_fr roof_bl roof_br
        ridge_front ridge_back ridge_saddle door_surround door_inner_ring leg center_leg
-       bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_rail landing)
+       bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_plate landing)
 
 if [[ "$what" == stl || "$what" == all ]]; then
   jobs_max=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)

@@ -71,8 +71,9 @@ H2D, large format, OpenSCAD, parametric, customizable, cottage, tree mount, fenc
 > louvres in the gable and under the eaves let hot air out.
 >
 > **Build it your way.** Stand it on its legs, or hang it on a fence, wall or tree. The mount goes on
-> the long side wall and a landing ledge leads to the door. On a fence it hangs on a French cleat;
-> on a tree it uses ratchet straps.
+> the long side wall and a landing ledge leads to the door. It hangs on a French cleat with lock
+> screws on a fence, or on a strapped tree plate; two steel shelf brackets carry it from below.
+> Checked by hand for a 20 kg load.
 >
 > **Prints without supports** on a Bambu Lab **H2D or H2S**. The corner modules are 317 mm tall, so
 > it needs an H2-series build volume. There are 4 corner modules that bolt together, 4 roof panels,
@@ -80,7 +81,7 @@ H2D, large format, OpenSCAD, parametric, customizable, cottage, tree mount, fenc
 >
 > **Material:** ASA is strongly recommended for outdoor use; PLA softens in summer sun. Light colours
 > keep it cooler.
-> **Filament:** 4.0 kg on legs, 4.4 kg mounted, so buy 5 × 1 kg spools.
+> **Filament:** 4.1 kg on legs, 4.4 kg on a fence, 5.0 kg on a tree, so buy 5–6 × 1 kg spools.
 > **Print time:** about 130 h with a 0.4 mm nozzle; a 0.6 mm nozzle is much faster on the big parts.
 > **Hardware:** stainless M4/M5/M6 bolts and #8 roofing screws with EPDM washers (full list in the
 > BOM).
