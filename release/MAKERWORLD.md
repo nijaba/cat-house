@@ -81,7 +81,10 @@ H2D, large format, OpenSCAD, parametric, customizable, cottage, tree mount, fenc
 >
 > **Material:** ASA is strongly recommended for outdoor use; PLA softens in summer sun. Light colours
 > keep it cooler.
-> **Filament:** 4.1 kg on legs, 4.4 kg on a fence, 5.0 kg on a tree, so buy 5–6 × 1 kg spools.
+> **Filament:** 4.2 kg on legs, 4.5 kg on a fence, 5.1 kg on a tree, so buy 5–6 × 1 kg spools.
+> **Opening roof:** one slope lifts on a ridge hinge and stays open on its own, held shut by two
+> turn-button latches, so you can swap the cushion without tools. A rib under the ridge cap and foam
+> under the lid keep it watertight. A glazed peek window shows whether the cat is home.
 > **Print time:** about 130 h with a 0.4 mm nozzle; a 0.6 mm nozzle is much faster on the big parts.
 > **Hardware:** stainless M4/M5/M6 bolts and #8 roofing screws with EPDM washers (full list in the
 > BOM).

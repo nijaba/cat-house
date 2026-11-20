@@ -9,7 +9,7 @@ mkdir -p stl renders
 
 parts=(corner_fl corner_fr corner_bl corner_br roof_fl roof_fr roof_bl roof_br
        ridge_front ridge_back ridge_saddle door_surround door_inner_ring leg center_leg
-       bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_plate landing)
+       bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_plate landing latch_keeper latch_button window_retainer)
 
 if [[ "$what" == stl || "$what" == all ]]; then
   jobs_max=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
@@ -30,6 +30,7 @@ if [[ "$what" == png || "$what" == all ]]; then
   "$OS" -o renders/assembly_fence_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2200 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_tree_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2300 -D 'mount="tree"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/landing.png --imgsize=1400,1100 --camera=150,-150,40,62,0,40,1150 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
+  "$OS" -o renders/roof_open.png --imgsize=1600,1300 --camera=-60,0,170,52,0,22,1900 -D 'open_angle=115' "${common[@]}" cat_house.scad
   "$OS" -o renders/exploded.png --imgsize=1600,1400 --camera=0,0,150,68,0,330,2500 -D 'part="exploded"' "${common[@]}" cat_house.scad
   # single-part views from the exported STL (needs ./build.sh stl first)
   if [[ -f stl/corner_fl.stl ]]; then

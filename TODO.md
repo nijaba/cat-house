@@ -6,4 +6,4 @@
 - [x] Licence: CC BY-NC-SA 4.0
 - [x] AIGC label on; repo public
 - [ ] Name the plates in the 3MFs, publish, announce (see release/MAKERWORLD.md §6)
-- [ ] Idea: a latched or hinged lift-off roof slope, so the cushion can come out without removing 20 screws
+- [x] Hinged roof slope with turn-button latches

@@ -24,7 +24,8 @@ The defaults assume a **40 × 40 cm (16 in) square cushion or a 40 cm round pet 
 thick. The interior is 43 × 43 cm at the floor. That leaves 41 cm between the seam flanges, so a 40 cm bed
 drops in with a little room. Inside height is 18 cm at the side walls and 30 cm under the ridge.
 
-The cushion cannot pass through the 16 cm door. To wash it, take the roof off (see the assembly section).
+The cushion cannot pass through the 16 cm door. Instead, the left roof slope opens like a lid (see
+[Opening the roof](#opening-the-roof)).
 
 For a different cushion, change `cushion_w`, `cushion_d` and `wall_h` in the **Cushion and interior**
 group. The file stops with an error if a part would no longer fit the bed. Up to about 41 cm still fits;
@@ -97,13 +98,16 @@ To export one part from the command line:
 | `corner_fl`, `corner_fr` (or `corner_fr_mount`) | 1 each | 239 × 236 × 320 | as exported: floor down |
 | `corner_bl`, `corner_br` (or `corner_br_mount`) | 1 each | 239 × 225 × 320 | as exported: floor down |
 | `roof_fl`, `roof_bl`, `roof_fr`, `roof_br` (or `roof_fr_mount`, `roof_br_mount`, 275 long) | 1 each | 315 × 272 × 20 | as exported: shingles up |
-| `ridge_front`, `ridge_back` | 1 each | 69 × 272 × 42 | as exported: one leg flat |
+| `ridge_front`, `ridge_back` | 1 each | 80 × 57 × 272 | as exported: **standing on end** (the hinge knuckles print upright); use an 8 mm brim |
 | `ridge_saddle` | 1 | 63 × 50 × 39 | as exported |
 | `door_surround` | 1 | Ø216 × 50 | as exported: flange down, hood up |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
 | `leg` | 4 | Ø40 × 60 | narrow end down |
 | `center_leg` | 1 | Ø100 × 60 | as exported: plate down |
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
+| `latch_keeper` | 2 | 36 × 34 × 12 | flat |
+| `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
+| `window_retainer` | 1 | 90 × 110 × 3 | flat |
 | `fence_house_cleat`, `fence_standoff` | 1 each | 300 long | as exported (either mount) |
 | `fence_post_cleat` | 1 | 300 × 58 × 26 | as exported (fence mount) |
 | `tree_plate` | 1 | 300 × 308 × 51 | as exported: trunk side down (tree mount) |
@@ -121,17 +125,17 @@ halves them.
 
 | Build | Filament | Print time | Buy (1 kg spools, one colour) |
 |---|---|---|---|
-| On its legs (no mount) | 4.1 kg | ≈ 133 h | **5 spools** |
-| Fence mount + landing ledge | 4.4 kg | ≈ 141 h | **5 spools** (6 to be safe) |
-| Tree mount + landing ledge | 5.0 kg | ≈ 162 h | **6 spools** |
+| On its legs (no mount) | 4.2 kg | ≈ 142 h | **5 spools** |
+| Fence mount + landing ledge | 4.5 kg | ≈ 150 h | **5 spools** (6 to be safe) |
+| Tree mount + landing ledge | 5.1 kg | ≈ 171 h | **6 spools** |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
 | Colour | Parts | On legs | Fence + ledge | Tree + ledge |
 |---|---|---|---|---|
 | Walls (cream) | 4 corner modules | 2.41 kg → 3 spools | 2.39 kg → 3 spools | 2.39 kg → 3 spools |
-| Roof (light sage) | 4 roof panels | 1.25 kg → 2 spools | 1.17 kg → 2 spools | 1.17 kg → 2 spools |
-| Trim (white) | ridge, door, keys, legs, ledge, mount | 0.47 kg → 1 spool | 0.88 kg → 1 spool | 1.45 kg → 2 spools |
+| Roof (light sage) | 4 roof panels | 1.26 kg → 2 spools | 1.18 kg → 2 spools | 1.18 kg → 2 spools |
+| Trim (white) | ridge, door, keys, latches, legs, ledge, mount | 0.52 kg → 1 spool | 0.92 kg → 1 spool | 1.49 kg → 2 spools |
 
 The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-left corner module
 (about 640 g, 18.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
@@ -166,11 +170,19 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 15 | M4 × 20 button head + 2 washers + nyloc nut | Corner-module seams (3 per side seam, 3 front, 6 back) |
 | 6 | M4 × 25 button head + washers + nyloc nut | Door surround and inner ring |
 | 6 | M4 × 16 button head + washers + nyloc nut | Standing seams (3 per slope) |
-| 8 | M4 × 16 button head + washers + nyloc nut | Ridge caps |
-| 4 | M4 × 20 button head + washers + nyloc nut | Saddle, ridge caps and roof at the centre joint |
-| 20 | #8 × 1" (4.2 × 25 mm) pan-head self-tapping screws with **bonded EPDM washers** (roofing screws) | Roof to gables (12) and eave corbels (8) |
-| 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot) |
-| 4 | M6 × 20 flat head + M6 nut | Centre leg |
+| 4 | M4 × 16 button head + washers + nyloc nut | Ridge caps to the lid slope |
+| 2 | M4 × 20 button head + washers + nyloc nut | Saddle, ridge caps and lid at the centre joint |
+| 2 | M4 stainless threaded rod, 265 mm (or 4 mm stainless rod), + 4 acorn nuts + 4 washers | Hinge pins, one per ridge cap |
+| 2 | M4 × 20 button head + washer + nyloc nut | Turn-button pivots (head inside the house) |
+| 10 | #8 × 1" (4.2 × 25 mm) pan-head self-tapping screws with **bonded EPDM washers** (roofing screws) | Fixed slope to gables (6) and eave corbels (4) |
+| 4 | #8 × 1" roofing screws with EPDM washers | Latch keepers to the lid (2 each) |
+| (10) | #8 × 1" roofing screws, as above | Optional: screw the lid down too for hurricane season (drill out the bosses first) |
+| 4 | M3 × 12 pan head + nut | Peek-window retainer |
+| 1 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Peek-window pane |
+| 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
+| | Clear neutral-cure outdoor silicone | Window pane bead |
+| 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot); not needed when mounted |
+| 4 | M6 × 20 flat head + M6 nut | Centre leg; not needed when mounted |
 | | Outdoor CA glue or epoxy | Bowtie keys (optional, they are a snug press fit) |
 
 Either mount: 16 × M5 × 20 button head + washers + nyloc nut (house cleat and standoff), and **2 steel
@@ -196,36 +208,89 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
    glue if you like.
 3. **Seams.** Bolt the inner flanges with M4 × 20 bolts: 3 per side seam, 3 at the front (below and above
    the door), and 6 at the back. Tighten them evenly so the battens close the outside gaps.
-4. **Legs.** Drop the M6 × 70 countersunk bolts through the floor at the corners into the tapered legs,
+4. **Legs (skip when mounted).** Drop the M6 × 70 countersunk bolts through the floor at the corners into the tapered legs,
    with the nut in the hex pocket under each foot. Bolt the centre leg under the middle of the floor with
    4 × M6 × 20.
-5. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
+5. **Peek window.** Run a thin bead of silicone round the pocket inside the front-left window, press
+   the polycarbonate pane in, and clamp it with the printed retainer (4 × M3 × 12, heads outside in the
+   window frame, nuts in the retainer's pockets). Wipe off any silicone that squeezes out.
+6. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
    through the wall with 6 × M4 × 25. They also lock the front seam.
-6. **Roof.** On each slope, bolt the front and back panels together through the standing seam
-   (3 × M4 × 16). Set each slope on the house so its eave edge overhangs evenly. Then drive the 20 roofing
-   screws through the bosses into the pilot holes: 3 into each gable top and 2 into the corbels under each
-   eave per panel. Snug them so the EPDM washers just compress; don't crush them.
-7. **Ridge.** Lay the two ridge caps along the peak and bolt them through the roof with M4 bolts. Put the
-   saddle over the joint between them with the four M4 × 20 bolts. If you want the ridge fully sealed, run
-   a thin bead of neutral-cure outdoor silicone along the panel tops before fitting the caps.
-8. **Mount (optional).**
-   - Bolt the house cleat (top) and the standoff (bottom) to the right-hand wall, and the landing ledge to
-     the front wall (3 bolts). Leave the centre leg off.
-   - *Fence:* screw the mount cleat level to the post, rail or wall, bevel up, with its high edge facing
-     out.
-   - *Tree:* put the bracket nuts into their pockets, then strap the tree plate to the trunk with the
-     V-groove against the bark. Tension the 3 straps. Loosen them each season so the tree can grow.
-   - Screw the two steel brackets' uprights to the post or plate, 60 mm apart and centred under where the
-     cleat will be. Their arms' top edges must sit 61 mm below the bottom edge of the mount cleat
-     (that's where the floor's underside lands). Easiest: hang the house first and mark.
-   - Hang the house on the cleat, so the house cleat's lip drops behind the mount cleat. Bolt the bracket
-     arms to the floor (4 × M6 × 25 through the centre-leg holes).
-   - From inside, drive the 4 lock screws, with fender washers, through the wall into the post or plate:
-     2 through the house cleat and 2 through the standoff.
-   - Do the proof test in [STRUCTURAL.md](STRUCTURAL.md) before letting the cat in.
+7. **Roof.** On each slope, bolt the front and back panels together through the standing seam
+   (3 × M4 × 16). The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
+   screws through the bosses into the pilot holes (3 into each gable top, 2 into the eave corbels per panel).
+   Snug them so the EPDM washers just compress; don't crush them. The left slope is the lid: set it in
+   place, but don't screw it down.
+8. **Ridge and hinge.** Lay the two ridge caps along the peak so their knuckles mesh with the knuckles on
+   the right slope. Slide a hinge pin (threaded rod) through each set from the gable end and cap both ends
+   with washers and acorn nuts. Bolt the caps to the lid (left) slope only (4 × M4 × 16). Put the saddle
+   over the joint between them and bolt its left leg (2 × M4 × 20).
+9. **Seal and latches.** Stick the EPDM foam tape along the tops of the left-hand gable rafters and the
+   left eave plate, where the lid rests. Screw each latch keeper under the lid's gable overhang, front and back (2 × #8 × 1"
+   roofing screws each, through the bosses). Bolt a turn button to each gable wall, below and beside its
+   keeper (M4 × 20, head inside the house, nyloc snug enough that the button stays where you turn it).
+   Turned flat, the button's tongue presses the keeper's foot down about 1.5 mm, which compresses the foam
+   and holds the lid down. Use a rubber or EPDM washer under each button and under each pivot bolt head.
+10. **Mount (optional).**
+     - Bolt the house cleat (top) and the standoff (bottom) to the right-hand wall, and the landing ledge to
+      the front wall (3 bolts). No legs: print and fit none of them. The brackets use the centre-leg holes, and
+      the four corner-leg holes stay open as extra drains.
+    - *Fence:* screw the mount cleat level to the post, rail or wall, bevel up, with its high edge facing
+      out.
+    - *Tree:* put the bracket nuts into their pockets, then strap the tree plate to the trunk with the
+      V-groove against the bark. Tension the 3 straps. Loosen them each season so the tree can grow.
+    - Screw the two steel brackets' uprights to the post or plate, 60 mm apart and centred under where the
+      cleat will be. Their arms' top edges must sit 61 mm below the bottom edge of the mount cleat
+      (that's where the floor's underside lands). Easiest: hang the house first and mark.
+    - Hang the house on the cleat, so the house cleat's lip drops behind the mount cleat. Bolt the bracket
+      arms to the floor (4 × M6 × 25 through the centre-leg holes).
+    - From inside, drive the 4 lock screws, with fender washers, through the wall into the post or plate:
+      2 through the house cleat and 2 through the standoff.
+    - Do the proof test in [STRUCTURAL.md](STRUCTURAL.md) before letting the cat in.
 
-To take the roof off for cleaning, remove the 20 roofing screws and lift the roof off as one piece. The
-ridge caps and standing seams hold it together.
+## Opening the roof
+
+![Roof open](renders/roof_open.png)
+
+Turn both buttons up and lift the left eave. The whole left slope, with the ridge caps, swings up on the
+hinge just below the ridge. Stop ears on the knuckles land on the fixed slope at about 120°, a little past
+the balance point (about 111°), so the lid stays open on its own while you swap the cushion. It opens away
+from the mount, so a post or tree is not in the way. To close it, lower the lid and turn the buttons flat.
+The lid's ridge edge stops 4 mm short of the fixed slope so it clears as it swings; the ridge cap covers
+that gap when closed.
+
+For hurricane season, drill out the 10 blind bosses on the lid (4.8 mm) and drive the optional roofing
+screws into them as well.
+
+### Keeping the opening roof watertight
+
+The lid is sealed the same way as the fixed roof, with no gap that faces the rain:
+
+- **Ridge.** The ridge cap belongs to the lid and overlaps the fixed slope, so water runs off the cap,
+  over the hinge knuckles and down the fixed slope. A 2 mm weather rib along the fixed slope sits in a
+  groove under the cap, so wind-driven rain can't creep up under the cap to the ridge gap.
+- **Gables and eave.** The lid overhangs every edge it sits on (70 mm at the front, 35 mm at the back,
+  50 mm at the eave). The EPDM foam under it closes the joint, and the latches keep it compressed.
+- **Holes.** Unused storm-screw holes in the lid are blind: a 0.8 mm printed skin closes them until you
+  drill them out. The only holes through the lid are the four keeper screws, which have the same bosses
+  and EPDM washers as the other roof screws. The turn-button pivots sit under the gable overhang, with
+  rubber washers.
+- **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them
+  leads indoors.
+
+## Is the cat home?
+
+The front window on the lid side (front left, when the mount is on the right) is a real, glazed peek
+window. It is 70 × 90 mm, with the decorative mullions on the outside. It sits under the 50 mm eave with
+a sloped sill, and from it you can see the cushion. The pane sits in a pocket inside the wall and is sealed
+with silicone. Turn it off with `peek_window = false`.
+
+Without looking in at all: a small battery presence sensor (a mmWave sensor that sees a sleeping cat, or
+a PIR motion sensor) can be stuck under the ridge on the inside of the fixed slope. Pick one that runs on
+batteries and talks to your phone. Nothing in the house needs to change for that.
+
+If the mount is on the left wall (`mount_side = "left"`), the lid is the right slope instead. Export the
+roof panels, ridge caps and latch parts with the same settings; the latch parts come out mirrored.
 
 For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, `corner_bl`, `roof_fl`,
 `roof_bl`, `landing` and `door_surround` with `-D 'mount="fence"' -D 'mount_side="left"'`. Either mount

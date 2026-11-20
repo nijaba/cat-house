@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing, latch_keeper, latch_button, window_retainer]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -69,6 +69,26 @@ seam_t = 4;
 ridge_leg = 40;
 ridge_t = 4;
 rake_w = 14;
+
+/* [Opening roof] */
+// One roof slope lifts like a lid: a knuckle hinge on the other slope just below the ridge, and two
+// turn-button latches on the gable ends. The lid is the slope away from the mount.
+roof_hinge = true;
+hinge_r = 5;         // knuckle radius
+hinge_pin = 4.5;     // hole for a 4 mm stainless rod or M4 threaded rod
+hinge_seg = 18;      // knuckle length
+hinge_gap = 0.6;
+hinge_stop = 126;    // stop-ear design angle; on the shingles it lands at about 120 degrees, past the ~111 degree balance point
+latch_x = 150;       // keeper position from the centre line (on the lid side)
+latch_pivot_x = 115; // turn-button pivot
+latch_pivot_z = 204.5; // the tongue presses the keeper down 1.5 mm, compressing the foam seal under the lid
+rib_u = 14;          // weather rib on the fixed slope, under the ridge cap, this far up-slope from the hinge axis
+
+/* [Peek window] */
+// The front window on the lid side is glazed, so you can see the cushion from outside.
+peek_window = true;
+pane_t = 2;          // 2 mm UV-stable polycarbonate, cut to (win_w + 7) x (win_h + 7)
+open_angle = 0;      // preview only: show the lid opened by this many degrees
 
 /* [Entrance] */
 door_d = 160;      // clear opening, fine for a 5 kg cat
@@ -153,6 +173,15 @@ landing_on = landing && mount != "none";
 landing_bolt_xs = [115, 165, 201];
 landing_x_end = hx + cleat_t - 1;
 landing_bolt_z = 26;
+lid_sx = mount != "none" ? -mount_sx : -1;   // the slope that opens
+hinge_sx = -lid_sx;                           // the slope that carries the hinge
+hinge_on = roof_hinge;
+function u_ax() = Lsh_e(eave_of(hinge_sx)) + 6;
+w_ax = roof_t + hinge_r + 0.5;
+// knuckle segments along one ridge-cap length: [start, end, owner] with owner 0 = fixed panel, 1 = lid (cap)
+function hinge_segs(v0, v1) = let(n0 = floor((v1 - v0 - 20 + hinge_gap)/(hinge_seg + hinge_gap)),
+    n = n0 % 2 == 1 ? n0 : n0 - 1, len = n*(hinge_seg + hinge_gap) - hinge_gap, a = (v0 + v1 - len)/2)
+  [for (i = [0 : n - 1]) [a + i*(hinge_seg + hinge_gap), a + i*(hinge_seg + hinge_gap) + hinge_seg, i % 2]];
 function win_on(f) = windows && !(mount != "none" && f == (mount_sx > 0 ? 2 : 3));
 rib_xs = [for (k = [1:30]) if (5 + k*rib_pitch < iw/2 - 6) 5 + k*rib_pitch];
 leg_xy = [iw/2 - 35, idp/2 - 35];
@@ -189,6 +218,8 @@ module slope_frame(e = eave_ov) translate([-xe(e), 0, ze(e)]) rotate([0, -pitch,
 module unslope_left(e = eave_ov) rotate([0, pitch, 0]) translate([xe(e), 0, -ze(e)]) children();
 module unslope_right(e = eave_ov) rotate([0, -pitch, 0]) translate([-xe(e), 0, -ze(e)]) children();
 // mount frame: local y = outward from the mount wall, local x = along it
+// frame of the slope on world side sx (-1 left, +1 right): local u up the slope, w out of the roof
+module side_frame(sx) scale([sx < 0 ? 1 : -1, 1, 1]) slope_frame(eave_of(sx)) children();
 module mount_xf() translate([mount_sx*hx, 0, 0]) rotate([0, 0, mount_sx > 0 ? -90 : 90]) children();
 module screw_xf(p) translate([p[0], p[1], roof_z(p[0])]) rotate([0, -pitch, 0]) children();
 
@@ -392,6 +423,16 @@ module module_cuts(sx, sy) {
   // room for the neighbour's seam batten
   if (sx > 0) translate([-0.01, sy < 0 ? -hy - 12 : hy + 0.01, zb - 1]) cube([seam_cover + 0.4, 12 - 0.01, 600]);
   if (sy > 0) translate([sx > 0 ? hx + 0.01 : -hx - 12, -0.01, zb - 1]) cube([12 - 0.01, seam_cover + 0.4, 600]);
+  // glazed peek window: opening through the wall core, a pocket for the pane on the inside, 4 clamp bolts
+  if (peek_window && windows && sx == lid_sx && sy < 0) face_xf(lid_sx < 0 ? 3 : 2) let(ac = lid_sx < 0 ? -hy/2 : hy/2) {
+    translate([ac - win_w/2, -wt - 1, win_zc - win_h/2]) cube([win_w, wt + 1.01, win_h]);
+    translate([ac - win_w/2 - 4, -wt - 1, win_zc - win_h/2 - 4]) cube([win_w + 8, 1 + pane_t, win_h + 8]);
+    for (dx = [-1, 1], dz = [-1, 1]) translate([ac + dx*(win_w/2 + 3), -wt - 1, win_zc + dz*(win_h/2 - 10)])
+      rotate([-90, 0, 0]) cylinder(d = 3.4, h = wt + relief + 3, $fn = 12);
+  }
+  // turn-button pivots on the lid side of both gables
+  if (hinge_on && sx == lid_sx) translate([sx*latch_pivot_x, sy*hy, latch_pivot_z]) rotate([90, 0, 0])
+    cylinder(d = m4, h = 3*wt + 10, center = true, $fn = 16);
   // landing ledge: flat pads and bolt holes on the front-corner module of the mount side
   if (landing_on && sx == mount_sx && sy < 0) scale([mount_sx, 1, 1]) {
     translate([76, -hy - 15, zb - 1]) cube([hx + 20 - 76, 15 - 0.01, door_sill + 1 - zb + 1]);
@@ -439,7 +480,7 @@ module shingles(vA, vB, Lsh) {
   }
 }
 
-module panel_local(v0, v1, front, e) {
+module panel_local(v0, v1, front, e, holes = true) {
   Lu = Lu_e(e);
   Lsh = Lsh_e(e);
   vA = front ? v0 + rake_w : v0 + seam_t;
@@ -454,31 +495,115 @@ module panel_local(v0, v1, front, e) {
       translate([6, 0, 0]) cube([Lsh - 8, seam_t, seam_h]);
       cube([1, seam_t, 2]);
     }
-    for (u = [40, Lsh/2, Lsh - 30]) translate([u, front ? v1 : v0, roof_t + 10])
+    if (holes) for (u = [40, Lsh/2, Lsh - 30]) translate([u, front ? v1 : v0, roof_t + 10])
       rotate([90, 0, 0]) cylinder(d = m4, h = 3*seam_t, center = true);
   }
 }
 
 function ridge_hole_vs(front) = front ? [yf + 30, (yf + ysplit)/2, ysplit - 14] : [ysplit + 14, (ysplit + yb)/2, yb - 30];
 
-module roof_panel(sx, sy) {
+// holes = false only for the open-lid preview, where OpenSCAD's preview mis-draws the holed underside
+module roof_panel(sx, sy, holes = true) {
   front = sy < 0;
   v0 = front ? yf : ysplit + gap;
   v1 = front ? ysplit - gap : yb;
   e = eave_of(sx);
+  is_lid = hinge_on && sx == lid_sx;
+  is_hinge = hinge_on && sx == hinge_sx;
   scale([-sx, 1, 1]) difference() {
     union() {
       intersection() {
-        slope_frame(e) panel_local(v0, v1, front, e);
-        translate([-600, -600, -100]) cube([600, 1200, 900]);
+        slope_frame(e) panel_local(v0, v1, front, e, holes);
+        // the lid's ridge edge stops 4 mm short so it clears the fixed slope as it swings open
+        translate([-350, -330, 100]) cube([350 - (is_lid ? 4 : 0), 660, 300]);
       }
       for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5)
         screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
+      if (is_hinge) slope_frame(e) panel_knuckles(v0, v1);
+      // weather rib under the ridge cap: wind-driven rain can't creep past it to the ridge gap
+      if (is_hinge) slope_frame(e) translate([u_ax() + rib_u - 1.5, v0, roof_t - 0.1]) cube([3, v1 - v0, 2.1]);
+      if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
     }
-    for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
-    for (v = ridge_hole_vs(front)) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
+    // on the lid these are blind (a 0.8 mm skin on top) so unused storm-screw holes can't let rain in; drill through to use them
+    if (holes) for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = is_lid ? roof_t + 3.4 : roof_t + shingle_t + 5, $fn = 16);
+    if (holes) if (!is_hinge) for (v = ridge_hole_vs(front)) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
+    if (is_hinge) slope_frame(e) translate([u_ax(), 0, w_ax]) rotate([90, 0, 0]) cylinder(d = hinge_pin, h = 1200, center = true, $fn = 20);
+    if (holes) if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
   }
 }
+
+// fixed-slope knuckles (slope frame of that panel, before mirroring)
+module panel_knuckles(v0, v1) for (sg = hinge_segs(v0, v1)) if (sg[2] == 0) translate([u_ax(), sg[0], 0]) {
+  translate([-hinge_r, 0, roof_t - 0.1]) cube([2*hinge_r, sg[1] - sg[0], w_ax - roof_t + 0.1]);
+  translate([0, 0, w_ax]) rotate([-90, 0, 0]) cylinder(r = hinge_r, h = sg[1] - sg[0], $fn = 32);
+}
+
+// lid-side knuckles on the ridge cap, with stop ears that land on the fixed slope at hinge_stop degrees
+// (slope frame of the fixed side: u up the slope, w out of the roof; opening turns u towards w)
+module cap_knuckles(v0, v1) {
+  t0 = roof_t + 0.2;
+  for (sg = hinge_segs(v0, v1)) if (sg[2] == 1) {
+    L = sg[1] - sg[0];
+    hull() {
+      translate([u_ax(), sg[0], w_ax]) rotate([-90, 0, 0]) cylinder(r = hinge_r, h = L, $fn = 32);
+      translate([u_ax() + hinge_r + 2, sg[0], t0]) cube([0.1, L, ridge_t]);
+    }
+    translate([u_ax(), sg[0], w_ax]) rotate([0, -(196.6 - hinge_stop), 0]) translate([0, 0, -3]) cube([14, L, 6]);
+  }
+}
+
+// screws run along the roof normal, which leans towards the ridge, so they sit towards the eave side
+function keeper_screws(front) = [for (x = [latch_x - 2, latch_x + 8]) [-x, (front ? -1 : 1)*(hy + 10)]];
+
+// hinge axis in world coordinates, and the preview transform that swings the lid open
+function ax_xl() = let(e = eave_of(hinge_sx)) -xe(e) + u_ax()*cos(pitch) - w_ax*sin(pitch);
+function ax_x() = hinge_sx > 0 ? -ax_xl() : ax_xl();
+function ax_z() = let(e = eave_of(hinge_sx)) ze(e) + u_ax()*sin(pitch) + w_ax*cos(pitch);
+module lid_open(a = open_angle) translate([ax_x(), 0, ax_z()]) rotate([0, hinge_sx*a, 0]) translate([-ax_x(), 0, -ax_z()]) children();
+
+// Latch keeper: hangs under the lid's gable overhang, screwed through the lid with two roofing screws.
+// Built for a lid on the left and the front gable; mirrored as needed.
+module latch_keeper_world(front = true) scale([lid_sx < 0 ? 1 : -1, front ? 1 : -1, 1]) difference() {
+  intersection() {
+    translate([0, -hy - 4.5, 0]) rotate([90, 0, 0]) linear_extrude(11.5)
+      polygon([[-latch_x - 12, 193], [-latch_pivot_x - 11, 193], [-latch_pivot_x - 11, 199],
+               [-latch_x + 12, 199], [-latch_x + 12, 300], [-latch_x - 12, 300]]);
+    envelope();
+  }
+  for (p = keeper_screws(true)) screw_xf(p) translate([0, 0, -15]) cylinder(d = pilot, h = 16, $fn = 16);
+}
+
+// Turn button on the gable wall: closed, its tongue lies over the keeper's foot; turned up, the lid is free.
+module latch_button_world(front = true, open = false) scale([lid_sx < 0 ? 1 : -1, front ? 1 : -1, 1])
+  translate([-latch_pivot_x, -hy - 2.2, latch_pivot_z]) rotate([90, 0, 0]) rotate([0, 0, open ? -90 : 0]) latch_button_local();
+
+// local: wall face at z = 0, outward +z, tongue along -x
+module latch_button_local() difference() {
+  union() {
+    cylinder(r = 9, h = 6, $fn = 40);
+    translate([-21, -4, 0]) cube([21, 8, 6]);
+    translate([-20, -1.5, 5.9]) cube([24, 3, 3.5]);   // finger grip
+  }
+  translate([0, 0, -1]) cylinder(d = m4, h = 20, $fn = 16);
+  translate([0, 0, 6 - 2]) cylinder(d = 9, h = 10, $fn = 24);   // recess for the washer and nyloc nut
+}
+
+// inner frame that clamps the window pane into its pocket (M3 bolts, nuts in pockets on the room side)
+module window_retainer() difference() {
+  translate([-win_w/2 - 10, -win_h/2 - 10, 0]) cube([win_w + 20, win_h + 20, 3]);
+  translate([-win_w/2, -win_h/2, -1]) cube([win_w, win_h, 5]);
+  for (dx = [-1, 1], dz = [-1, 1]) translate([dx*(win_w/2 + 3), dz*(win_h/2 - 10), 0]) {
+    translate([0, 0, -1]) cylinder(d = 3.4, h = 5, $fn = 12);
+    translate([0, 0, 1]) cylinder(r = 5.5/sqrt(3) + 0.2, h = 5, $fn = 6);
+  }
+}
+// pane and retainer in place (preview); built in the lid-side face frame
+module peek_window_world() face_xf(lid_sx < 0 ? 3 : 2) let(ac = lid_sx < 0 ? -hy/2 : hy/2) {
+  color("#BFE3F0", 0.45) translate([ac - win_w/2 - 3.5, -wt + 0.01, win_zc - win_h/2 - 3.5]) cube([win_w + 7, pane_t - 0.02, win_h + 7]);
+  color(c_trim) translate([ac, -wt, win_zc]) rotate([90, 0, 0]) window_retainer();
+}
+
+module latch_keeper_print() translate([latch_x + 12, roof_z(latch_x - 12), 0]) rotate([90, 0, 0]) translate([0, hy + 16, 0]) latch_keeper_world(true);
 
 module ridge_cap(sy, saddle = false) {
   front = sy < 0;
@@ -486,12 +611,29 @@ module ridge_cap(sy, saddle = false) {
   v1 = saddle ? ysplit + 25 : (front ? ysplit - gap : yb);
   t0 = saddle ? roof_t + ridge_t + 0.2 : roof_t + 0.2;
   difference() {
-    for (s = [-1, 1]) let(e = eave_of(s), u0 = Lsh_e(e) + 4 + (saddle ? 6 : 0)) scale([s, 1, 1]) intersection() {
-      slope_frame(e) translate([u0, v0, t0]) cube([Lu_e(e) + 40 - u0, v1 - v0, ridge_t]);
-      translate([-600, -600, -100]) cube([600, 1200, 900]);
+    union() {
+      for (sx = [-1, 1]) let(e = eave_of(sx), hingeleg = hinge_on && sx == hinge_sx,
+          u0 = hingeleg ? (saddle ? u_ax() + rib_u + 6 : u_ax()) : Lsh_e(e) + 4 + (saddle ? 6 : 0))
+        intersection() {
+          side_frame(sx) difference() {
+            union() {
+              translate([u0, v0, t0]) cube([Lu_e(e) + 40 - u0, v1 - v0, ridge_t]);
+              // thickening over the weather-rib groove
+              if (hingeleg && !saddle) translate([u_ax() + rib_u - 4.5, v0, t0 + ridge_t - 0.01]) cube([9, v1 - v0, 2]);
+            }
+            // groove that fits over the weather rib
+            if (hingeleg && !saddle) translate([u_ax() + rib_u - 2.5, v0 - 1, t0 - 0.01]) cube([5, v1 - v0 + 2, 2.6]);
+            // clear the fixed knuckles
+            if (hingeleg && !saddle) for (sg = hinge_segs(v0, v1)) if (sg[2] == 0)
+              translate([u0 - 1, sg[0] - hinge_gap, -1]) cube([hinge_r + 1.8 + (u_ax() - u0) + 1, sg[1] - sg[0] + 2*hinge_gap, 40]);
+          }
+          translate([sx < 0 ? -600 : 0, -600, -100]) cube([600, 1200, 900]);
+        }
+      if (hinge_on && !saddle) side_frame(hinge_sx) cap_knuckles(v0, v1);
     }
-    for (s = [-1, 1], v = (saddle ? [ysplit - 14, ysplit + 14] : ridge_hole_vs(front)))
-      let(e = eave_of(s)) scale([s, 1, 1]) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = 40, $fn = 16);
+    for (sx = [-1, 1], v = (saddle ? [ysplit - 14, ysplit + 14] : ridge_hole_vs(front)))
+      if (!(hinge_on && sx == hinge_sx)) let(e = eave_of(sx)) side_frame(sx) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = 40, $fn = 16);
+    if (hinge_on && !saddle) side_frame(hinge_sx) translate([u_ax(), 0, w_ax]) rotate([90, 0, 0]) cylinder(d = hinge_pin, h = 1200, center = true, $fn = 20);
   }
 }
 
@@ -670,7 +812,13 @@ module ridge_print(sy, saddle = false) {
   u0 = Lsh_e(e) + 4 + (saddle ? 6 : 0);
   // outer face of one leg on the bed, the other leg rises at 2 x pitch
   v1 = saddle ? ysplit + 25 : (sy < 0 ? ysplit - gap : yb);
-  translate([0, v1 - v0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
+  eh = eave_of(hinge_sx);
+  if (hinge_on && !saddle) {
+    // stood on its end: the profile extrudes straight up, so the knuckles and stop ears need no support
+    translate([hinge_sx > 0 ? 345 : 0, 30, -v0]) rotate([90, 0, 0])
+      if (hinge_sx > 0) unslope_right(eh) ridge_cap(sy, saddle); else unslope_left(eh) ridge_cap(sy, saddle);
+  } else
+    translate([0, v1 - v0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
 }
 
 module rail_print(which) {
@@ -699,6 +847,9 @@ module print_part(p) {
   if (p == "center_leg") center_leg();
   if (p == "bowtie_key") bowtie_key();
   if (p == "landing") landing_print();
+  if (p == "latch_keeper") latch_keeper_print();
+  if (p == "latch_button") latch_button_local();
+  if (p == "window_retainer") window_retainer();
   if (p == "fence_house_cleat" || p == "fence_post_cleat" || p == "fence_standoff" || p == "tree_plate") rail_print(p);
 }
 
@@ -712,9 +863,15 @@ c_leg = "#FBFBF7";
 
 module assembly(e = 0) {
   for (sx = [-1, 1], sy = [-1, 1]) color(c_wall) translate([sx*e*70, sy*e*70, 0]) corner(sx, sy);
-  for (sx = [-1, 1], sy = [-1, 1]) color(c_roof) translate([sx*e*90, sy*e*40, e*170]) roof_panel(sx, sy);
-  color(c_trim) translate([0, 0, e*260]) { ridge_cap(-1); ridge_cap(1); }
-  color(c_trim) translate([0, 0, e*300]) ridge_cap(-1, true);
+  for (sx = [-1, 1], sy = [-1, 1]) color(c_roof) translate([sx*e*90, sy*e*40, e*170])
+    if (hinge_on && sx == lid_sx) lid_open() roof_panel(sx, sy, holes = open_angle == 0); else roof_panel(sx, sy);
+  color(c_trim) translate([0, 0, e*260]) lid_open(hinge_on ? open_angle : 0) { ridge_cap(-1); ridge_cap(1); }
+  color(c_trim) translate([0, 0, e*300]) lid_open(hinge_on ? open_angle : 0) ridge_cap(-1, true);
+  if (peek_window && windows && e == 0) peek_window_world();
+  if (hinge_on) color(c_trim) for (f = [true, false]) {
+    translate([0, 0, e*200]) lid_open() latch_keeper_world(f);
+    translate([0, (f ? -1 : 1)*e*60, 0]) latch_button_world(f, open_angle > 0);
+  }
   color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
   color(c_trim) translate([0, -idp/2 + e*80, door_z]) rotate([-90, 0, 0]) door_inner_ring();
   if (show_legs) color(c_leg) translate([0, 0, -e*80]) {
@@ -775,6 +932,8 @@ module layout() {
   plate(0, 2) color(c_trim) {
     translate([110, 110, 0]) door_inner_ring();
     translate([260, 70, 0]) center_leg();
+    for (i = [0, 1]) translate([228 + i*45, 170, 0]) latch_keeper_print();
+    for (i = [0, 1]) translate([250 + i*40, 280, 0]) latch_button_local();
   }
   plate(1, 2) color(c_trim) {
     translate([162, 50, 0]) rail_print("fence_house_cleat");
