@@ -26,7 +26,7 @@ fi
 if [[ "$what" == png || "$what" == all ]]; then
   common=(--colorscheme=Tomorrow)
   "$OS" -o renders/assembly_front.png --imgsize=1600,1300 --camera=0,0,110,72,0,330,1650 "${common[@]}" cat_house.scad
-  "$OS" -o renders/assembly_back.png --imgsize=1600,1300 --camera=0,0,110,72,0,160,1650 "${common[@]}" cat_house.scad
+  "$OS" -o renders/assembly_back.png --imgsize=1600,1300 --camera=0,0,110,55,0,170,1750 "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_front_gable.png --imgsize=1600,1300 --camera=0,0,120,68,0,8,1750 "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_fence_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2200 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_tree_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2300 -D 'mount="tree"' -D 'show_legs=false' "${common[@]}" cat_house.scad
