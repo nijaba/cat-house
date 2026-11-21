@@ -93,7 +93,7 @@ hatch_h = 140;
 hatch_x = -100;      // centre of the opening (left half of the back wall)
 hatch_z0 = 25;       // sill height above the floor
 hatch_gasket = 1.5;  // closed-cell foam strip between the frame and the flap
-hatch_magnet = [6.3, 2.2]; // pocket for 6 x 2 mm neodymium discs (use 8 x 3 if wind lifts the flap)
+hatch_magnet = [6.3, 3.2]; // pocket for 6 x 3 mm neodymium discs (use [8.3, 3.2] for 8 x 3 if wind lifts the flap)
 
 /* [Peek window] */
 // The front window on the lid side is glazed, so you can see the cushion from outside.

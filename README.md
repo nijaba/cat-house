@@ -182,7 +182,7 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 4 | M3 × 12 pan head + nut | Peek-window retainer |
 | 4 | M4 × 20 countersunk + washer + nyloc nut | Escape-hatch frame (heads flush in the frame, nuts inside) |
 | 1 | M4 stainless threaded rod, 175 mm, + 2 acorn nuts | Escape-hatch hinge pin |
-| 4 | 6 × 2 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
+| 4 | 6 × 3 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
 | 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
 | 1 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Peek-window pane |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
@@ -300,7 +300,7 @@ all round, so:
 - **Wind can't blow through it.** Wind from outside presses the flap onto the foam gasket and seals it
   shut. Suction from wind passing the house is held by two pairs of small magnets at the bottom. The pull
   is enough for an ordinary gusty storm and still easy for a cat to push. If it rattles in your spot, swap to
-  8 × 3 mm magnets. The hood and cheeks keep rain and side wind off the flap's edges.
+  8 × 3 mm magnets (set `hatch_magnet = [8.3, 3.2]` and reprint the frame and flap). The hood and cheeks keep rain and side wind off the flap's edges.
 - **Leave room behind it.** The flap swings out about 15 cm. If the house stands near a wall, keep the back
   15 cm or more away.
 
