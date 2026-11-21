@@ -51,8 +51,10 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
   - *fence*: the **mount cleat** screws to a fence post, rail or wall.
   - *tree*: the **tree plate** (the mount cleat on a tall backing board) straps to the trunk with 3 ratchet
     straps or hose clamps. A V-groove on its back centres it on the trunk.
-  - **Two steel shelf brackets under the floor are required when mounted.** Without them the floor centre
+  - **Two shelf brackets under the floor are required when mounted.** Without them the floor centre
     is overstressed (see [STRUCTURAL.md](STRUCTURAL.md)). The brackets bolt through the centre-leg holes.
+    Use bought steel brackets, or print the optional `support_bracket` (2 needed; see
+    [Printed support brackets](#printed-support-brackets-optional)).
   - A mounted house uses the `_mount` versions of the two right-hand corner modules and the two right-hand
     roof panels. Those corners have flat pads and bolt holes for the cleat and standoff, and no windows.
     Those roof panels have a 15 mm eave instead of 50 mm, so the roof clears the post or trunk.
@@ -114,6 +116,7 @@ To export one part from the command line:
 | `fence_post_cleat` | 1 | 300 × 58 × 26 | as exported (fence mount) |
 | `tree_plate` | 1 | 300 × 308 × 51 | as exported: trunk side down (tree mount) |
 | `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
+| `support_bracket` | 2 | 200 × 300 × 36 | as exported: web down (optional, replaces the steel brackets; 6 walls, 40 % infill) |
 | `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
 
 See `renders/plate_layout.png` for how the parts fit on the plates.
@@ -130,6 +133,7 @@ halves them.
 | On its legs (no mount) | 4.2 kg | ≈ 142 h | **5 spools** |
 | Fence mount + landing ledge | 4.5 kg | ≈ 150 h | **5 spools** (6 to be safe) |
 | Tree mount + landing ledge | 5.1 kg | ≈ 171 h | **6 spools** |
+| Printed support brackets (optional, 2) | +0.51 kg | +≈ 21 h | add 1 spool |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
@@ -196,6 +200,10 @@ shelf brackets, 12 × 8 in (305 × 200 mm), heavy duty, each rated for at least 
 hot-dip galvanised steel. They bolt to the floor with 4 × M6 × 25 flat head + washers + nuts through the
 centre-leg holes. Drill each bracket arm 6.5 mm at 216 and 276 mm from the inside face of its upright.
 
+With the printed brackets instead: 4 × M6 × 35 flat head + washers + nuts through the arms and floor
+(no drilling, the holes are printed). Tree mount: use M5 × 40 for the uprights instead of M5 × 35. Add a
+washer under every screw head on the plastic.
+
 Fence mount: 4 × #10 × 1½" stainless countersunk screws for the mount cleat, 6 × #10 × 2" for the bracket
 uprights, and 4 × #10 × 3" (5 × 80 mm) stainless wood screws as lock screws. Use large (25 mm) fender
 washers inside the house.
@@ -249,9 +257,10 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
       out.
     - *Tree:* put the bracket nuts into their pockets, then strap the tree plate to the trunk with the
       V-groove against the bark. Tension the 3 straps. Loosen them each season so the tree can grow.
-    - Screw the two steel brackets' uprights to the post or plate, 60 mm apart and centred under where the
+    - Screw the two brackets' uprights to the post or plate, 60 mm apart and centred under where the
       cleat will be. Their arms' top edges must sit 61 mm below the bottom edge of the mount cleat
-      (that's where the floor's underside lands). Easiest: hang the house first and mark.
+      (that's where the floor's underside lands). Easiest: hang the house first and mark. Printed
+      brackets go webs inward, with the open side out so a driver reaches the screws past the diagonal.
     - Hang the house on the cleat, so the house cleat's lip drops behind the mount cleat. Bolt the bracket
       arms to the floor (4 × M6 × 25 through the centre-leg holes).
     - From inside, drive the 4 lock screws, with fender washers, through the wall into the post or plate:
@@ -287,6 +296,24 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
   rubber washers.
 - **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them
   leads indoors.
+
+## Printed support brackets (optional)
+
+`support_bracket` is a printable replacement for the two steel shelf brackets: an L-section triangle with a
+300 mm arm and a 200 mm upright, the same bolt and screw positions as the steel ones, and no drilling.
+Set `brackets = "printed"` to see them in the assembly.
+
+- **Print them lying on the web**, as exported, so the arm, upright and diagonal are all loaded along their
+  layers, never across them. Use **6 walls, 40 % gyroid infill and 6 top and bottom layers** (the
+  included `release/cat_cottage_H2D_printed_brackets.3mf` already has these). Each takes about 257 g and
+  10.5 h.
+- **Strength.** At the 20 kg design load the highest stress is about 4 MPa, and under everyday load (house
+  plus a resting cat) about 1 MPa. ASA's allowable stress here is about 10 MPa (see
+  [STRUCTURAL.md](STRUCTURAL.md#2b-printed-support-brackets)).
+- **Heat.** ASA creeps slowly when hot and loaded. Print them in a light colour, keep them in shade under
+  the house where possible, and check after the first hot month that the arm hasn't sagged (a level on the
+  floor is enough). If it has dropped more than 3 mm, swap to steel.
+- **When to choose steel instead:** a heavier cat (over 7 kg), two cats, or a spot in full afternoon sun.
 
 ## Escape hatch
 
@@ -330,7 +357,7 @@ type gives the same house parts.
 
 Checked by hand for a 20 kg load: on the floor, on the roof and on the ledge, standing on legs or mounted.
 See [STRUCTURAL.md](STRUCTURAL.md). In short: on its legs it is fine as printed. **Mounted, it needs the two
-steel brackets underneath.** Do the 20 kg proof test before first use.
+brackets underneath** (steel, or the printed ones). Do the 20 kg proof test before first use.
 
 ## Placing it in Florida
 

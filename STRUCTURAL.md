@@ -10,6 +10,7 @@ finite-element analysis. Before letting a cat in, do the proof test at the end.
 | On its legs, 20 kg anywhere | ✅ OK (floor, legs, seams) |
 | Mounted, **no support underneath** | ❌ **Not OK.** The floor centre has nothing under it and is overstressed (≈ 24 MPa against an allowable ≈ 10 MPa). The whole moment would hang on two lock screws. |
 | Mounted **with two steel shelf brackets** under the floor | ✅ OK, so **brackets are required when mounted** |
+| Mounted with the two **printed** `support_bracket`s instead | ✅ OK (≈ 4 MPa peak, ≈ 1 MPa everyday); check for sag after the first hot month |
 | Roof, 20 kg standing on it | ✅ OK, after raising the standing seam from 14 to 20 mm (at 14 mm: ≈ 16 MPa, over the limit) |
 | Landing ledge, 20 kg at its outer edge | ✅ OK, after moving its bolts up to 26 mm |
 | French cleat as first designed | ❌ **Bug, fixed.** The bevels sloped the wrong way and pushed the house away from the fence. Even when correct, a 45° cleat can only resist an outward pull equal to the weight it carries, and this house needs 4–7 times that. Lock screws now carry that pull. |
@@ -66,6 +67,27 @@ on the trunk side.
 - **Tree plate.** The plate holds 3 straps. With ratchet straps tensioned to 1 kN or more, the V-groove's
   grip and friction carry the roughly 250 N vertical load many times over. Each bracket nut is pulled
   through a 20 mm backing with about 4 kN capacity. ✅
+
+## 2b. Printed support brackets
+
+Added 2026-11-21. `support_bracket` is a triangle: a 300 mm arm and a 200 mm upright, both
+36 × 12 mm flanges, plus a diagonal from the upright's foot to the arm 250 mm out, between the two floor
+bolts (220 and 280 mm), and a 7 mm web on one side. It prints lying on the web, so every member carries its
+load in the print plane (allowable ≈ 10 MPa). Loads per bracket are the same as for the steel ones:
+≤ 123 N vertical and ≤ 52 N·m at the mounting surface.
+
+- **Couple at the wall.** The top screw (z = −40) is 173 mm above the upright's foot:
+  52 / 0.173 ≈ 300 N pulls on the top screw, and the foot pushes on the wall with the same force. That is
+  the same as for a steel bracket, within a #10 wood screw's ≈ 500 N design value. ✅
+- **Diagonal** (compression, about 35° from horizontal): 300 / cos 35° ≈ 370 N over its flange and web,
+  ≈ 370 mm², ≈ 1 MPa. Its unbraced length is about 290 mm, but the web holds it against buckling. ✅
+- **Arm** beyond the diagonal: the outer bolt is 30 mm past it. M = 123 × 30 ≈ 3.7 N·m. The flange alone
+  has Z = 36 × 12² / 6 = 864 mm³, giving σ ≈ **4.3 MPa**. ✅ Everyday load is about a quarter of that. The
+  inner bolt sits over the web.
+- **Bolt bearing** (M6 in a 12 mm flange): 123 N / (6 × 12) ≈ 1.7 MPa. ✅
+- **Creep.** Everyday stress is about 1 MPa or less. At 60 °C ASA under that stress creeps by a fraction of
+  a percent a year, so a sag of 1–2 mm at the arm's end is possible over the first summer. Check it, and
+  switch to steel for heavier cats or full sun.
 
 ## 3. On its legs
 

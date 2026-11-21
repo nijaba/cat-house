@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -129,10 +129,18 @@ tree_back_t = 25;    // tree plate backing behind the cleat; V-groove and strap 
 tree_plate_bottom = -160; // the plate runs below the house so the support brackets can bolt to it
 strap_w = 26;        // 25 mm ratchet strap or hose clamps
 strap_t = 6;
-// Support brackets (bought, steel) under the floor when mounted: see STRUCTURAL.md
+// Support brackets under the floor when mounted (required): see STRUCTURAL.md
 show_brackets = true;
+brackets = "steel";  // [steel, printed] bought steel shelf brackets, or the printable support_bracket (print 2)
 bracket_arm = 305;   // 12 in shelf bracket
 bracket_leg = 200;   // 8 in
+pb_arm = 300;        // printed bracket: arm length from the mounting surface
+pb_leg = 200;        // upright height under the floor
+pb_flange = 12;      // thickness of the arm and upright flanges
+pb_w = 36;           // flange width (the print height)
+pb_web = 7;          // web on one side of the flanges
+bracket_screw_z = [-40, -95, -145]; // screws or M5 bolts through the upright (matches the tree plate)
+bracket_bolt_d = [220, 280];        // M6 bolts up through the floor's centre-leg holes, from the mounting surface
 mount_eave_ov = 15; // roof overhang on the mount side, so the eave clears the post or trunk
 // L-shaped landing ledge at door-sill height, from beside the mount around the front corner to the door
 landing = true;      // only used when mount is not "none"
@@ -818,12 +826,49 @@ module tree_plate() {
 
 // Steel shelf brackets (bought), shown for reference: two under the floor centre, bolted through the
 // centre-leg holes. Mount frame: arm runs from the mounting surface back under the house.
-module support_brackets() color("#8A8F94") for (x = [-30, 30]) translate([x - 15, 0, 0]) {
+module steel_brackets() color("#8A8F94") for (x = [-30, 30]) translate([x - 15, 0, 0]) {
   translate([0, cleat_t - 4, zb - bracket_leg]) cube([30, 4, bracket_leg]);
   translate([0, cleat_t - bracket_arm, zb - 4]) cube([30, bracket_arm, 4]);
   hull() {
     translate([13, cleat_t - 4.5, zb - bracket_leg + 20]) cube([4, 0.5, 0.5]);
     translate([13, cleat_t - bracket_arm + 40, zb - 4.5]) cube([4, 0.5, 0.5]);
+  }
+}
+
+module support_brackets() {
+  if (brackets == "printed") color(c_trim) for (s = [-1, 1]) translate([s*30, 0, 0]) scale([s, 1, 1]) printed_bracket();
+  else steel_brackets();
+}
+
+// Printable support bracket (mount frame, centred on its floor bolts at x = 0). An L-section: flanges
+// pb_w wide and a web on the -x side, so the screws through the upright sit on the open side and a
+// driver reaches them straight past the diagonal. Printed lying on the web, so every member is loaded
+// along its layers.
+module printed_bracket() {
+  y0 = cleat_t;
+  x0 = -21; x1 = x0 + pb_w;
+  xd = x0 + 13;  // the diagonal flange stops short of the screw line
+  module prof(a, b) translate([a, 0, 0]) rotate([90, 0, 90]) linear_extrude(b - a) children();
+  d_lo = [y0 - pb_flange, zb - pb_leg + 11];   // diagonal: upright foot to the arm, between the floor bolts
+  d_hi = [y0 - 250, zb - pb_flange];
+  difference() {
+    union() {
+      prof(x0, x1) {
+        translate([y0 - pb_flange, zb - pb_leg]) square([pb_flange, pb_leg]);
+        translate([y0 - pb_arm, zb - pb_flange]) square([pb_arm - pb_flange + 0.01, pb_flange]);
+      }
+      prof(x0, xd) {
+        hull() { translate(d_lo) circle(r = 7, $fn = 24); translate(d_hi) circle(r = 7, $fn = 24); }
+        // fillet in the top corner, web side only
+        polygon([[y0 - pb_flange, zb - pb_flange], [y0 - pb_flange, zb - 45], [y0 - 45, zb - pb_flange]]);
+      }
+      prof(x0, x0 + pb_web) polygon([[y0 - pb_flange, d_lo[1]], [y0 - pb_flange, zb - pb_flange], [d_hi[0], zb - pb_flange]]);
+    }
+    // keep the arm's top flat and the upright's back flat
+    translate([x0 - 1, y0 - pb_arm - 1, zb]) cube([pb_w + 2, pb_arm + 2, 10]);
+    translate([x0 - 1, y0, zb - pb_leg - 1]) cube([pb_w + 2, 10, pb_leg + 2]);
+    for (d = bracket_bolt_d) translate([0, y0 - d, zb - pb_flange - 1]) cylinder(d = 6.5, h = pb_flange + 2, $fn = 20);
+    for (z = bracket_screw_z) translate([0, y0 + 1, z]) rotate([90, 0, 0]) cylinder(d = 5.5, h = pb_flange + 2, $fn = 20);
   }
 }
 
@@ -913,6 +958,7 @@ module print_part(p) {
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();
   if (p == "center_leg") center_leg();
+  if (p == "support_bracket") translate([zb, -(cleat_t - pb_arm), 0]) rotate([0, -90, 0]) translate([21, 0, 0]) printed_bracket();
   if (p == "bowtie_key") bowtie_key();
   if (p == "landing") landing_print();
   if (p == "latch_keeper") latch_keeper_print();

@@ -29,20 +29,17 @@ on 2026-11-20.
 
 ## 2. Files to upload
 
-- **Raw files:** every STL in `stl/` (26 files), `cat_house.scad`, and the README as the printing guide
+- **Raw files:** every STL in `stl/` (32 files), `cat_house.scad`, and the README as the printing guide
   (paste its key sections into the description).
-- **Print profile 1 — "On legs":** `release/cat_cottage_H2D_on_legs.3mf`. It has 10 plates on the H2D with
-  a 0.4 mm nozzle, 0.20 mm layers, Bambu ASA, the textured PEI plate, 4 walls, 15 % gyroid and a 5 mm brim:
-  1. front-left corner + 4 legs + 4 bowtie keys + ridge saddle
-  2. back-left corner + front ridge cap
-  3. front-right corner + back ridge cap
-  4. back-right corner
-  5. door surround + centre leg
-  6–9. the four roof panels
-  10. inner door ring
+- **Print profile 1 — "On legs":** `release/cat_cottage_H2D_on_legs.3mf`, 12 plates on the H2D with a
+  0.4 mm nozzle, 0.20 mm layers, Bambu ASA, the textured PEI plate, 4 walls, 15 % gyroid and a 5 mm brim.
+  The big parts (corners, roof panels) get a plate each; the small parts share plates.
 - **Print profile 2 — "Fence or tree mount with landing ledge":** `release/cat_cottage_H2D_mounted.3mf`
-  (11 plates). It uses the `_mount` corners and roof panels, the step-less door surround and the ledge, and
+  (13 plates). It uses the `_mount` corners and roof panels, the step-less door surround and the ledge, and
   holds both mount sets, so the description says to print either the fence or the tree plates.
+- **Print profile 3 — "Printed support brackets (optional)":** `release/cat_cottage_H2D_printed_brackets.3mf`
+  (2 plates, one bracket each, 6 walls and 40 % gyroid). For mounted houses that use printed brackets
+  instead of steel ones.
 - **Before uploading:** open each 3MF in Bambu Studio, name the plates ("Corner FL + small parts", …,
   "Fence mount (optional)"), slice once to confirm, then save. This is allowed as a separate profile
   because it is a variant with different parts.
@@ -179,6 +176,6 @@ for the first two days, because early engagement drives MakerWorld's ranking.
       publishing profile 2)
 - [x] Licence: CC BY-NC-SA 4.0
 - [x] AIGC label: on
-- [ ] Name the plates in both 3MFs in Bambu Studio, slice, save
+- [ ] Name the plates in the 3MFs in Bambu Studio, slice, save
 - [x] GitHub repo public and linked in the description
 - [ ] Publish on MakerWorld with Community Post on, then work down section 4
