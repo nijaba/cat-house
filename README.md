@@ -290,12 +290,11 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
 
 ## Escape hatch
 
+![Back, with the escape hatch](renders/assembly_back.png)
+
 A second way out, in the back wall opposite the door, so a cat can't be cornered inside. It is a 140 × 140 mm
 opening with a flap hung from a pin at the top. The flap sits *outside* its frame and overlaps it by 10 mm
 all round, so:
-
-![Back, with the escape hatch](renders/assembly_back.png)
-
 
 - **It only opens outwards.** From inside, a push swings it up and out. From outside, pushing only presses
   it harder against the frame, and the flap sits recessed 14 mm between side cheeks under a hood, so there is
