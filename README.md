@@ -109,7 +109,7 @@ To export one part from the command line:
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
 | `latch_keeper` | 2 | 36 × 34 × 12 | flat |
 | `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
-| `window_retainer` | 1 | 90 × 110 × 3 | flat |
+| `window_retainer` | 2 mounted, 4 on legs (one per window) | 90 × 110 × 3 | flat |
 | `hatch_frame` | 1 | 170 × 174 × 43 | as exported: wall side down, hood and cheeks up |
 | `hatch_flap` | 1 | 157 × 164 × 12 | as exported: inside face down |
 | `fence_house_cleat`, `fence_standoff` | 1 each | 300 long | as exported (either mount) |
@@ -183,12 +183,12 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 10 | #8 × 1" (4.2 × 25 mm) pan-head self-tapping screws with **bonded EPDM washers** (roofing screws) | Fixed slope to gables (6) and eave corbels (4) |
 | 4 | #8 × 1" roofing screws with EPDM washers | Latch keepers to the lid (2 each) |
 | (10) | #8 × 1" roofing screws, as above | Optional: screw the lid down too for hurricane season (drill out the bosses first) |
-| 4 | M3 × 12 pan head + nut | Peek-window retainer |
+| 8 (16 on legs) | M3 × 12 pan head + nut | Window retainers, 4 per window |
 | 4 | M4 × 20 countersunk + washer + nyloc nut | Escape-hatch frame (heads flush in the frame, nuts inside) |
 | 1 | M4 stainless threaded rod, 175 mm, + 2 acorn nuts | Escape-hatch hinge pin |
 | 4 | 6 × 3 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
 | 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
-| 1 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Peek-window pane |
+| 2 (4 on legs) | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
 | | Clear neutral-cure outdoor silicone | Window pane bead |
 | 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot); not needed when mounted |
@@ -225,7 +225,7 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
 4. **Legs (skip when mounted).** Drop the M6 × 70 countersunk bolts through the floor at the corners into the tapered legs,
    with the nut in the hex pocket under each foot. Bolt the centre leg under the middle of the floor with
    4 × M6 × 20.
-5. **Peek window.** Run a thin bead of silicone round the pocket inside the front-left window, press
+5. **Windows.** For each window, run a thin bead of silicone round the pocket on the inside, press
    the polycarbonate pane in, and clamp it with the printed retainer (4 × M3 × 12, heads outside in the
    window frame, nuts in the retainer's pockets). Wipe off any silicone that squeezes out.
 6. **Escape hatch.** Glue two magnets into the frame's pockets and two into the flap's (check the polarity so
@@ -337,10 +337,11 @@ Turn it off with `hatch = false`. It sits in the back-left corner module; `hatch
 
 ## Is the cat home?
 
-The front window on the lid side (front left, when the mount is on the right) is a real, glazed peek
-window. It is 70 × 90 mm, with the decorative mullions on the outside. It sits under the 50 mm eave with
-a sloped sill, and from it you can see the cushion. The pane sits in a pocket inside the wall and is sealed
-with silicone. Turn it off with `peek_window = false`.
+Every window is real and glazed: the two on the lid-side wall when mounted, all four when the house stands
+on legs. Each is 70 × 90 mm, with the decorative mullions on the outside. They sit under the 50 mm eave
+with sloped sills, and from either one you can see the cushion. Each pane sits in a pocket inside the wall
+and is sealed with silicone. `peek_all = false` glazes only the front window on the lid side, and
+`peek_window = false` none.
 
 Without looking in at all: a small battery presence sensor (a mmWave sensor that sees a sleeping cat, or
 a PIR motion sensor) can be stuck under the ridge on the inside of the fixed slope. Pick one that runs on

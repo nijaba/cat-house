@@ -96,8 +96,9 @@ hatch_gasket = 1.5;  // closed-cell foam strip between the frame and the flap
 hatch_magnet = [6.3, 3.2]; // pocket for 6 x 3 mm neodymium discs (use [8.3, 3.2] for 8 x 3 if wind lifts the flap)
 
 /* [Peek window] */
-// The front window on the lid side is glazed, so you can see the cushion from outside.
+// The windows are glazed, so you can see the cushion from outside.
 peek_window = true;
+peek_all = true;     // true: glaze every window (2 when mounted, 4 on legs); false: only the front one on the lid side
 pane_t = 2;          // 2 mm UV-stable polycarbonate, cut to (win_w + 7) x (win_h + 7)
 open_angle = 0;      // preview only: show the lid opened by this many degrees
 hatch_open_angle = 0; // preview only: show the escape flap opened by this many degrees
@@ -444,7 +445,7 @@ module module_cuts(sx, sy) {
   if (sx > 0) translate([-0.01, sy < 0 ? -hy - 12 : hy + 0.01, zb - 1]) cube([seam_cover + 0.4, 12 - 0.01, 600]);
   if (sy > 0) translate([sx > 0 ? hx + 0.01 : -hx - 12, -0.01, zb - 1]) cube([12 - 0.01, seam_cover + 0.4, 600]);
   // glazed peek window: opening through the wall core, a pocket for the pane on the inside, 4 clamp bolts
-  if (peek_window && windows && sx == lid_sx && sy < 0) face_xf(lid_sx < 0 ? 3 : 2) let(ac = lid_sx < 0 ? -hy/2 : hy/2) {
+  if (peek_on(sx, sy)) face_xf(sx < 0 ? 3 : 2) let(ac = peek_ac(sx, sy)) {
     translate([ac - win_w/2, -wt - 1, win_zc - win_h/2]) cube([win_w, wt + 1.01, win_h]);
     translate([ac - win_w/2 - 4, -wt - 1, win_zc - win_h/2 - 4]) cube([win_w + 8, 1 + pane_t, win_h + 8]);
     for (dx = [-1, 1], dz = [-1, 1]) translate([ac + dx*(win_w/2 + 3), -wt - 1, win_zc + dz*(win_h/2 - 10)])
@@ -623,8 +624,11 @@ module window_retainer() difference() {
     translate([0, 0, 1]) cylinder(r = 5.5/sqrt(3) + 0.2, h = 5, $fn = 6);
   }
 }
-// pane and retainer in place (preview); built in the lid-side face frame
-module peek_window_world() face_xf(lid_sx < 0 ? 3 : 2) let(ac = lid_sx < 0 ? -hy/2 : hy/2) {
+// which corner modules get a glazed window, and where it sits along that wall (face frame)
+function peek_on(sx, sy) = peek_window && win_on(sx < 0 ? 3 : 2) && (peek_all || (sx == lid_sx && sy < 0));
+function peek_ac(sx, sy) = (sx < 0 ? -1 : 1) * (sy < 0 ? 1 : -1) * hy/2;
+// panes and retainers in place (preview)
+module peek_window_world() for (sx = [-1, 1], sy = [-1, 1]) if (peek_on(sx, sy)) face_xf(sx < 0 ? 3 : 2) let(ac = peek_ac(sx, sy)) {
   color("#BFE3F0", 0.45) translate([ac - win_w/2 - 3.5, -wt + 0.01, win_zc - win_h/2 - 3.5]) cube([win_w + 7, pane_t - 0.02, win_h + 7]);
   color(c_trim) translate([ac, -wt, win_zc]) rotate([90, 0, 0]) window_retainer();
 }
@@ -983,7 +987,7 @@ module assembly(e = 0) {
     if (hinge_on && sx == lid_sx) lid_open() roof_panel(sx, sy, holes = open_angle == 0); else roof_panel(sx, sy);
   color(c_trim) translate([0, 0, e*260]) lid_open(hinge_on ? open_angle : 0) { ridge_cap(-1); ridge_cap(1); }
   color(c_trim) translate([0, 0, e*300]) lid_open(hinge_on ? open_angle : 0) ridge_cap(-1, true);
-  if (peek_window && windows && e == 0) peek_window_world();
+  if (e == 0) peek_window_world();
   if (hatch) color(c_trim) translate([0, e*100, 0]) { hatch_frame_world(); hatch_open(hatch_open_angle) hatch_flap_world(); }
   if (hinge_on) color(c_trim) for (f = [true, false]) {
     translate([0, 0, e*200]) lid_open() latch_keeper_world(f);
