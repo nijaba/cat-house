@@ -68,7 +68,8 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 ### Weather details
 
 - **Rain.** The roof overhangs 70 mm at the front, 35 mm at the back and 50 mm at the sides. Shingles
-  shed water downslope. The standing seam and ridge cap cover the roof joints, and battens cover the wall
+  shed water downslope. Each standing seam is sealed with silicone between its two upstands and covered by a
+  printed seam cap, so rain can't reach the joint from above. The ridge cap covers the ridge, and battens cover the wall
   seams. The entrance is shielded by the roof overhang, a 45 mm hood and a 40 mm sill, and its step slopes
   outward.
 - **No water traps.** Every horizontal ledge (trim, window sills, drip caps, belt course) has a sloped top.
@@ -102,6 +103,7 @@ To export one part from the command line:
 | `roof_fl`, `roof_bl`, `roof_fr`, `roof_br` (or `roof_fr_mount`, `roof_br_mount`, 275 long) | 1 each | 315 × 272 × 20 | as exported: shingles up |
 | `ridge_front`, `ridge_back` | 1 each | 80 × 57 × 272 | as exported: **standing on end** (the hinge knuckles print upright); use an 8 mm brim |
 | `ridge_saddle` | 1 | 63 × 50 × 39 | as exported |
+| `seam_cap` (mounted: 1 `seam_cap` + 1 `seam_cap_mount`, 230 long) | 2 | 271 × 13 × 19 | as exported: top down, open side up |
 | `door_surround` | 1 | Ø216 × 50 | as exported: flange down, hood up |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
 | `leg` | 4 | Ø40 × 60 | narrow end down |
@@ -175,7 +177,7 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 |---|---|---|
 | 15 | M4 × 20 button head + 2 washers + nyloc nut | Corner-module seams (3 per side seam, 3 front, 6 back) |
 | 6 | M4 × 25 button head + washers + nyloc nut | Door surround and inner ring |
-| 6 | M4 × 16 button head + washers + nyloc nut | Standing seams (3 per slope) |
+| 6 | M4 × 20 button head + washers + nyloc nut | Standing seams and their caps (3 per slope) |
 | 4 | M4 × 16 button head + washers + nyloc nut | Ridge caps to the lid slope |
 | 2 | M4 × 20 button head + washers + nyloc nut | Saddle, ridge caps and lid at the centre joint |
 | 2 | M4 stainless threaded rod, 265 mm (or 4 mm stainless rod), + 4 acorn nuts + 4 washers | Hinge pins, one per ridge cap |
@@ -190,7 +192,7 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
 | 2 (4 on legs) | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
-| | Clear neutral-cure outdoor silicone | Window pane bead |
+| | Clear neutral-cure outdoor silicone | Window pane beads and standing seams |
 | 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot); not needed when mounted |
 | 4 | M6 × 20 flat head + M6 nut | Centre leg; not needed when mounted |
 | | Outdoor CA glue or epoxy | Bowtie keys (optional, they are a snug press fit) |
@@ -234,8 +236,10 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
    rod and cap it with acorn nuts.
 7. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
    through the wall with 6 × M4 × 25. They also lock the front seam.
-8. **Roof.** On each slope, bolt the front and back panels together through the standing seam
-   (3 × M4 × 16). The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
+8. **Roof.** On each slope, run a continuous bead of neutral-cure silicone down one face of the standing
+   seam's upstand, push the front and back panels together, slide the seam cap over the rib from the eave
+   end, and bolt cap and seam together (3 × M4 × 20). Wipe off the silicone that squeezes out.
+   The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
    screws through the bosses into the pilot holes (3 into each gable top, 2 into the eave corbels per panel).
    Snug them so the EPDM washers just compress; don't crush them. The left slope is the lid: set it in
    place, but don't screw it down.

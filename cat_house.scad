@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, seam_cap, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -66,6 +66,7 @@ shingle_w = 30;
 shingle_t = 2.6;
 seam_h = 20;     // standing seam (20 mm makes it a rib that carries a 20 kg point load at mid-slope) that joins the front and back roof panels
 seam_t = 4;
+seam_cap = true;  // printed U-cap over each standing seam, so rain can't reach the joint from above
 ridge_leg = 40;
 ridge_t = 4;
 rake_w = 14;
@@ -527,6 +528,31 @@ module panel_local(v0, v1, front, e, holes = true) {
   }
 }
 
+// Seam cap (slope frame): an inverted U that slips over the two upstands of a standing seam and is held by
+// the seam's own bolts. With a silicone bead between the upstands that makes two seals in a row.
+seam_cap_cl = 0.4;
+seam_cap_wall = 2;
+function seam_cap_zb() = roof_t + shingle_t + 0.6;   // walls stop just above the shingles
+module seam_profile(Lsh) polygon([[0, roof_t], [0, roof_t + 2], [1, roof_t + 2], [6, roof_t + seam_h], [Lsh - 2, roof_t + seam_h], [Lsh - 2, roof_t]]);
+module seam_cap_local(e) {
+  Lsh = Lsh_e(e);
+  hi = seam_t + gap + seam_cap_cl;   // inner half-width
+  module ext(w) translate([0, ysplit, 0]) rotate([90, 0, 0]) linear_extrude(2*w, center = true) children();
+  difference() {
+    intersection() {
+      ext(hi + seam_cap_wall) offset(r = seam_cap_cl + seam_cap_wall, $fn = 16) seam_profile(Lsh);
+      translate([-50, ysplit - 50, seam_cap_zb()]) cube([Lsh + 100, 100, 100]);
+    }
+    ext(hi) offset(delta = seam_cap_cl) seam_profile(Lsh);
+    for (u = [40, Lsh/2, Lsh - 30]) translate([u, ysplit, roof_t + 10]) rotate([90, 0, 0]) cylinder(d = m4 + 0.2, h = 40, center = true, $fn = 16);
+  }
+}
+module seam_cap_print(e) {
+  W = seam_t + gap + seam_cap_cl + seam_cap_wall;
+  wtop = roof_t + seam_h + seam_cap_cl + seam_cap_wall;
+  translate([seam_cap_cl + seam_cap_wall, ysplit + W, wtop]) rotate([180, 0, 0]) seam_cap_local(e);
+}
+
 function ridge_hole_vs(front) = front ? [yf + 30, (yf + ysplit)/2, ysplit - 14] : [ysplit + 14, (ysplit + yb)/2, yb - 30];
 
 // holes = false only for the open-lid preview, where OpenSCAD's preview mis-draws the holed underside
@@ -958,6 +984,7 @@ module print_part(p) {
   if (p == "ridge_front") ridge_print(-1);
   if (p == "ridge_back") ridge_print(1);
   if (p == "ridge_saddle") ridge_print(-1, true);
+  if (p == "seam_cap") seam_cap_print(eave_of(mount_sx));
   if (p == "door_surround") door_surround(step = !landing_on);
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();
@@ -986,6 +1013,8 @@ module assembly(e = 0) {
   for (sx = [-1, 1], sy = [-1, 1]) color(c_roof) translate([sx*e*90, sy*e*40, e*170])
     if (hinge_on && sx == lid_sx) lid_open() roof_panel(sx, sy, holes = open_angle == 0); else roof_panel(sx, sy);
   color(c_trim) translate([0, 0, e*260]) lid_open(hinge_on ? open_angle : 0) { ridge_cap(-1); ridge_cap(1); }
+  if (seam_cap) color(c_trim) for (sx = [-1, 1]) translate([sx*e*90, 0, e*220])
+    lid_open(hinge_on && sx == lid_sx ? open_angle : 0) side_frame(sx) seam_cap_local(eave_of(sx));
   color(c_trim) translate([0, 0, e*300]) lid_open(hinge_on ? open_angle : 0) ridge_cap(-1, true);
   if (e == 0) peek_window_world();
   if (hatch) color(c_trim) translate([0, e*100, 0]) { hatch_frame_world(); hatch_open(hatch_open_angle) hatch_flap_world(); }

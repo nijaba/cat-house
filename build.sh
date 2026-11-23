@@ -8,7 +8,7 @@ what="${1:-all}"
 mkdir -p stl renders
 
 parts=(corner_fl corner_fr corner_bl corner_br roof_fl roof_fr roof_bl roof_br
-       ridge_front ridge_back ridge_saddle door_surround door_inner_ring leg center_leg
+       ridge_front ridge_back ridge_saddle seam_cap door_surround door_inner_ring leg center_leg
        bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_plate support_bracket landing latch_keeper latch_button window_retainer hatch_frame hatch_flap)
 
 if [[ "$what" == stl || "$what" == all ]]; then
@@ -19,7 +19,7 @@ if [[ "$what" == stl || "$what" == all ]]; then
     run "$p" -D "part=\"$p\"" &
   done
   # mount-side (right) corners and roof panels: bolt holes, no windows, short eave (tree or fence)
-  for p in corner_fr corner_br roof_fr roof_br door_surround; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
+  for p in corner_fr corner_br roof_fr roof_br door_surround seam_cap; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
   wait
 fi
 
