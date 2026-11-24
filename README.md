@@ -120,6 +120,8 @@ To export one part from the command line:
 | `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
 | `support_bracket` | 2 | 200 × 300 × 36 | as exported: web down (optional, replaces the steel brackets; 6 walls, 40 % infill) |
 | `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
+| `tunnel_body`, `tunnel_roof` (or the `_away` pair) | 1 each | 246 × 162 × 181, 268 × 176 × 14 | as exported: floor down; shingles up (optional entrance tunnel, replaces the door surround) |
+| `landing_away`, `corner_fl_away` | 1 each | 292 × 101 × 51, 239 × 236 × 320 | replace `landing` and `corner_fl` when the tunnel faces away from a wall |
 
 See `renders/plate_layout.png` for how the parts fit on the plates.
 
@@ -136,6 +138,7 @@ halves them.
 | Fence mount + landing ledge | 4.5 kg | ≈ 150 h | **5 spools** (6 to be safe) |
 | Tree mount + landing ledge | 5.1 kg | ≈ 171 h | **6 spools** |
 | Printed support brackets (optional, 2) | +0.51 kg | +≈ 21 h | add 1 spool |
+| Entrance tunnel (optional, body + roof) | +0.57 kg | +≈ 16 h | add 1 spool |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
@@ -235,18 +238,22 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
    opening (4 × M4 × 20 countersunk from outside, nuts inside). Hang the flap between the cheeks on the M4
    rod and cap it with acorn nuts.
 7. **Door.** Hold the door surround outside with the hood on top, and the inner ring inside. Bolt them
-   through the wall with 6 × M4 × 25. They also lock the front seam.
+   through the wall with 6 × M4 × 25. They also lock the front seam. With the optional entrance tunnel, fit it instead of the
+   surround (see [Entrance tunnel](#entrance-tunnel-optional)).
 8. **Roof.** On each slope, run a continuous bead of neutral-cure silicone down one face of the standing
    seam's upstand, push the front and back panels together, slide the seam cap over the rib from the eave
-   end, and bolt cap and seam together (3 × M4 × 20). Wipe off the silicone that squeezes out.
+   end, and bolt cap and seam together (3 × M4 × 20). Carry the bead on past the seam's top end to the
+   panels' ridge edge, so the short plain stretch under the ridge cap is sealed too. Wipe off the excess.
    The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
    screws through the bosses into the pilot holes (3 into each gable top, 2 into the eave corbels per panel).
    Snug them so the EPDM washers just compress; don't crush them. The left slope is the lid: set it in
    place, but don't screw it down.
 9. **Ridge and hinge.** Lay the two ridge caps along the peak so their knuckles mesh with the knuckles on
    the right slope. Slide a hinge pin (threaded rod) through each set from the gable end and cap both ends
-   with washers and acorn nuts. Bolt the caps to the lid (left) slope only (4 × M4 × 16). Put the saddle
-   over the joint between them and bolt its left leg (2 × M4 × 20).
+   with washers and acorn nuts. Bolt the caps to the lid (left) slope only (4 × M4 × 16), with a bead of
+   silicone under the lid-side leg (they never come apart), so storm wind can't push water up under it. Put
+   the saddle over the joint between them, with a dab of silicone in that joint, and bolt its left leg
+   (2 × M4 × 20).
 10. **Seal and latches.** Stick the EPDM foam tape along the tops of the left-hand gable rafters and the
    left eave plate, where the lid rests. Screw each latch keeper under the lid's gable overhang, front and back (2 × #8 × 1"
    roofing screws each, through the bosses). Bolt a turn button to each gable wall, below and beside its
@@ -300,6 +307,38 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
   rubber washers.
 - **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them
   leads indoors.
+
+## Entrance tunnel (optional)
+
+![Entrance tunnel, mouth towards the mount](renders/tunnel.png)
+
+A short tunnel with a corner that replaces the door surround. The cat walks along the landing, goes in at
+the mouth, turns and reaches the door. Rain driven by the wind can't follow the corner: in the rain test
+([RAIN.md](RAIN.md)) the door stays dry up to 22 mph of wind from every direction. Without the tunnel,
+1.9 L/h reaches the cushion in the same storm. Set `door_tunnel = true`.
+
+- **Size.** Inside it is 150 mm wide, about 200 mm tall at the door and 111 mm tall at the mouth, under a
+  lintel. The mouth sits 150 mm along from the door centre (`tun_run`); 200 mm stays dry to 43 mph too. The
+  roof slopes down towards the mouth to pass under the house's front overhang, and outwards to shed rain.
+- **Which way it faces (`tun_dir`).**
+  - `"mount"` (default), for a post or tree: the mouth faces the mount, and the cat climbs from the post
+    onto the landing.
+  - `"away"`, for a wall. Next to a wall the mouth would face the wall with only 10 cm to spare, so the
+    tunnel and the landing move to the free side of the door. The landing then runs 8 cm past the house
+    corner, leaving a 15 × 9.5 cm porch at the mouth to jump onto. Print `corner_fl_away`, `landing_away`,
+    `tunnel_body_away` and `tunnel_roof_away` instead of `corner_fl`, `landing`, `tunnel_body` and
+    `tunnel_roof` (for a mount on the right; the model mirrors everything for a mount on the left).
+- **Fitting.**
+  1. Run a bead of silicone round the back of the round boss.
+  2. Put the body on the landing with its boss in the cut-out round the door.
+  3. Bolt it through the wall with 4 of the door's 6 bolts (M4 × 25, inner ring inside; the top two
+     holes fall in the open doorway).
+  4. Stick EPDM foam tape on the roof's back upstand.
+  5. Screw the roof onto the four tabs with 4 roofing screws (#8 × 1", EPDM washers).
+- **Printing.** Both parts print without supports. The doorway in the body's back wall is open to the top,
+  so it needs no bridge. Only the 150 mm lintel over the mouth is bridged.
+- **On legs** the tunnel also works (mouth to the right), just bolted at the door. Mounted, it also rests on
+  the landing.
 
 ## Printed support brackets (optional)
 
@@ -359,6 +398,9 @@ For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, 
 type gives the same house parts.
 
 ## Strength
+
+Rain: see [RAIN.md](RAIN.md) for a driven-rain check. The door is the only real way in, when wind blows
+rain straight at it. Fit the optional entrance tunnel, or face the door away from the usual storm wind.
 
 Checked by hand for a 20 kg load: on the floor, on the roof and on the ledge, standing on legs or mounted.
 See [STRUCTURAL.md](STRUCTURAL.md). In short: on its legs it is fine as printed. **Mounted, it needs the two

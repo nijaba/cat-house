@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, seam_cap, door_surround, door_inner_ring, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, seam_cap, door_surround, door_inner_ring, tunnel_body, tunnel_roof, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -100,6 +100,7 @@ hatch_magnet = [6.3, 3.2]; // pocket for 6 x 3 mm neodymium discs (use [8.3, 3.2
 // The windows are glazed, so you can see the cushion from outside.
 peek_window = true;
 peek_all = true;     // true: glaze every window (2 when mounted, 4 on legs); false: only the front one on the lid side
+pane_alpha = 0.45;   // preview only: pane transparency
 pane_t = 2;          // 2 mm UV-stable polycarbonate, cut to (win_w + 7) x (win_h + 7)
 open_angle = 0;      // preview only: show the lid opened by this many degrees
 hatch_open_angle = 0; // preview only: show the escape flap opened by this many degrees
@@ -110,6 +111,20 @@ door_sill = 40;    // sill height above the floor: keeps splash and the cushion 
 surround_w = 28;
 hood_depth = 45;   // rain hood over the entrance
 sill_depth = 28;   // outside step / drip ledge
+// Optional cornered entrance tunnel: replaces the door surround. The cat goes in at a mouth facing the
+// mount side (on the landing when mounted), turns a corner and reaches the door, so wind can't drive rain
+// straight in. Its roof slopes down towards the mouth to pass under the house's front overhang.
+door_tunnel = false;
+tun_wi = 150;       // inside width (out from the wall)
+tun_t = 4;          // wall and floor thickness
+tun_end = -96;      // closed end, outer face (x, mount side positive)
+tun_run = 150;      // mouth (x): 150 keeps it dry up to 22 mph wind from any side (see RAIN.md)
+tun_z0 = 206;       // top of the walls at the house wall, above the door centre line
+tun_ax = 9;         // roof slope down towards the mouth (degrees)
+tun_ay = 3;         // and outwards
+tun_dir = "mount";  // [mount, away] mouth towards the mount (post or tree: the cat comes along the landing),
+                    // or away from it (a wall: the landing moves to the free side and runs past the corner as a porch)
+tun_lintel_z = 155; // underside of the lintel over the mouth (mouth clear height = this - door_sill - tun_t)
 
 /* [Legs and floor] */
 leg_h = 60;
@@ -193,7 +208,9 @@ function u_ridge_e(e) = Lsh_e(e) + 4 + ridge_leg/2;
 function roof_len_e(e) = (xe(e) + roof_t*sin(pitch))/cos(pitch) + 1;
 landing_on = landing && mount != "none";
 landing_bolt_xs = [115, 165, 201];
-landing_x_end = hx + cleat_t - 1;
+// the side the landing (and the tunnel's mouth) is on
+entry_sx = (door_tunnel && tun_dir == "away") ? -mount_sx : mount_sx;
+landing_x_end = entry_sx == mount_sx ? hx + cleat_t - 1 : hx + 80;   // away from a wall it runs past the corner as a porch
 landing_bolt_z = 26;
 lid_sx = mount != "none" ? -mount_sx : -1;   // the slope that opens
 hinge_sx = -lid_sx;                           // the slope that carries the hinge
@@ -462,7 +479,7 @@ module module_cuts(sx, sy) {
   if (hinge_on && sx == lid_sx) translate([sx*latch_pivot_x, sy*hy, latch_pivot_z]) rotate([90, 0, 0])
     cylinder(d = m4, h = 3*wt + 10, center = true, $fn = 16);
   // landing ledge: flat pads and bolt holes on the front-corner module of the mount side
-  if (landing_on && sx == mount_sx && sy < 0) scale([mount_sx, 1, 1]) {
+  if (landing_on && sx == entry_sx && sy < 0) scale([entry_sx, 1, 1]) {
     translate([76, -hy - 15, zb - 1]) cube([hx + 20 - 76, 15 - 0.01, door_sill + 1 - zb + 1]);
     for (x = landing_bolt_xs) translate([x, -hy - 10, landing_bolt_z]) rotate([-90, 0, 0]) cylinder(d = m5, h = wt + 20, $fn = 16);
   }
@@ -655,7 +672,7 @@ function peek_on(sx, sy) = peek_window && win_on(sx < 0 ? 3 : 2) && (peek_all ||
 function peek_ac(sx, sy) = (sx < 0 ? -1 : 1) * (sy < 0 ? 1 : -1) * hy/2;
 // panes and retainers in place (preview)
 module peek_window_world() for (sx = [-1, 1], sy = [-1, 1]) if (peek_on(sx, sy)) face_xf(sx < 0 ? 3 : 2) let(ac = peek_ac(sx, sy)) {
-  color("#BFE3F0", 0.45) translate([ac - win_w/2 - 3.5, -wt + 0.01, win_zc - win_h/2 - 3.5]) cube([win_w + 7, pane_t - 0.02, win_h + 7]);
+  color("#BFE3F0", pane_alpha) translate([ac - win_w/2 - 3.5, -wt + 0.01, win_zc - win_h/2 - 3.5]) cube([win_w + 7, pane_t - 0.02, win_h + 7]);
   color(c_trim) translate([ac, -wt, win_zc]) rotate([90, 0, 0]) window_retainer();
 }
 
@@ -775,6 +792,72 @@ module door_inner_ring() difference() {
   translate([0, 0, -1]) cylinder(r = door_r, h = 10, $fn = 120);
   for (a = [0 : 60 : 300]) rotate([0, 0, a]) translate([door_r + 14, 0, -1]) cylinder(d = m4, h = 10, $fn = 16);
 }
+
+// ---- cornered entrance tunnel (world frame for a mount on the right; mirrored for the left) ----
+function tun_yb() = -hy - relief;                      // back face against the siding
+function tun_yo() = tun_yb() - 2*tun_t - tun_wi;       // outer face of the front wall
+module tun_plane() translate([0, tun_yb(), tun_z0]) rotate([tun_ay, 0, 0]) rotate([0, tun_ax, 0]) children();
+tun_tabs = [for (lx = [tun_end + 12, tun_run - 14], ly = [-tun_t - 7, -(tun_wi + tun_t) + 7]) [lx, ly]];
+tun_floor_z = door_sill;   // the floor's underside: sits on the landing when mounted
+
+module tunnel_body_world() scale([entry_sx, 1, 1]) {
+  yb = tun_yb(); yo = tun_yo(); L = tun_run - tun_end; zf = tun_floor_z;
+  difference() {
+    union() {
+      intersection() {
+        union() {
+          translate([tun_end, yo, zf]) cube([L, yb - yo, tun_t]);                       // floor
+          translate([tun_end, yb - tun_t, zf]) cube([L, tun_t, 200]);                 // back wall
+          translate([tun_end, yo, zf]) cube([L, tun_t, 200]);                         // front wall
+          translate([tun_end, yo, zf]) cube([2*tun_t, yb - yo, 200]);                 // closed end, thick enough for a door bolt
+          // lintel over the mouth: stops near-horizontal rain skimming under the roof to the doorway
+          translate([tun_run - 8, yo, tun_lintel_z]) cube([8, yb - yo, 200]);
+          // round boss that fills the siding cut-out round the door and carries the bolts
+          intersection() {
+            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out, h = relief + 0.01, $fn = 120);
+            translate([tun_end, -hy - 10, zf]) cube([L, 20, 300]);
+          }
+        }
+        tun_plane() translate([-1000, -1000, -1000]) cube([2000, 2000, 1000]);        // walls stop at the roof plane
+      }
+      // screw tabs for the roof, with 45 degree gussets so the body prints without support
+      for (t = tun_tabs) hull() {
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 3, 1]);
+      }
+    }
+    // the doorway, open to the top so the back wall needs no bridge
+    intersection() {   // above the tunnel floor, so the cut never grazes the floor's underside
+      hull() for (z = [door_z, door_z + 200]) translate([0, -hy + 1, z]) rotate([90, 0, 0]) cylinder(r = door_r, h = relief + tun_t + 2, $fn = 120);
+      translate([-200, -hy - 50, zf + tun_t]) cube([400, 100, 400]);
+    }
+    // the door's bolt pattern (4 of its 6 holes; the top two fall in the open doorway)
+    for (a = [0, 180, 240, 300]) translate([(door_r + 14)*cos(a), -hy + 1, door_z + (door_r + 14)*sin(a)])
+      rotate([90, 0, 0]) cylinder(d = m4, h = relief + tun_t + 2, $fn = 16);
+    // pilot holes for the roof screws
+    for (t = tun_tabs) tun_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
+    // floor drains past the doorway
+    for (x = [door_r + 25 : 25 : tun_run - 15], y = [yo + 25 : 25 : yb - 20]) translate([x, y, zf - 1]) cylinder(d = drain_d, h = tun_t + 2, $fn = 16);
+  }
+}
+
+// roof, built flat in the roof plane's frame (x along the house, y out from the wall), shingles up
+module tunnel_roof_local() {
+  x0 = tun_end - 8; x1 = tun_run + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = 4;
+  difference() {
+    union() {
+      translate([x0, y0, 0]) cube([x1 - x0, -y0 - 2, t]);   // 2 mm off the siding: the double slope leans the back edge in
+      translate([x0, -6, 0]) cube([90 - x0, 4, t + 10]);    // flashing upstand against the wall (stops short of the roof latch)
+      // fish-scale shingles, courses running along x and stepping down towards the outer edge
+      translate([0, 0, t - roof_t]) multmatrix([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0]])
+        translate([y0, 0, 0]) shingles_strip(x0 + 2, x1 - 2, -y0 - 6);
+    }
+    for (p = tun_tabs) translate([p[0], p[1], -1]) cylinder(d = screw_clear, h = 20, $fn = 16);
+  }
+}
+// the shingles module works along u from an eave at u = 0; here the eave is the outer edge
+module shingles_strip(vA, vB, Lsh) shingles(vA, vB, Lsh);
+module tunnel_roof_world() scale([entry_sx, 1, 1]) tun_plane() tunnel_roof_local();
 
 // =====================================================================
 //  Legs and floor keys
@@ -905,7 +988,7 @@ module printed_bracket() {
 // =====================================================================
 //  Landing ledge (world coordinates, built for the right side and mirrored for the left)
 // =====================================================================
-module landing_world() scale([mount_sx, 1, 1]) {
+module landing_world() scale([entry_sx, 1, 1]) {
   zt = door_sill; zp = zt - landing_t; zf = zb + 2;
   yi = -hy - 6;
   difference() {
@@ -933,7 +1016,7 @@ module landing_world() scale([mount_sx, 1, 1]) {
 }
 
 // print upside down: the walking surface goes on the bed
-module landing_print() translate([mount_sx > 0 ? -landing_x0 : landing_x_end, -hy, door_sill])
+module landing_print() translate([entry_sx > 0 ? -landing_x0 : landing_x_end, -hy, door_sill])
   rotate([180, 0, 0]) landing_world();
 
 // =====================================================================
@@ -986,6 +1069,8 @@ module print_part(p) {
   if (p == "ridge_saddle") ridge_print(-1, true);
   if (p == "seam_cap") seam_cap_print(eave_of(mount_sx));
   if (p == "door_surround") door_surround(step = !landing_on);
+  if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -tun_floor_z]) tunnel_body_world();
+  if (p == "tunnel_roof") translate([entry_sx > 0 ? -(tun_end - 8) : tun_run + 14, tun_wi + 2*tun_t + 20, 0]) scale([entry_sx, 1, 1]) tunnel_roof_local();
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();
   if (p == "center_leg") center_leg();
@@ -1022,7 +1107,10 @@ module assembly(e = 0) {
     translate([0, 0, e*200]) lid_open() latch_keeper_world(f);
     translate([0, (f ? -1 : 1)*e*60, 0]) latch_button_world(f, open_angle > 0);
   }
-  color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
+  if (door_tunnel) {
+    color(c_wall) translate([0, -e*150, 0]) tunnel_body_world();
+    color(c_roof) translate([0, -e*150, e*120]) tunnel_roof_world();
+  } else color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
   color(c_trim) translate([0, -idp/2 + e*80, door_z]) rotate([-90, 0, 0]) door_inner_ring();
   if (show_legs) color(c_leg) translate([0, 0, -e*80]) {
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx*leg_xy[0], sy*leg_xy[1], zb - leg_h]) leg();

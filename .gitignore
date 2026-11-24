@@ -2,3 +2,4 @@
 *.local.md
 stl/.*.log
 result.json
+tools/rain*/

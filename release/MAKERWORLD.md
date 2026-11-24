@@ -29,7 +29,7 @@ on 2026-11-20.
 
 ## 2. Files to upload
 
-- **Raw files:** every STL in `stl/` (32 files), `cat_house.scad`, and the README as the printing guide
+- **Raw files:** every STL in `stl/` (40 files), `cat_house.scad`, and the README as the printing guide
   (paste its key sections into the description).
 - **Print profile 1 — "On legs":** `release/cat_cottage_H2D_on_legs.3mf`, 12 plates on the H2D with a
   0.4 mm nozzle, 0.20 mm layers, Bambu ASA, the textured PEI plate, 4 walls, 15 % gyroid and a 5 mm brim.
@@ -40,6 +40,8 @@ on 2026-11-20.
 - **Print profile 3 — "Printed support brackets (optional)":** `release/cat_cottage_H2D_printed_brackets.3mf`
   (2 plates, one bracket each, 6 walls and 40 % gyroid). For mounted houses that use printed brackets
   instead of steel ones.
+- **Print profile 4 — "Entrance tunnel (optional)":** `release/cat_cottage_H2D_entrance_tunnel.3mf`
+  (2 plates: body and roof). The `_away` STLs are for wall mounting.
 - **Before uploading:** open each 3MF in Bambu Studio, name the plates ("Corner FL + small parts", …,
   "Fence mount (optional)"), slice once to confirm, then save. This is allowed as a separate profile
   because it is a variant with different parts.
