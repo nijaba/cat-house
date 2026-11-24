@@ -13,6 +13,8 @@ finite-element analysis. Before letting a cat in, do the proof test at the end.
 | Mounted with the two **printed** `support_bracket`s instead | ✅ OK (≈ 4 MPa peak, ≈ 1 MPa everyday); check for sag after the first hot month |
 | Roof, 20 kg standing on it | ✅ OK, after raising the standing seam from 14 to 20 mm (at 14 mm: ≈ 16 MPa, over the limit) |
 | Landing ledge, 20 kg at its outer edge | ✅ OK, after moving its bolts up to 26 mm |
+| Entrance tunnel (optional): floor, roof, bolts | ✅ OK after thickening the floor and the roof plate from 4 to 6 mm (at 4 mm: ≈ 18 MPa each) |
+| Landing as a porch past the corner (tunnel facing away from a wall) | ✅ OK after deepening the web and end gusset to 50 mm and adding a second gusset (at 30 mm: ≈ 19 MPa) |
 | French cleat as first designed | ❌ **Bug, fixed.** The bevels sloped the wrong way and pushed the house away from the fence. Even when correct, a 45° cleat can only resist an outward pull equal to the weight it carries, and this house needs 4–7 times that. Lock screws now carry that pull. |
 
 ## Assumptions
@@ -114,6 +116,19 @@ load in the print plane (allowable ≈ 10 MPa). Loads per bracket are the same a
   37 mm), 18.6 N·m gives ≈ 500 N across 3 × M5, about 170 N each. Each bolt's washer would need about
   2 kN to pull through the 5 mm wall. ✅
 
+## 5b. Landing as a porch (tunnel facing away from a wall)
+
+Added 2026-11-23. With `tun_dir = "away"` the landing runs 80 mm past the house corner, where nothing
+holds it but its own web along the wall line and the gussets under it.
+
+- **End gusset**, carrying 20 kg at the porch's outer corner (about 87 mm out from the web):
+  - 30 mm deep: Z = 6 × 30² / 6 = 900 mm³, M = 196 × 87 ≈ 17 N·m, σ ≈ 19 MPa ❌
+  - **50 mm deep (now the default for the porch): Z = 2 500 mm³, σ ≈ 6.8 MPa ✅**
+  - A second gusset halfway along the porch shares the load.
+- **The porch as a cantilever past the corner:** the 95 × 8 mm plate plus the 6 × 50 mm web have
+  Z ≈ 5 400 mm³. M = 196 × 80 ≈ 15.7 N·m, so σ ≈ 2.9 MPa. ✅
+- **Bolts:** the same three M5s and the same tipping moment as the standard ledge (section 5). ✅
+
 ## 6. Joints
 
 - **Front and back seam bolts** (M4) carry the far half of the house as a cantilever (≈ 46 N·m over a
@@ -121,12 +136,39 @@ load in the print plane (allowable ≈ 10 MPa). Loads per bracket are the same a
 - **House cleat and standoff bolts** (8 × M5 each) carry the vertical shear, about 250 N in total. Bearing
   on the 5 mm wall is about 1.2 MPa. ✅
 
+## 7. Entrance tunnel (optional)
+
+Added 2026-11-23. A box 150 mm wide inside, bolted to the wall through 4 of the door's M4 holes. Mounted,
+its floor also rests on the landing. The plate stresses use the circular-plate formula for a point load
+on a simply supported plate: σ = 3P / (2π t²) × [(1 + ν) ln(a / r₀) + 1], with P = 196 N, ν = 0.35 and a
+paw of r₀ ≈ 15 mm.
+
+- **Floor**, worst case on legs, where it spans 150 mm from the back wall to the front wall (a = 75 mm):
+  - 4 mm: σ ≈ 18.5 MPa ❌
+  - **6 mm (now the default): σ ≈ 8.2 MPa ✅**
+  - Mounted, the floor rests on the landing, and only a 56 mm band past the landing's edge spans, at
+    about 5 MPa.
+- **Roof.** A cat will jump onto it. The plate rests on the wall tops along both sides and spans 150 mm:
+  - 4 mm: σ ≈ 18.5 MPa ❌
+  - **6 mm plate under the shingles (now the default): σ ≈ 8.2 MPa ✅**
+  - Wind uplift is held by its 4 screws.
+- **Front wall as a beam.** Taking 20 kg at the mouth's outer corner as a cantilever from the closed end
+  (246 mm), with depth about 130 mm and 4 mm wall: σ ≈ 4.3 MPa. ✅ The floor and roof make it a closed tube,
+  so the real stress is lower.
+- **Door bolts on legs**, where the tunnel hangs from them alone. 20 kg at the mouth's outer corner gives
+  31 N·m of tipping, pivoting on the boss's bottom edge: about 135 N of tension in each top bolt. It also
+  gives 29 N·m of twist in the wall plane: about 125 N of shear per bolt. M4 stainless carries several kN.
+  The 5 mm wall, backed by the inner ring, takes about 1.2 kN before a washer pulls through. ✅
+- **Mounted, tipping over the landing's edge:** about 120 N on the door bolts. ✅
+
 ## Proof test before first use
 
 1. **Floor.** With the house assembled (and mounted, if you're mounting it), put a 20 kg sandbag or a stack
    of books on a board on the floor centre for 10 minutes. Look for cracking at the floor seams and keys,
    and check that the floor doesn't sag by more than a few millimetres.
-2. **Ledge.** Hang or set 10 kg on the outer edge of the ledge for 10 minutes.
+2. **Ledge.** Hang or set 10 kg on the outer edge of the ledge for 10 minutes (on the porch's outer corner
+   too, if it runs past the house corner). With the tunnel, also set 10 kg on its floor at the mouth and on
+   the middle of its roof.
 3. **Roof.** Press firmly at the middle of the standing seam on each slope.
 4. **Afterwards.** Re-tighten all the bolts. Recheck the screws and straps after the first hot month, since
    ASA settles a little under load.

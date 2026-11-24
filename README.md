@@ -120,36 +120,39 @@ To export one part from the command line:
 | `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
 | `support_bracket` | 2 | 200 × 300 × 36 | as exported: web down (optional, replaces the steel brackets; 6 walls, 40 % infill) |
 | `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
-| `tunnel_body`, `tunnel_roof` (or the `_away` pair) | 1 each | 246 × 162 × 181, 268 × 176 × 14 | as exported: floor down; shingles up (optional entrance tunnel, replaces the door surround) |
-| `landing_away`, `corner_fl_away` | 1 each | 292 × 101 × 51, 239 × 236 × 320 | replace `landing` and `corner_fl` when the tunnel faces away from a wall |
+| `tunnel_body`, `tunnel_roof` (or the `_away` pair) | 1 each | 246 × 161 × 179, 268 × 176 × 16 | as exported: floor down; shingles up (optional entrance tunnel, replaces the door surround) |
+| `landing_away`, `corner_fl_away` | 1 each | 292 × 101 × 58, 239 × 236 × 320 | replace `landing` and `corner_fl` when the tunnel faces away from a wall |
 
 See `renders/plate_layout.png` for how the parts fit on the plates.
 
 ### How much ASA to buy
 
-These weights come from slicing every STL in Bambu Studio 2.x. The settings were the H2D 0.4 mm nozzle,
+These weights come from slicing every STL in Bambu Studio 2.x (re-sliced 2026-11-23 with all current parts). The settings were the H2D 0.4 mm nozzle,
 "0.20mm Standard @BBL H2D" with 4 walls, 5 top and 5 bottom layers, 15 % gyroid infill and a 5 mm brim, and
 Bambu ASA on the textured PEI plate. Times are for that profile; a 0.6 mm nozzle on the big parts roughly
 halves them.
 
 | Build | Filament | Print time | Buy (1 kg spools, one colour) |
 |---|---|---|---|
-| On its legs (no mount) | 4.2 kg | ≈ 142 h | **5 spools** |
-| Fence mount + landing ledge | 4.5 kg | ≈ 150 h | **5 spools** (6 to be safe) |
-| Tree mount + landing ledge | 5.1 kg | ≈ 171 h | **6 spools** |
-| Printed support brackets (optional, 2) | +0.51 kg | +≈ 21 h | add 1 spool |
-| Entrance tunnel (optional, body + roof) | +0.57 kg | +≈ 16 h | add 1 spool |
+| On its legs (no mount) | 4.3 kg | ≈ 147 h | **5 spools** |
+| Fence mount + landing ledge | 4.6 kg | ≈ 154 h | **5 spools** (6 to be safe) |
+| Tree mount + landing ledge | 5.2 kg | ≈ 175 h | **6 spools** |
+| Printed support brackets (optional, 2; 6 walls, 40 % infill) | +0.51 kg | +≈ 21 h | add 1 spool |
+| Entrance tunnel (optional, body + roof) | +0.59 kg | +≈ 18 h | add 1 spool (the wall layout's longer landing adds 40 g) |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
 | Colour | Parts | On legs | Fence + ledge | Tree + ledge |
 |---|---|---|---|---|
-| Walls (cream) | 4 corner modules | 2.41 kg → 3 spools | 2.39 kg → 3 spools | 2.39 kg → 3 spools |
-| Roof (light sage) | 4 roof panels | 1.26 kg → 2 spools | 1.18 kg → 2 spools | 1.18 kg → 2 spools |
-| Trim (white) | ridge, door, keys, latches, legs, ledge, mount | 0.52 kg → 1 spool | 0.92 kg → 1 spool | 1.49 kg → 2 spools |
+| Walls (cream) | 4 corner modules | 2.24 kg → 3 spools | 2.26 kg → 3 spools | 2.26 kg → 3 spools |
+| Roof (light sage) | 4 roof panels | 1.27 kg → 2 spools | 1.19 kg → 2 spools | 1.19 kg → 2 spools |
+| Trim (white) | ridge, seam caps, door, keys, latches, windows, hatch, legs, ledge, mount | 0.76 kg → 1 spool | 1.13 kg → 2 spools | 1.70 kg → 2 spools |
 
-The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-left corner module
-(about 640 g, 18.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
+With the tunnel, its body (0.42 kg) goes with the walls and its roof (0.18 kg) with the roof. Both still
+fit in the spools above, though the walls then leave only about 0.3 kg spare.
+
+The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-right corner module
+(about 610 g, 17.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
 runs out. The margins above cover a failed print or two and the purge lines. They don't cover a full
 reprint of a corner module.
 
@@ -317,15 +320,17 @@ the mouth, turns and reaches the door. Rain driven by the wind can't follow the 
 ([RAIN.md](RAIN.md)) the door stays dry up to 22 mph of wind from every direction. Without the tunnel,
 1.9 L/h reaches the cushion in the same storm. Set `door_tunnel = true`.
 
-- **Size.** Inside it is 150 mm wide, about 200 mm tall at the door and 111 mm tall at the mouth, under a
-  lintel. The mouth sits 150 mm along from the door centre (`tun_run`); 200 mm stays dry to 43 mph too. The
+- **Size.** Inside it is 150 mm wide. Its ceiling clears the top of the door, and the mouth is 109 mm tall
+  under a lintel. The floor and the roof plate are 6 mm thick, so they carry a cat jumping onto them (see
+  [STRUCTURAL.md](STRUCTURAL.md)). The mouth sits 150 mm along from the door centre (`tun_run`); 200 mm stays dry to 43 mph too. The
   roof slopes down towards the mouth to pass under the house's front overhang, and outwards to shed rain.
 - **Which way it faces (`tun_dir`).**
   - `"mount"` (default), for a post or tree: the mouth faces the mount, and the cat climbs from the post
     onto the landing.
   - `"away"`, for a wall. Next to a wall the mouth would face the wall with only 10 cm to spare, so the
     tunnel and the landing move to the free side of the door. The landing then runs 8 cm past the house
-    corner, leaving a 15 × 9.5 cm porch at the mouth to jump onto. Print `corner_fl_away`, `landing_away`,
+    corner, leaving a 15 × 9.5 cm porch at the mouth to jump onto. Under the porch, the web and gussets are
+    deeper (50 mm), so the porch carries 20 kg at its corner. Print `corner_fl_away`, `landing_away`,
     `tunnel_body_away` and `tunnel_roof_away` instead of `corner_fl`, `landing`, `tunnel_body` and
     `tunnel_roof` (for a mount on the right; the model mirrors everything for a mount on the left).
 - **Fitting.**

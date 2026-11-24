@@ -116,15 +116,17 @@ sill_depth = 28;   // outside step / drip ledge
 // straight in. Its roof slopes down towards the mouth to pass under the house's front overhang.
 door_tunnel = false;
 tun_wi = 150;       // inside width (out from the wall)
-tun_t = 4;          // wall and floor thickness
+tun_t = 4;          // wall thickness
+tun_floor_t = 6;    // floor thickness (20 kg on one spot past the landing's edge: see STRUCTURAL.md)
+tun_roof_t = 6;     // roof plate under the shingles (a cat jumping onto it)
 tun_end = -96;      // closed end, outer face (x, mount side positive)
 tun_run = 150;      // mouth (x): 150 keeps it dry up to 22 mph wind from any side (see RAIN.md)
-tun_z0 = 206;       // top of the walls at the house wall, above the door centre line
+tun_z0 = 204;       // top of the walls at the house wall, above the door centre line
 tun_ax = 9;         // roof slope down towards the mouth (degrees)
 tun_ay = 3;         // and outwards
 tun_dir = "mount";  // [mount, away] mouth towards the mount (post or tree: the cat comes along the landing),
                     // or away from it (a wall: the landing moves to the free side and runs past the corner as a porch)
-tun_lintel_z = 155; // underside of the lintel over the mouth (mouth clear height = this - door_sill - tun_t)
+tun_lintel_z = 155; // underside of the lintel over the mouth (mouth clear height = this - door_sill - tun_floor_t)
 
 /* [Legs and floor] */
 leg_h = 60;
@@ -806,7 +808,7 @@ module tunnel_body_world() scale([entry_sx, 1, 1]) {
     union() {
       intersection() {
         union() {
-          translate([tun_end, yo, zf]) cube([L, yb - yo, tun_t]);                       // floor
+          translate([tun_end, yo, zf]) cube([L, yb - yo, tun_floor_t]);                 // floor
           translate([tun_end, yb - tun_t, zf]) cube([L, tun_t, 200]);                 // back wall
           translate([tun_end, yo, zf]) cube([L, tun_t, 200]);                         // front wall
           translate([tun_end, yo, zf]) cube([2*tun_t, yb - yo, 200]);                 // closed end, thick enough for a door bolt
@@ -823,13 +825,13 @@ module tunnel_body_world() scale([entry_sx, 1, 1]) {
       // screw tabs for the roof, with 45 degree gussets so the body prints without support
       for (t = tun_tabs) hull() {
         tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 3, 1]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
       }
     }
     // the doorway, open to the top so the back wall needs no bridge
     intersection() {   // above the tunnel floor, so the cut never grazes the floor's underside
       hull() for (z = [door_z, door_z + 200]) translate([0, -hy + 1, z]) rotate([90, 0, 0]) cylinder(r = door_r, h = relief + tun_t + 2, $fn = 120);
-      translate([-200, -hy - 50, zf + tun_t]) cube([400, 100, 400]);
+      translate([-200, -hy - 50, zf + tun_floor_t]) cube([400, 100, 400]);
     }
     // the door's bolt pattern (4 of its 6 holes; the top two fall in the open doorway)
     for (a = [0, 180, 240, 300]) translate([(door_r + 14)*cos(a), -hy + 1, door_z + (door_r + 14)*sin(a)])
@@ -837,13 +839,13 @@ module tunnel_body_world() scale([entry_sx, 1, 1]) {
     // pilot holes for the roof screws
     for (t = tun_tabs) tun_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
     // floor drains past the doorway
-    for (x = [door_r + 25 : 25 : tun_run - 15], y = [yo + 25 : 25 : yb - 20]) translate([x, y, zf - 1]) cylinder(d = drain_d, h = tun_t + 2, $fn = 16);
+    for (x = [door_r + 25 : 25 : tun_run - 15], y = [yo + 25 : 25 : yb - 20]) translate([x, y, zf - 1]) cylinder(d = drain_d, h = tun_floor_t + 2, $fn = 16);
   }
 }
 
 // roof, built flat in the roof plane's frame (x along the house, y out from the wall), shingles up
 module tunnel_roof_local() {
-  x0 = tun_end - 8; x1 = tun_run + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = 4;
+  x0 = tun_end - 8; x1 = tun_run + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = tun_roof_t;
   difference() {
     union() {
       translate([x0, y0, 0]) cube([x1 - x0, -y0 - 2, t]);   // 2 mm off the siding: the double slope leans the back edge in
@@ -988,6 +990,7 @@ module printed_bracket() {
 // =====================================================================
 //  Landing ledge (world coordinates, built for the right side and mirrored for the left)
 // =====================================================================
+porch_d = landing_x_end - hx > 40 ? 50 : 30;   // depth of the web and gussets past the corner
 module landing_world() scale([entry_sx, 1, 1]) {
   zt = door_sill; zp = zt - landing_t; zf = zb + 2;
   yi = -hy - 6;
@@ -1004,9 +1007,11 @@ module landing_world() scale([entry_sx, 1, 1]) {
       for (x = [landing_x0 + 4, 48, 92, 140, 188, hx - 6]) translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(6)
         polygon([[yi + 0.01, zf], [yi + 0.01, zp + 0.01], [yi - landing_w + 8, zp + 0.01]]);
       // end gusset past the corner, under the part that reaches out to the mounting surface
-      translate([landing_x_end - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(6)
-        polygon([[yi - 0.01, zp - 30], [yi - 0.01, zp + 0.01], [yi - landing_w + 8, zp + 0.01]]);
-      translate([hx, yi - 0.01, zp - 30]) cube([landing_x_end - hx - 2, 6, 30.02]);
+      // (deeper, and doubled, when it runs past the corner as a porch)
+      for (x = landing_x_end - hx > 40 ? [hx + 36, landing_x_end - 8] : [landing_x_end - 8])
+        translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(6)
+          polygon([[yi - 0.01, zp - porch_d], [yi - 0.01, zp + 0.01], [yi - landing_w + 8, zp + 0.01]]);
+      translate([hx, yi - 0.01, zp - porch_d]) cube([landing_x_end - hx - 2, 6, porch_d + 0.02]);
     }
     // drain and grip slots, square to the wall
     for (x = [landing_x0 + 14 : 16 : landing_x_end - 12]) translate([x - 2.5, yi - landing_w + 12, zp - 1]) cube([5, landing_w - 24, landing_t + 2]);
