@@ -197,7 +197,10 @@ If something is too tight or too loose, measure the gap with a feeler gauge or c
 and rebuild the parts that use it with `./build.sh stl`.
 
 The coupons' STLs are in `stl/test/`, and `tools/test_coupons.scad` makes them. The slicer profiles behind
-the project files come from `tools/flatten_profiles.py`.
+the project files come from `tools/flatten_profiles.py`. After exporting project files from the command
+line, run `python3 -I tools/fix_3mf.py release/*.3mf`. It records which settings differ from Bambu's
+built-in profile, which Bambu Studio needs in order to keep them, and switches supports on for the parts
+that need them.
 
 ## Print order: on legs, three colours, with the entrance tunnel
 

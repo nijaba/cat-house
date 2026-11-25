@@ -1,0 +1,103 @@
+"""Make Bambu Studio keep this project's settings when it opens a project file exported by the command line.
+
+The command line writes every setting into Metadata/project_settings.config, but leaves
+"different_settings_to_system" empty. Bambu Studio reads that list to know which values differ from its
+built-in profile, so it silently reloads the plain profile (no supports, 2 walls, ...). This script fills in
+the list by comparing with the built-in profiles. It also switches supports on per object for the parts that
+need them, whatever the project's global setting.
+
+Usage: python3 -I tools/fix_3mf.py release/*.3mf
+"""
+import json, os, re, sys, zipfile
+
+BBL = '/Applications/BambuStudio.app/Contents/Resources/profiles/BBL'
+SKIP = {'name', 'from', 'inherits', 'setting_id', 'instantiation', 'version', 'compatible_printers',
+        'compatible_printers_condition', 'renamed_from', 'type', 'description', 'filament_id',
+        'print_settings_id', 'filament_settings_id', 'printer_settings_id'}
+NEEDS_SUPPORT = {'ridge_front.stl', 'ridge_back.stl', 'ridge_pair.stl', 'hinge_cap.stl', 'latch_keeper.stl', 'hatch_flap.stl'}
+OBJECT_SUPPORT = [('enable_support', '1'), ('support_type', 'tree(auto)'), ('support_threshold_angle', '30'),
+                  ('support_on_build_plate_only', '0')]
+
+_idx = {}
+
+
+def index(kind):
+    if kind not in _idx:
+        out = {}
+        for f in os.listdir(os.path.join(BBL, kind)):
+            if f.endswith('.json'):
+                try:
+                    d = json.load(open(os.path.join(BBL, kind, f)))
+                except ValueError:
+                    continue
+                out[d.get('name', f[:-5])] = os.path.join(BBL, kind, f)
+        _idx[kind] = out
+    return _idx[kind]
+
+
+def flatten(kind, name):
+    d = json.load(open(index(kind)[name]))
+    base = flatten(kind, d['inherits']) if d.get('inherits') else {}
+    base.update({k: v for k, v in d.items() if k != 'inherits'})
+    return base
+
+
+def diff_keys(project, system):
+    keys = []
+    for k, v in system.items():
+        if k in SKIP or k not in project:
+            continue
+        pv = project[k]
+        if isinstance(v, list) and not isinstance(pv, list):
+            pv = [pv]
+        if isinstance(pv, list) and isinstance(v, list) and len(pv) != len(v) and len(set(map(str, v))) == 1:
+            v = [v[0]] * len(pv)   # system lists one value per extruder; the project may carry more
+        if str(pv) != str(v):
+            keys.append(k)
+    return ';'.join(sorted(keys))
+
+
+def fix(path):
+    z = zipfile.ZipFile(path)
+    items = [(i, z.read(i.filename)) for i in z.infolist()]
+    z.close()
+    out = []
+    for info, data in items:
+        if info.filename == 'Metadata/project_settings.config':
+            cfg = json.loads(data)
+            if cfg['print_settings_id'] not in index('process'):   # an older export renamed the profile
+                cfg['print_settings_id'] = cfg['print_settings_id'].rsplit(' ', 1)[0]
+            p = diff_keys(cfg, flatten('process', cfg['print_settings_id']))
+            fils = cfg.get('filament_settings_id') or []
+            f = [diff_keys(cfg, flatten('filament', n)) if n in index('filament') else '' for n in fils]
+            m = diff_keys(cfg, flatten('machine', cfg['printer_settings_id']))
+            cfg['different_settings_to_system'] = [p] + f + [m]
+            data = json.dumps(cfg, indent=4).encode()
+            print(f"{os.path.basename(path)}: process differs in {len(p.split(';')) if p else 0} settings"
+                  f" ({'supports on' if cfg.get('enable_support') == '1' else 'supports off'} globally)")
+        elif info.filename == 'Metadata/model_settings.config':
+            text = data.decode()
+
+            def add(m):
+                block = m.group(0)
+                name = re.search(r'<metadata key="name" value="([^"]+)"', block).group(1)
+                if name not in NEEDS_SUPPORT or 'key="enable_support"' in block:
+                    return block
+                extra = ''.join(f'\n    <metadata key="{k}" value="{v}"/>' for k, v in OBJECT_SUPPORT)
+                return re.sub(r'(<metadata key="name" value="[^"]+"/>)', r'\1' + extra, block, count=1)
+
+            text, n = re.subn(r'<object id="\d+">.*?</object>', add, text, flags=re.S)
+            hits = len(re.findall(r'<metadata key="enable_support" value="1"/>', text))
+            if hits:
+                print(f"    supports switched on for {hits} object(s)")
+            data = text.encode()
+        out.append((info, data))
+    tmp = path + '.tmp'
+    with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as w:
+        for info, data in out:
+            w.writestr(info, data)
+    os.replace(tmp, path)
+
+
+for p in sys.argv[1:]:
+    fix(p)
