@@ -8,7 +8,7 @@ what="${1:-all}"
 mkdir -p stl renders
 
 parts=(corner_fl corner_fr corner_bl corner_br roof_fl roof_fr roof_bl roof_br
-       ridge_front ridge_back ridge_pair ridge_saddle seam_cap door_surround door_inner_ring tunnel_body tunnel_roof leg center_leg
+       ridge_front ridge_back ridge_pair ridge_saddle seam_cap door_surround door_inner_ring tunnel_body tunnel_roof tunnel_ramp tunnel_ramp_roof leg center_leg
        bowtie_key fence_house_cleat fence_post_cleat fence_standoff tree_plate support_bracket landing latch_keeper latch_button window_retainer hatch_frame hatch_flap)
 
 if [[ "$what" == stl || "$what" == all ]]; then
@@ -19,7 +19,7 @@ if [[ "$what" == stl || "$what" == all ]]; then
     run "$p" -D "part=\"$p\"" &
   done
   # mount-side (right) corners and roof panels: bolt holes, no windows, short eave (tree or fence)
-  for p in corner_fr corner_br roof_fr roof_br door_surround seam_cap; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
+  for p in corner_fr corner_br roof_fr roof_br door_surround seam_cap tunnel_body; do run "${p}_mount" -D "part=\"$p\"" -D 'mount="fence"' & done
   # entrance tunnel turned away from the mount (for a wall): landing on the free side, its corner module, the tunnel
   for p in corner_fl landing tunnel_body tunnel_roof; do run "${p}_away" -D "part=\"$p\"" -D 'mount="fence"' -D 'door_tunnel=true' -D 'tun_dir="away"' & done
   wait
@@ -33,6 +33,7 @@ if [[ "$what" == png || "$what" == all ]]; then
   "$OS" -o renders/assembly_fence_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2200 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/assembly_tree_mount.png --imgsize=1600,1300 --camera=60,0,60,74,0,42,2300 -D 'mount="tree"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/tunnel.png --imgsize=1400,1100 --camera=60,-150,110,62,0,35,1500 -D 'mount="fence"' -D 'show_legs=false' -D 'door_tunnel=true' "${common[@]}" cat_house.scad
+  "$OS" -o renders/tunnel_legs.png --imgsize=1400,1100 --camera=90,-200,30,72,0,20,1500 -D 'door_tunnel=true' "${common[@]}" cat_house.scad
   "$OS" -o renders/tunnel_wall.png --imgsize=1400,1100 --camera=-60,-150,110,62,0,325,1500 -D 'mount="fence"' -D 'show_legs=false' -D 'door_tunnel=true' -D 'tun_dir="away"' "${common[@]}" cat_house.scad
   "$OS" -o renders/landing.png --imgsize=1400,1100 --camera=150,-150,40,62,0,40,1150 -D 'mount="fence"' -D 'show_legs=false' "${common[@]}" cat_house.scad
   "$OS" -o renders/roof_open.png --imgsize=1600,1300 --camera=-60,0,170,52,0,22,1900 -D 'open_angle=115' "${common[@]}" cat_house.scad

@@ -106,8 +106,8 @@ To export one part from the command line:
 | `seam_cap` (mounted: 1 `seam_cap` + 1 `seam_cap_mount`, 230 long) | 2 | 271 × 13 × 19 | as exported: top down, open side up |
 | `door_surround` | 1 | Ø216 × 50 | as exported: flange down, hood up |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
-| `leg` | 4 | Ø40 × 60 | narrow end down |
-| `center_leg` | 1 | Ø100 × 60 | as exported: plate down |
+| `leg` | 4 | Ø84 × 60 | foot down (wide foot for sand; `leg_foot_d = 0` for the original narrow one) |
+| `center_leg` | 1 | Ø100 × 60 | as exported: plate down (its 84 mm foot widens at 45°) |
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
 | `latch_keeper` | 2 | 36 × 34 × 12 | flat |
 | `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
@@ -120,7 +120,8 @@ To export one part from the command line:
 | `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
 | `support_bracket` | 2 | 200 × 300 × 36 | as exported: web down (optional, replaces the steel brackets; 6 walls, 40 % infill) |
 | `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
-| `tunnel_body`, `tunnel_roof` (or the `_away` pair) | 1 each | 246 × 161 × 179, 268 × 176 × 16 | as exported: floor down; shingles up (optional entrance tunnel, replaces the door surround) |
+| `tunnel_body_mount`, `tunnel_roof` (or the `_away` pair) | 1 each | 240 × 161 × 178, 256 × 176 × 16 | mounted houses: as exported, floor down; shingles up (optional entrance tunnel, replaces the door surround) |
+| `tunnel_body`, `tunnel_ramp`, `tunnel_roof`, `tunnel_ramp_roof` | 1 each | 180 × 164 × 291, 225 × 163 × 263, 256 × 176 × 16, 173 × 176 × 9 | houses on legs: the landing and the ramp down to the ground; as exported, legs and ramp foot down / shingles up |
 | `landing_away`, `corner_fl_away` | 1 each | 292 × 101 × 58, 239 × 236 × 320 | replace `landing` and `corner_fl` when the tunnel faces away from a wall |
 
 See `renders/plate_layout.png` for how the parts fit on the plates.
@@ -220,19 +221,19 @@ print apart from the others. (The other project files in `release/` are still se
 |---|---|---|---|---|---|
 | 1 | `cat_cottage_H2D_test_coupons.3mf` | white | 1 | 0.12 kg | ≈ 2.7 h |
 | 2 | `cat_cottage_H2D_on_legs_walls.3mf`: 4 corner modules, **3 walls** | grey | 4 | 2.52 kg | ≈ 44 h |
-| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf`: 4 roof panels, then the tunnel roof | white | 5 | 1.89 kg | ≈ 34 h |
-| 4 | `cat_cottage_H2D_tunnel_body.3mf` | green | 1 | 0.52 kg | ≈ 7.6 h |
+| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf`: 4 roof panels, then both tunnel roofs | white | 6 | 2.01 kg | ≈ 36 h |
+| 4 | `cat_cottage_H2D_tunnel_body.3mf`: the on-legs tunnel's landing and ramp extension | green | 2 | 1.26 kg | ≈ 23 h |
 | 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps as one object, standing on end, with tree supports and an 8 mm brim | green | 1 | 0.29 kg | ≈ 6 h |
 | 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap, with supports | green | 2 | 0.19 kg | ≈ 3 h |
-| 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, legs, keys, latch buttons, window retainers, inner door ring | green | 2 | 0.35 kg | ≈ 6.5 h |
+| 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, wide-foot legs, keys, latch buttons, window retainers, inner door ring | green | 3 | 0.48 kg | ≈ 8.6 h |
 
 | Colour | Needed | Spools on hand | Spare |
 |---|---|---|---|
-| White: roof, tunnel roof, test pieces | 2.0 kg | 4 | ≈ 2 kg |
+| White: roof, tunnel roofs, test pieces | 2.1 kg | 4 | ≈ 1.9 kg |
 | Grey: 4 corner modules | 2.5 kg | 3 | ≈ 0.5 kg |
-| Green: trim and tunnel body | 1.35 kg | 3 | ≈ 1.6 kg |
+| Green: trim and tunnel | 2.2 kg | 3 | ≈ 0.8 kg |
 
-In all: about 5.9 kg and about 103 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
+In all: about 6.9 kg and about 122 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
 lines that's a 1.9 mm shell each side, slightly more than the 4 × 0.42 mm the strength checks assumed, and
 it keeps the grey within 3 spools. The other parts keep 4 walls.
 
@@ -263,6 +264,7 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 4 | 6 × 3 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
 | 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
 | 2 (4 on legs) | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
+| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 78 mm | Tunnel windows (on-legs tunnel) |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
 | | Clear neutral-cure outdoor silicone | Window pane beads and standing seams |
 | 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot); not needed when mounted |
@@ -370,9 +372,11 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
   groove under the cap, so wind-driven rain can't creep up under the cap to the ridge gap.
 - **Gables and eave.** The lid overhangs every edge it sits on (70 mm at the front, 35 mm at the back,
   50 mm at the eave). The EPDM foam under it closes the joint, and the latches keep it compressed.
-- **Holes.** Unused storm-screw holes in the lid are blind: a 0.8 mm printed skin closes them until you
-  drill them out. The only holes through the lid are the four keeper screws, which have the same bosses
-  and EPDM washers as the other roof screws. The turn-button pivots sit under the gable overhang, with
+- **Holes.** The lid has no storm-screw holes any more: the hinge and the two latches hold it. The only holes
+  through the lid are the four keeper screws (same bosses and EPDM washers as the other roof screws) and the
+  six ridge-cap bolts under the cap. The fixed slope keeps its 10 roofing screws, 3 into each gable top and
+  2 into the eave per panel: it carries the hinge and is what holds the roof on. The pilot holes under the
+  lid stay in the walls, hidden, in case you ever want to screw the lid down for a storm. The turn-button pivots sit under the gable overhang, with
   rubber washers.
 - **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them
   leads indoors.
@@ -408,8 +412,47 @@ the mouth, turns and reaches the door. Rain driven by the wind can't follow the 
   5. Screw the roof onto the four tabs with 4 roofing screws (#8 × 1", EPDM washers).
 - **Printing.** Both parts print without supports. The doorway in the body's back wall is open to the top,
   so it needs no bridge. Only the 150 mm lintel over the mouth is bridged.
-- **On legs** the tunnel also works (mouth to the right), just bolted at the door. Mounted, it also rests on
-  the landing.
+- **Roof latch.** The tunnel's closed end stops 25 mm short of the front latch button, and its roof overhangs
+  only 2 mm there, so the button's grip (21–45 mm from the tunnel) can still be turned. With the wall layout
+  (`tun_dir = "away"`) the tunnel runs under the latch: you reach over the tunnel roof and about 7 cm under
+  the lid's overhang to turn it.
+
+### On legs: the ramp version
+
+![Entrance tunnel on legs: a ramp down to the ground](renders/tunnel_legs.png)
+
+With the house on its legs, the tunnel reaches down to the ground (`tun_ground`, on automatically when
+`mount = "none"`). The cat comes in at ground level, walks up a 30° ramp with grip ridges to a flat landing
+at the door, and turns the same corner.
+
+- **Three points on the ground.** The landing at the door sits on a V-shaped belly carried by a central
+  keel with two legs. The ramp has the same V-belly, following it down until it rests on the ground at the
+  mouth. Nothing else is under the floor.
+- **Two printed pieces and a second roof.**
+  - The door section (`tunnel_body`) is the landing.
+  - The ramp extension (`tunnel_ramp`) carries the whole ramp, down to the mouth 300 mm along from the door
+    centre. It slides into the landing on two splice plates (4 × M4 × 16 with nuts).
+  - The main tunnel roof spans both pieces and screws into both, which ties them together. A second, lower
+    roof (`tunnel_ramp_roof`) covers the rest of the ramp, sloping down under the house's eave, and tucks
+    under the main roof.
+- **Cottage look.** The outer wall has the same horizontal siding grooves as the house, and four clear
+  windows with raised trim frames: 78 × 78 mm panes of 2 mm polycarbonate in pockets on the inside, sealed
+  with silicone. The cat can see out, and the tunnel is light inside. `tun_windows = false` or
+  `tun_siding = false` leaves them out.
+- **Drainage.**
+  - The landing falls 1.5° towards the ramp, away from the door, with four drain holes at its low end. Water
+    a wet cat brings in can't run into the house.
+  - The ramp's grip ridges have gaps, so water runs straight down and out of the mouth, where more drain
+    holes let it into the ground.
+  - The window trims have sloped sills.
+- **Printing.** No supports. The V-belly faces are 45° (about 49° on the ramp), and they rest on the keel
+  and on the ground. Only the lintel's 80 mm bridge and the trims' 3 mm ledges print over air.
+- **Rain.** Dry in every case tested (up to 43 mph), because the mouth is farther from the door.
+- **Fitting.**
+  1. Bolt the landing to the wall as above.
+  2. Slide the extension's splice plates inside the landing's open end and bolt them.
+  3. Set the panes in silicone.
+  4. Screw on both roofs (8 roofing screws).
 
 ## Printed support brackets (optional)
 
@@ -481,7 +524,8 @@ brackets underneath** (steel, or the printed ones). Do the 20 kg proof test befo
 
 - Put it in shade if you can. Face the entrance away from the prevailing wind and rain, and away from
   sprinklers.
-- On the ground, use the legs on pavers or gravel rather than bare soil, so the floor drains and stays dry.
+- On the ground, the legs have wide 84 mm feet (`leg_foot_d`), about 9 times the old foot's area, so they
+  don't sink into sand. Pavers or gravel under them still help the floor drain and stay dry.
 - **Hurricane watch:** bring it inside, or at least take the roof off and store it. A mounted house with its
   anti-lift screws will ride out ordinary summer storms, not a hurricane.
 - Once a year, check the screws and straps, clear the drain holes and louvres, and wash it with mild soap.

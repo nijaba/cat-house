@@ -161,6 +161,22 @@ paw of r₀ ≈ 15 mm.
   The 5 mm wall, backed by the inner ring, takes about 1.2 kN before a washer pulls through. ✅
 - **Mounted, tipping over the landing's edge:** about 120 N on the door bolts. ✅
 
+## 8. On legs: ramp tunnel and wide feet
+
+Added 2026-11-25.
+
+- **Ramp tunnel.** It touches the ground at three places: the two keel legs under the landing, and the
+  ramp's V-belly where it reaches the ground. It is bolted to the door, so the door bolts carry little.
+  - **Landing.** The 6 mm landing rests on a solid V-belly (printed with infill) for its whole width, so it
+    doesn't span at all.
+  - **Keel legs.** Each is 6 × 60 mm with a 40 × 40 mm foot. 20 kg on one leg is about 0.5 MPa in the
+    leg, and about 120 kPa on the soil under its foot for the moment of a landing. A cat standing still on
+    the landing presses far less. ✅
+  - **Ramp.** The ramp rests on its belly all the way down, and on the ground for its last 80 mm or so. ✅
+- **Wide feet.** The house (about 5 kg), a 20 kg design load and the tunnel's share come to about 260 N
+  over 5 legs, about 52 N per leg. On an 84 mm foot (5 540 mm²) that's under 10 kPa. Loose dry sand
+  carries about 50 kPa or more, so the feet won't sink. The old 28 mm foot pressed about 85 kPa. ✅
+
 ## Proof test before first use
 
 1. **Floor.** With the house assembled (and mounted, if you're mounting it), put a 20 kg sandbag or a stack

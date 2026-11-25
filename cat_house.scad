@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, ridge_pair, seam_cap, door_surround, door_inner_ring, tunnel_body, tunnel_roof, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, ridge_pair, seam_cap, door_surround, door_inner_ring, tunnel_body, tunnel_roof, tunnel_ramp, tunnel_ramp_roof, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -119,17 +119,27 @@ tun_wi = 150;       // inside width (out from the wall)
 tun_t = 4;          // wall thickness
 tun_floor_t = 6;    // floor thickness (20 kg on one spot past the landing's edge: see STRUCTURAL.md)
 tun_roof_t = 6;     // roof plate under the shingles (a cat jumping onto it)
-tun_end = -96;      // closed end, outer face (x, mount side positive)
+tun_end = -90;      // closed end, outer face (x, mount side positive); keeps clear of the roof-latch button
 tun_run = 150;      // mouth (x): 150 keeps it dry up to 22 mph wind from any side (see RAIN.md)
 tun_z0 = 204;       // top of the walls at the house wall, above the door centre line
 tun_ax = 9;         // roof slope down towards the mouth (degrees)
 tun_ay = 3;         // and outwards
 tun_dir = "mount";  // [mount, away] mouth towards the mount (post or tree: the cat comes along the landing),
                     // or away from it (a wall: the landing moves to the free side and runs past the corner as a porch)
+tun_ground = mount == "none";   // on legs the tunnel's outer half drops to the ground; mounted, it sits on the landing
+tun_step_x = 90;                // on legs: where the ramp starts, just past the door
+tun_ramp_a = 30;                // on legs: ramp angle down to the ground
+tun_land_tilt = 1.5;            // on legs: the landing falls this much (degrees) towards the ramp, away from the door, so water drains
+tun_ramp_end = 300;             // on legs: the ramp extension's mouth (x)
+tun_ramp_ax = 20;               // on legs: the extension's roof slope, steeper so it passes under the house's eave
+tun_skirt = "arches";          // [arches, lattice, big_arch] on legs: how the wall below the walking surface is opened
+tun_siding = true;              // siding grooves and window trim on the tunnel's outer wall, to match the house
+tun_windows = tun_ground;       // clear 2 mm polycarbonate windows in the outer wall (panes 88 x 88 mm); on by default for the on-legs tunnel
 tun_lintel_z = 155; // underside of the lintel over the mouth (mouth clear height = this - door_sill - tun_floor_t)
 
 /* [Legs and floor] */
 leg_h = 60;
+leg_foot_d = 84;     // wide foot for sand or soft soil (0 = the original narrow foot); 84 clears the ground-level tunnel
 drain_d = 6;
 
 /* [Mount] */
@@ -591,15 +601,15 @@ module roof_panel(sx, sy, holes = true) {
         // the lid's ridge edge stops 4 mm short so it clears the fixed slope as it swings open
         translate([-350, -330, 100]) cube([350 - (is_lid ? 4 : 0), 660, 300]);
       }
-      for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5)
+      // screw pads on the fixed slope only: the lid is held by its hinge and latches, so it has no storm screws
+      if (!is_lid) for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5)
         screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
       if (is_hinge) slope_frame(e) panel_knuckles(v0, v1);
       // weather rib under the ridge cap: wind-driven rain can't creep past it to the ridge gap
       if (is_hinge) slope_frame(e) translate([u_ax() + rib_u - 1.5, v0, roof_t - 0.1]) cube([3, v1 - v0, 2.1]);
       if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
     }
-    // on the lid these are blind (a 0.8 mm skin on top) so unused storm-screw holes can't let rain in; drill through to use them
-    if (holes) for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = is_lid ? roof_t + 3.4 : roof_t + shingle_t + 5, $fn = 16);
+    if (holes && !is_lid) for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
     if (holes) if (!is_hinge) for (v = ridge_hole_vs(front)) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
     if (is_hinge) slope_frame(e) translate([u_ax(), 0, w_ax]) rotate([90, 0, 0]) cylinder(d = hinge_pin, h = 1200, center = true, $fn = 20);
     if (holes) if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
@@ -804,16 +814,20 @@ module tun_plane() translate([0, tun_yb(), tun_z0]) rotate([tun_ay, 0, 0]) rotat
 tun_tabs = [for (lx = [tun_end + 12, tun_run - 14], ly = [-tun_t - 7, -(tun_wi + tun_t) + 7]) [lx, ly]];
 tun_floor_z = door_sill;   // the floor's underside: sits on the landing when mounted
 
-module tunnel_body_world() scale([entry_sx, 1, 1]) {
+module tunnel_body_world() if (tun_ground) tunnel_landing_world(); else scale([entry_sx, 1, 1]) {
   yb = tun_yb(); yo = tun_yo(); L = tun_run - tun_end; zf = tun_floor_z;
+  zg = tun_ground ? zb - leg_h : zf;   // bottom of the walls: the ground on legs, the landing when mounted
+  H = 200 + zf - zg;
   difference() {
     union() {
       intersection() {
         union() {
-          translate([tun_end, yo, zf]) cube([L, yb - yo, tun_floor_t]);                 // floor
-          translate([tun_end, yb - tun_t, zf]) cube([L, tun_t, 200]);                 // back wall
-          translate([tun_end, yo, zf]) cube([L, tun_t, 200]);                         // front wall
-          translate([tun_end, yo, zf]) cube([2*tun_t, yb - yo, 200]);                 // closed end, thick enough for a door bolt
+          if (tun_ground) tun_base_frame(tun_end, tun_run);
+          else translate([tun_end, yo, zg]) cube([L, yb - yo, tun_floor_t]);         // floor
+          if (tun_ground) tun_ramp_floor(tun_end, tun_run, yo, yb);
+          translate([tun_end, yb - tun_t, zg]) cube([L, tun_t, H]);                   // back wall
+          translate([tun_end, yo, zg]) cube([L, tun_t, H]);                           // front wall
+          translate([tun_end, yo, zg]) cube([2*tun_t, yb - yo, H]);                   // closed end, thick enough for a door bolt
           // lintel over the mouth: stops near-horizontal rain skimming under the roof to the doorway
           // with 45 degree haunches at the walls, so its underside bridges 80 mm instead of 150
           translate([tun_run - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(8)
@@ -843,14 +857,23 @@ module tunnel_body_world() scale([entry_sx, 1, 1]) {
       rotate([90, 0, 0]) cylinder(d = m4, h = relief + tun_t + 2, $fn = 16);
     // pilot holes for the roof screws
     for (t = tun_tabs) tun_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
-    // floor drains past the doorway
-    for (x = [door_r + 25 : 25 : tun_run - 15], y = [yo + 25 : 25 : yb - 20]) translate([x, y, zf - 1]) cylinder(d = drain_d, h = tun_floor_t + 2, $fn = 16);
+    // floor drains past the doorway (on legs the underside is open: arches between piers)
+    if (tun_ground) tun_skirt_cuts(tun_end + 2*tun_t, tun_run, 25);   // tops at 25 keep 12 mm of wall under the lower door bolts
+    if (tun_ground && tun_siding) intersection() {
+      tun_siding_cuts(tun_end, tun_run);
+      translate([tun_end - 1, tun_yo() - 1, door_sill + tun_floor_t]) cube([tun_run - tun_end + 2, 3, 300]);
+    }
+    if (tun_windows) for (xc = [-30, 70]) tun_window_cut(xc, door_sill + tun_floor_t + 59);
+    if (!tun_ground) for (x = [door_r + 25 : 25 : tun_run - 15], y = [yo + 25 : 25 : yb - 20]) translate([x, y, zf - 1]) cylinder(d = drain_d, h = tun_floor_t + 2, $fn = 16);
+    // on legs: bolt holes for the ramp extension's splice plates
+    if (tun_ground) for (y = [yb - tun_t - 1, yo - 1], z = [40, 110], x = [tun_run - 12]) translate([x, y, z]) rotate([-90, 0, 0]) cylinder(d = m4, h = tun_t + 2, $fn = 16);
   }
+  if (tun_siding && tun_windows) for (xc = [-30, 70]) tun_window_trim(xc, door_sill + tun_floor_t + 59);
 }
 
 // roof, built flat in the roof plane's frame (x along the house, y out from the wall), shingles up
 module tunnel_roof_local() {
-  x0 = tun_end - 8; x1 = tun_run + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = tun_roof_t;
+  x0 = tun_end - 2; x1 = tun_run + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = tun_roof_t;   // closed end: 2 mm, clear of the latch
   difference() {
     union() {
       translate([x0, y0, 0]) cube([x1 - x0, -y0 - 2, t]);   // 2 mm off the siding: the double slope leans the back edge in
@@ -866,14 +889,243 @@ module tunnel_roof_local() {
 module shingles_strip(vA, vB, Lsh) shingles(vA, vB, Lsh);
 module tunnel_roof_world() scale([entry_sx, 1, 1]) tun_plane() tunnel_roof_local();
 
+// ---- on legs: the ramp down to the ground (in the tunnel's own frame, mouth towards +x) ----
+// cells between the ribs that carry the landing and the ramp (ribs run along x, so each layer bridges 30 mm)
+function tun_cell_ys() = let(yo = tun_yo()) [for (k = [0 : 4]) yo + tun_t + 15 + k*30];
+function tun_rib_ys() = let(yo = tun_yo()) [for (k = [1 : 4]) yo + tun_t + k*30];
+// top of the walking surface along x: landing at the door, then the ramp, then flat on the ground
+function tun_walk_z(x) = let(zt = door_sill + tun_floor_t, zg = zb - leg_h + 4, zs = zt - (tun_step_x - tun_end)*tan(tun_land_tilt))
+  max(zg, x <= tun_step_x ? zt - (max(x, tun_end) - tun_end)*tan(tun_land_tilt) : zs - (x - tun_step_x)*tan(tun_ramp_a));
+// the walking surface (6 mm) with grip ridges, plus the ribs under it, between x0 and x1
+module tun_ramp_floor(x0, x1, yo, yb) {
+  zg = zb - leg_h;
+  n = 24;
+  pts = [for (i = [0 : n]) let(x = x0 + (x1 - x0)*i/n) [x, tun_walk_z(x)]];
+  // walking surface, 6 mm thick under the landing; under the ramp its underside falls at 45 degrees (not the
+  // ramp's 30), so it prints over itself without supports
+  translate([0, yb, 0]) rotate([90, 0, 0]) linear_extrude(yb - yo)
+    polygon(concat(pts, [for (i = [n : -1 : 0]) [pts[i][0], max(zg, pts[i][1] - tun_floor_t)]]));
+  // grip ridges across the ramp, every 25 mm along it
+  // (in 26 mm segments with 8 mm gaps, so water runs down the ramp instead of pooling behind them)
+  for (x = [tun_step_x + 15 : 25 : x1 - 5], y = [yo + tun_t + 4 : 34 : yb - tun_t - 26]) if (x > x0 && tun_walk_z(x) > zg + 5)
+    translate([x, y, tun_walk_z(x) - 1]) cube([3, 26, 3]);
+}
+// on legs: pointed arches through the walls and ribs below the walking surface, leaving piers (45 degree tops, no supports)
+module tun_arch_cuts(x0, x1, zcap) {
+  w = 44; step = w + 18; base = zb - leg_h + 3;
+  for (xc = [x0 + 12 + w/2 : step : x1 - w/2 - 6]) let(top = min(zcap, tun_walk_z(xc + w/2) - tun_floor_t - 6))
+    if (top - base > w/2 + 8) translate([0, tun_yb() + 1, 0]) rotate([90, 0, 0]) linear_extrude(tun_yb() - tun_yo() + 2)
+      polygon([[xc - w/2, base], [xc + w/2, base], [xc + w/2, top - w/2], [xc, top], [xc - w/2, top - w/2]]);
+}
+// on legs: the wall area below the walking surface (x-z), up to zcap
+function tun_under_z(x) = max(zb - leg_h, tun_walk_z(x) - tun_floor_t);   // underside of the walking surface
+module tun_skirt_region(x0, x1, zcap) let(base = zb - leg_h + 3, n = 30)
+  polygon(concat([[x0, base], [x1, base]], [for (i = [n : -1 : 0]) let(x = x0 + (x1 - x0)*i/n) [x, max(base, min(zcap, tun_under_z(x) - 6))]]));
+// the openings below the walking surface, for the style chosen, as 2D shapes in x-z
+module tun_skirt_cut2d(x0, x1, zcap) {
+  base = zb - leg_h + 3;
+  if (tun_skirt == "lattice") intersection() {
+    offset(delta = -6) tun_skirt_region(x0, x1, zcap);
+    p = 30; a = p/sqrt(2) - 6;   // diamond holes, leaving 45 degree bars about 6 mm wide
+    for (i = [floor(x0/p) - 1 : ceil(x1/p) + 1], j = [0 : 12]) translate([i*p + (j % 2)*p/2, base + j*p/2]) rotate(45) square(a, center = true);
+  }
+  if (tun_skirt == "big_arch") {
+    // one tall pointed arch (45 degree top) as wide as the height allows, posts only at the ends
+    xc = (x0 + x1)/2;
+    top = min(zcap, tun_under_z(x1 - 12) + (x1 - 12 - xc), tun_under_z(xc) - 4) - 4;
+    w = min(x1 - x0 - 24, 2*(top - base - 6));
+    if (w > 30) polygon([[xc - w/2, base], [xc + w/2, base], [xc + w/2, top - w/2], [xc, top], [xc - w/2, top - w/2]]);
+  }
+}
+module tun_skirt_cuts(x0, x1, zcap) {
+  if (tun_skirt == "arches") tun_arch_cuts(x0, x1, zcap);
+  else translate([0, tun_yb() + 1, 0]) rotate([90, 0, 0]) linear_extrude(tun_yb() - tun_yo() + 2) tun_skirt_cut2d(x0, x1, zcap);
+}
+// siding on the outer face of the front wall above the walking surface: V-grooves every 25 mm, like the house
+module tun_siding_cuts(x0, x1) let(yo = tun_yo())
+  for (z = [door_sill + 20 : 25 : 260]) translate([x0, yo - 0.01, z]) rotate([0, 90, 0]) linear_extrude(x1 - x0)
+    polygon([[-1, -0.1], [1, -0.1], [0, 1.1]]);
+// raised trim round a window on the outer face, with a sloped sill
+module tun_window_trim(xc, zc, w = 80, h = 80, c = 25) let(yo = tun_yo()) difference() {
+  translate([0, yo + 0.01, 0]) rotate([90, 0, 0]) linear_extrude(3)
+    offset(delta = 8) polygon([[xc - w/2, zc - h/2], [xc + w/2, zc - h/2], [xc + w/2, zc + h/2 - c], [xc + w/2 - c, zc + h/2],
+                               [xc - w/2 + c, zc + h/2], [xc - w/2, zc + h/2 - c]]);
+  // sloped top on the bottom bar, so rain runs off instead of sitting on a ledge
+  translate([xc - w/2 - 10, 0, 0]) rotate([90, 0, 90]) linear_extrude(w + 20)
+    polygon([[yo - 3.1, zc - h/2 + 0.1], [yo - 3.1, zc - h/2 - 3], [yo + 0.01, zc - h/2 + 0.1]]);
+  translate([0, yo + 2, 0]) rotate([90, 0, 0]) linear_extrude(10)
+    polygon([[xc - w/2, zc - h/2], [xc + w/2, zc - h/2], [xc + w/2, zc + h/2 - c], [xc + w/2 - c, zc + h/2],
+             [xc - w/2 + c, zc + h/2], [xc - w/2, zc + h/2 - c]]);
+}
+// on legs: base frame under the walls, so the piers spread their load on soft ground
+module tun_base_frame(x0, x1) let(zg = zb - leg_h, yo = tun_yo(), yb = tun_yb()) {
+  translate([x0, yo, zg]) cube([x1 - x0, 14, 3]);
+  translate([x0, yb - 14, zg]) cube([x1 - x0, 14, 3]);
+}
+// a window in the outer wall: opening with 45 degree top corners, and a pocket for the pane on the inside face
+module tun_window_cut(xc, zc, w = 80, h = 80, c = 25) let(yo = tun_yo()) {
+  translate([0, yo + tun_t + 1, 0]) rotate([90, 0, 0]) linear_extrude(tun_t + 2)
+    polygon([[xc - w/2, zc - h/2], [xc + w/2, zc - h/2], [xc + w/2, zc + h/2 - c], [xc + w/2 - c, zc + h/2],
+             [xc - w/2 + c, zc + h/2], [xc - w/2, zc + h/2 - c]]);
+  translate([xc - w/2 - 4.3, yo + tun_t - 2.2, zc - h/2 - 4.3]) cube([w + 8.6, 3.2, h + 8.6]);
+}
+tun_ramp_drop = tun_roof_t + shingle_t + 1;   // the extension's roof starts this far below, so it tucks under the door section's roof
+module tun_ramp_plane() translate([tun_run, tun_yb(), tun_z0 - tun_run*tan(tun_ax) - tun_ramp_drop]) rotate([tun_ay, 0, 0]) rotate([0, tun_ramp_ax, 0]) children();
+tun_ramp_tabs = [for (lx = [22, (tun_ramp_end - tun_run)/cos(tun_ramp_ax) - 14], ly = [-tun_t - 7, -(tun_wi + tun_t) + 7]) [lx, ly]];
+
+// on legs: the door section is just the landing, on a V-shaped belly (45 degree faces, prints without supports)
+// carried by a central keel with two legs; the ramp extension brings the walking surface down to the ground
+tun_land_x1 = tun_step_x;                          // where the landing section ends and the ramp extension starts
+tun_land_windows = [-42, 35];
+tun_ramp_windows = [[135, 80], [222, 55]];
+module tun_belly(x0, x1) let(yo = tun_yo(), yb = tun_yb(), zf = tun_floor_z, d = (tun_yb() - tun_yo())/2)
+  translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) polygon([[yo, zf + 0.01], [yb, zf + 0.01], [(yo + yb)/2, zf - d]]);
+// the same V-shaped belly under the ramp, sheared to follow it down to the ground (faces about 49 degrees)
+module tun_ramp_belly(x0, x1) tun_slope_belly(x0, x1, tan(tun_ramp_a));
+module tun_slope_belly(x0, x1, k) let(yo = tun_yo(), yb = tun_yb(), d = (tun_yb() - tun_yo())/2, zg = zb - leg_h,
+                                     z0 = tun_walk_z(x0) - tun_floor_t)
+  intersection() {
+    multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [-k, 0, 1, k*x0], [0, 0, 0, 1]])
+      translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) polygon([[yo, z0 + 0.01], [yb, z0 + 0.01], [(yo + yb)/2, z0 - d]]);
+    translate([x0 - 1, yo - 1, zg]) cube([x1 - x0 + 2, yb - yo + 2, 500]);
+  }
+module tun_keel(x0, x1) let(yc = (tun_yo() + tun_yb())/2, zg = zb - leg_h, zk = tun_floor_z - (tun_yb() - tun_yo())/2 + 1, w = 60, xc = (x0 + x1)/2)
+  difference() {
+    union() {
+      translate([x0, yc - 3, zg]) cube([x1 - x0, 6, zk - zg]);
+      for (x = [x0, x1 - 40]) translate([x, yc - 20, zg]) cube([40, 40, 3]);   // foot pads
+    }
+    // the opening between the two legs, with a 45 degree top
+    translate([0, yc + 4, 0]) rotate([90, 0, 0]) linear_extrude(8)
+      polygon([[xc - w/2, zg - 1], [xc + w/2, zg - 1], [xc + w/2, zk - 5 - w/2], [xc, zk - 5], [xc - w/2, zk - 5 - w/2]]);
+  }
+
+module tunnel_landing_world() scale([entry_sx, 1, 1]) {
+  yb = tun_yb(); yo = tun_yo(); zf = tun_floor_z; x0 = tun_end; x1 = tun_land_x1; L = x1 - x0;
+  difference() {
+    union() {
+      intersection() {
+        union() {
+          translate([0, yb, 0]) rotate([90, 0, 0]) linear_extrude(yb - yo)            // landing, falling towards the ramp
+            polygon([[x0, tun_walk_z(x0)], [x1, tun_walk_z(x1)], [x1, tun_walk_z(x1) - tun_floor_t], [x0, tun_walk_z(x0) - tun_floor_t]]);
+          translate([x0, yb - tun_t, zf]) cube([L, tun_t, 200]);                      // back wall
+          translate([x0, yo, zf]) cube([L, tun_t, 200]);                              // front wall
+          translate([x0, yo, zf]) cube([2*tun_t, yb - yo, 200]);                      // closed end
+          intersection() {
+            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out, h = relief + 0.01, $fn = 120);
+            translate([x0, -hy - 10, zf - 40]) cube([L, 20, 340]);
+          }
+        }
+        tun_plane() translate([-1000, -1000, -1000]) cube([2000, 2000, 1000]);
+      }
+      tun_slope_belly(x0, x1, tan(tun_land_tilt));
+      tun_keel(x0 + 2, x1 - 2);
+      for (t = tun_tabs) if (t[0] < 0) hull() {
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+      }
+    }
+    intersection() {
+      hull() for (z = [door_z, door_z + 200]) translate([0, -hy + 1, z]) rotate([90, 0, 0]) cylinder(r = door_r, h = relief + tun_t + 2, $fn = 120);
+      translate([-200, -hy - 50, zf + tun_floor_t]) cube([400, 100, 400]);
+    }
+    for (a = [0, 180, 240, 300]) translate([(door_r + 14)*cos(a), -hy + 1, door_z + (door_r + 14)*sin(a)])
+      rotate([90, 0, 0]) cylinder(d = m4, h = relief + tun_t + 2, $fn = 16);
+    for (t = tun_tabs) if (t[0] < 0) tun_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
+    // bolt holes for the ramp extension's splice plates
+    for (y = [yb - tun_t - 1, yo - 1], z = [70, 150]) translate([x1 - 8, y, z]) rotate([-90, 0, 0]) cylinder(d = m4, h = tun_t + 2, $fn = 16);
+    // drains at the landing's low end, coming out on the belly's faces (clear of the keel)
+    for (dy = [-60, -25, 25, 60]) translate([x1 - 14, (yo + yb)/2 + dy, zb - leg_h]) cylinder(d = drain_d, h = 200, $fn = 16);
+    if (tun_windows) for (xc = tun_land_windows) tun_window_cut(xc, zf + tun_floor_t + 59, 70);
+    if (tun_siding) intersection() {
+      tun_siding_cuts(x0, x1);
+      translate([x0 - 1, yo - 1, zf + tun_floor_t]) cube([L + 2, 3, 300]);
+    }
+  }
+  if (tun_siding && tun_windows) for (xc = tun_land_windows) tun_window_trim(xc, zf + tun_floor_t + 59, 70);
+}
+
+module tunnel_ramp_world() scale([entry_sx, 1, 1]) {
+  yb = tun_yb(); yo = tun_yo(); zg = zb - leg_h; x0 = tun_land_x1; x1 = tun_ramp_end;
+  difference() {
+    union() {
+      intersection() {
+        union() {
+          tun_ramp_floor(x0, x1, yo, yb);
+          tun_ramp_belly(x0, x1);
+          // walls from the walking surface's underside up
+          intersection() {
+            union() {
+              translate([x0, yb - tun_t, zg]) cube([x1 - x0, tun_t, 400]);
+              translate([x0, yo, zg]) cube([x1 - x0, tun_t, 400]);
+            }
+            translate([0, yb + 1, 0]) rotate([90, 0, 0]) linear_extrude(yb - yo + 2)
+              polygon(concat([[x1, 400], [x0, 400]], [for (i = [0 : 30]) let(x = x0 + (x1 - x0)*i/30) [x, tun_under_z(x)]]));
+          }
+          // the lintel where the roofs meet
+          translate([tun_run - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(8)
+            polygon([[yo, tun_lintel_z - 35], [yo + tun_t, tun_lintel_z - 35], [yo + tun_t + 35, tun_lintel_z],
+                     [yb - tun_t - 35, tun_lintel_z], [yb - tun_t, tun_lintel_z - 35], [yb, tun_lintel_z - 35], [yb, 400], [yo, 400]]);
+        }
+        // up to the door section's roof before tun_run, its own lower roof after
+        union() {
+          intersection() { translate([x0 - 30, -1000, -1000]) cube([tun_run - x0 + 30, 2000, 2000]); tun_plane() translate([-1000, -1000, -1000]) cube([2000, 2000, 1000]); }
+          intersection() { translate([tun_run, -1000, -1000]) cube([1000, 2000, 2000]); tun_ramp_plane() translate([-1000, -1000, -1000]) cube([2000, 2000, 1000]); }
+        }
+      }
+      // splice plates that slide inside the landing section's walls
+      for (y = [yb - 2*tun_t - 0.3, yo + tun_t + 0.3]) translate([x0 - 15, y, tun_floor_z + tun_floor_t + 10]) cube([17, tun_t, 100]);
+      // tabs for the door section's roof (over the top of the ramp) and for its own roof
+      for (t = tun_tabs) if (t[0] > 0) hull() {
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+      }
+      for (t = tun_ramp_tabs) hull() {
+        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
+        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+      }
+    }
+    for (y = [yb - 2*tun_t - 1.3, yo + tun_t - 0.7], z = [70, 150]) translate([x0 - 8, y, z]) rotate([-90, 0, 0]) cylinder(d = m4, h = tun_t + 2, $fn = 16);
+    for (t = tun_tabs) if (t[0] > 0) tun_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
+    for (t = tun_ramp_tabs) tun_ramp_plane() translate([t[0], t[1], -16]) cylinder(d = pilot, h = 17, $fn = 16);
+    if (tun_siding) intersection() {
+      tun_siding_cuts(x0, x1);
+      translate([0, yb, 0]) rotate([90, 0, 0]) linear_extrude(yb - yo + 1) polygon(concat([[x1, 400], [x0, 400]], [for (i = [0 : 20]) let(x = x0 + (x1 - x0)*i/20) [x, tun_walk_z(x) + 2]]));
+    }
+    if (tun_windows) for (w = tun_ramp_windows) tun_window_cut(w[0], w[1], 70);
+    // drains where water collects at the mouth
+    for (x = [x1 - 30 : 12 : x1 - 6], y = [yo + 20 : 20 : yb - 15]) translate([x, y, zg - 1]) cylinder(d = drain_d, h = 20, $fn = 16);
+  }
+  if (tun_siding && tun_windows) for (w = tun_ramp_windows) tun_window_trim(w[0], w[1], 70);
+}
+// its roof, flat in its own plane, tucked 14 mm under the door section's roof
+module tunnel_ramp_roof_local() {
+  x1 = (tun_ramp_end - tun_run)/cos(tun_ramp_ax) + 14; y0 = -(tun_wi + 2*tun_t) - 20; t = tun_roof_t;
+  difference() {
+    union() {
+      translate([0.5, y0, 0]) cube([x1 - 0.5, -y0 - 2, t]);
+      translate([0, 0, t - roof_t]) multmatrix([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0]])
+        translate([y0, 0, 0]) shingles_strip(16, x1 - 2, -y0 - 6);
+    }
+    for (p = tun_ramp_tabs) translate([p[0], p[1], -1]) cylinder(d = screw_clear, h = 20, $fn = 16);
+  }
+}
+module tunnel_ramp_roof_world() scale([entry_sx, 1, 1]) tun_ramp_plane() tunnel_ramp_roof_local();
+
 // =====================================================================
 //  Legs and floor keys
 // =====================================================================
 module leg() difference() {
-  cylinder(d1 = 28, d2 = 40, h = leg_h);
+  union() {
+    cylinder(d1 = 28, d2 = 40, h = leg_h);
+    if (leg_foot_d > 0) {   // wide foot, coned up into the leg (prints foot down, no overhang)
+      cylinder(d = leg_foot_d, h = 4);
+      translate([0, 0, 4]) cylinder(d1 = leg_foot_d, d2 = 30, h = (leg_foot_d - 30)/2);
+    }
+  }
   translate([0, 0, -1]) cylinder(d = m6, h = leg_h + 2);
   translate([0, 0, -0.01]) cylinder(r = 10/sqrt(3) + 0.25, h = 6, $fn = 6);   // M6 nut
-  translate([0, 0, 10]) rotate_extrude() translate([14 + 10*6/leg_h, 0]) circle(r = 1.4, $fn = 4);
+  if (leg_foot_d == 0) translate([0, 0, 10]) rotate_extrude() translate([14 + 10*6/leg_h, 0]) circle(r = 1.4, $fn = 4);
 }
 
 // printed upside down: the plate's top face goes on the bed
@@ -881,6 +1133,11 @@ module center_leg() difference() {
   union() {
     cylinder(d = 100, h = 8);
     cylinder(d1 = 44, d2 = 32, h = leg_h);
+    // wide foot (this leg prints upside down, so the foot widens upward at 45 degrees)
+    if (leg_foot_d > 0) {
+      translate([0, 0, leg_h - 4 - (leg_foot_d - 33)/2]) cylinder(d1 = 33, d2 = leg_foot_d, h = (leg_foot_d - 33)/2);
+      translate([0, 0, leg_h - 4]) cylinder(d = leg_foot_d, h = 4);
+    }
   }
   for (sx = [-1, 1], sy = [-1, 1]) translate([sx*30, sy*30, 0]) {
     translate([0, 0, -1]) cylinder(d = m6, h = 20);
@@ -1081,8 +1338,10 @@ module print_part(p) {
   if (p == "ridge_pair") { ridge_print(-1); translate([0, 100, 0]) ridge_print(1); }
   if (p == "seam_cap") seam_cap_print(eave_of(mount_sx));
   if (p == "door_surround") door_surround(step = !landing_on);
-  if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -tun_floor_z]) tunnel_body_world();
-  if (p == "tunnel_roof") translate([entry_sx > 0 ? -(tun_end - 8) : tun_run + 14, tun_wi + 2*tun_t + 20, 0]) scale([entry_sx, 1, 1]) tunnel_roof_local();
+  if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -(tun_ground ? zb - leg_h : tun_floor_z)]) tunnel_body_world();
+  if (p == "tunnel_roof") translate([entry_sx > 0 ? -(tun_end - 2) : tun_run + 14, tun_wi + 2*tun_t + 20, 0]) scale([entry_sx, 1, 1]) tunnel_roof_local();
+  if (p == "tunnel_ramp") translate([-(tun_land_x1 - 15), -tun_yo(), -(zb - leg_h)]) tunnel_ramp_world();
+  if (p == "tunnel_ramp_roof") translate([0, tun_wi + 2*tun_t + 20, 0]) tunnel_ramp_roof_local();
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();
   if (p == "center_leg") center_leg();
@@ -1122,6 +1381,14 @@ module assembly(e = 0) {
   if (door_tunnel) {
     color(c_trim) translate([0, -e*150, 0]) tunnel_body_world();   // green: the grey goes to the corners
     color(c_roof) translate([0, -e*150, e*120]) tunnel_roof_world();
+    if (tun_windows && e == 0) color("#BFE3F0", pane_alpha) scale([entry_sx, 1, 1])
+      for (w = tun_ground ? concat([for (x = tun_land_windows) [x, door_sill + tun_floor_t + 59]], tun_ramp_windows)
+                          : [[-30, door_sill + tun_floor_t + 59], [70, door_sill + tun_floor_t + 59]])
+        translate([w[0] - 39, tun_yo() + tun_t - 2.1, w[1] - 44]) cube([78, 2, 88]);
+    if (tun_ground) {
+      color(c_trim) translate([e*120, -e*150, 0]) tunnel_ramp_world();
+      color(c_roof) translate([e*120, -e*150, e*120]) tunnel_ramp_roof_world();
+    }
   } else color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
   color(c_trim) translate([0, -idp/2 + e*80, door_z]) rotate([-90, 0, 0]) door_inner_ring();
   if (show_legs) color(c_leg) translate([0, 0, -e*80]) {
