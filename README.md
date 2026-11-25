@@ -144,12 +144,11 @@ Splitting the colours the way the renders show takes more spools, because each c
 
 | Colour | Parts | On legs | Fence + ledge | Tree + ledge |
 |---|---|---|---|---|
-| Walls (cream) | 4 corner modules | 2.24 kg → 3 spools | 2.26 kg → 3 spools | 2.26 kg → 3 spools |
-| Roof (light sage) | 4 roof panels | 1.27 kg → 2 spools | 1.19 kg → 2 spools | 1.19 kg → 2 spools |
-| Trim (white) | ridge, seam caps, door, keys, latches, windows, hatch, legs, ledge, mount | 0.76 kg → 1 spool | 1.13 kg → 2 spools | 1.70 kg → 2 spools |
+| Walls (grey) | 4 corner modules | 2.24 kg → 3 spools | 2.26 kg → 3 spools | 2.26 kg → 3 spools |
+| Roof (white) | 4 roof panels | 1.27 kg → 2 spools | 1.19 kg → 2 spools | 1.19 kg → 2 spools |
+| Trim (green) | ridge, seam caps, door, keys, latches, windows, hatch, legs, ledge, mount | 0.76 kg → 1 spool | 1.13 kg → 2 spools | 1.70 kg → 2 spools |
 
-With the tunnel, its body (0.42 kg) goes with the walls and its roof (0.18 kg) with the roof. Both still
-fit in the spools above, though the walls then leave only about 0.3 kg spare.
+With the tunnel, its body (0.42 kg) is printed in the trim colour and its roof (0.18 kg) with the roof.
 
 The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-right corner module
 (about 610 g, 17.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
@@ -163,7 +162,9 @@ reprint of a corner module.
 **Use ASA.** It holds up to Florida sun and heat: it keeps its colour and strength under UV, and it softens
 only near 95–100 °C. PLA softens at about 55 °C, a temperature a dark part reaches in summer sun. PETG is
 UV-tolerant but creeps under constant load and turns chalky, so treat it as a short-term stand-in only.
-Pick light colours, because a white or pale roof runs much cooler than a dark one.
+Pick light colours, because a white or pale roof runs much cooler than a dark one. The renders and project
+files use a white roof, grey walls and green trim; the walls take more sun than the trim, so they get the
+lighter of the two.
 
 Starting settings for Bambu Studio (generic ASA profile on the H2D):
 
@@ -210,28 +211,35 @@ that need them.
 
 ## Print order: on legs, three colours, with the entrance tunnel
 
-These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls, 15 %
+These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls (3 for the corners), 15 %
 gyroid, 5 top and bottom layers, Bambu ASA, textured PEI plate. There is one project file per colour, so a
 plate never changes filament part-way through. Trim is split in three, so the parts that need supports
-print apart from the others; the white parts together are 0.83 kg, 1 spool. (The other project files in `release/` are still set up for 0.4 mm.)
+print apart from the others. (The other project files in `release/` are still set up for 0.4 mm.)
 
-| Order | File | Plates | ASA | Time |
-|---|---|---|---|---|
-| 1 | `cat_cottage_H2D_test_coupons.3mf` (any colour) | 1 | 0.11 kg | ≈ 2.6 h |
-| 2 | `cat_cottage_H2D_on_legs_tunnel_walls.3mf` (cream): 4 corner modules, then the tunnel body | 5 | 3.36 kg → **4 spools** | ≈ 55 h |
-| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf` (sage): 4 roof panels, then the tunnel roof | 5 | 1.89 kg → 2 spools | ≈ 34 h |
-| 4 | `cat_cottage_H2D_trim1_ridge_caps.3mf` (white): both ridge caps as one object, standing on end, with tree supports and an 8 mm brim | 1 | 0.29 kg | ≈ 6 h |
-| 5 | `cat_cottage_H2D_trim2_supported.3mf` (white): latch keepers, hatch frame, hatch flap, with supports | 2 | 0.19 kg | ≈ 3 h |
-| 6 | `cat_cottage_H2D_trim3_small.3mf` (white): ridge saddle, seam caps, legs, keys, latch buttons, window retainers, inner door ring | 2 | 0.35 kg | ≈ 6.5 h |
+| Order | File | Colour | Plates | ASA | Time |
+|---|---|---|---|---|---|
+| 1 | `cat_cottage_H2D_test_coupons.3mf` | white | 1 | 0.12 kg | ≈ 2.7 h |
+| 2 | `cat_cottage_H2D_on_legs_walls.3mf`: 4 corner modules, **3 walls** | grey | 4 | 2.52 kg | ≈ 44 h |
+| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf`: 4 roof panels, then the tunnel roof | white | 5 | 1.89 kg | ≈ 34 h |
+| 4 | `cat_cottage_H2D_tunnel_body.3mf` | green | 1 | 0.52 kg | ≈ 7.6 h |
+| 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps as one object, standing on end, with tree supports and an 8 mm brim | green | 1 | 0.29 kg | ≈ 6 h |
+| 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap, with supports | green | 2 | 0.19 kg | ≈ 3 h |
+| 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, legs, keys, latch buttons, window retainers, inner door ring | green | 2 | 0.35 kg | ≈ 6.5 h |
 
-In all: about 6.2 kg (7 spools: 4 cream, 2 sage, 1 white) and about 106 h. That's a third faster than with
-a 0.4 mm nozzle, but uses about 1.3 kg more ASA: with 0.62 mm lines, 4 walls fill the 5 mm walls almost
-solid. 3 walls would save only 0.4 kg and leave the cream with no margin.
+| Colour | Needed | Spools on hand | Spare |
+|---|---|---|---|
+| White: roof, tunnel roof, test pieces | 2.0 kg | 4 | ≈ 2 kg |
+| Grey: 4 corner modules | 2.5 kg | 3 | ≈ 0.5 kg |
+| Green: trim and tunnel body | 1.35 kg | 3 | ≈ 1.6 kg |
+
+In all: about 5.9 kg and about 103 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
+lines that's a 1.9 mm shell each side, slightly more than the 4 × 0.42 mm the strength checks assumed, and
+it keeps the grey within 3 spools. The other parts keep 4 walls.
 
 - Print the front-left corner first, and check it for warping and for the fit of its seam flanges before
   printing the other three.
-- Each corner takes 670–760 g: start it on a full spool, or let the AMS switch to a second spool of the
-  same colour.
+- Each corner takes 600–670 g. Three spools hold four corners only with the AMS switching to the next grey
+  spool part-way through, so keep two grey spools loaded with auto-refill on.
 
 ## Hardware (all stainless steel, A2/304 or better A4/316)
 

@@ -1100,10 +1100,10 @@ module print_part(p) {
 // =====================================================================
 //  Assembly, exploded view and plate layout
 // =====================================================================
-c_wall = "#F3E2B3";
-c_roof = "#9DB8A8";
-c_trim = "#FBFBF7";
-c_leg = "#FBFBF7";
+c_wall = "#A7ABAD";   // grey walls
+c_roof = "#F4F4F1";   // white roof: reflects the sun
+c_trim = "#3F7D4E";   // green trim
+c_leg = "#3F7D4E";
 
 module assembly(e = 0) {
   for (sx = [-1, 1], sy = [-1, 1]) color(c_wall) translate([sx*e*70, sy*e*70, 0]) corner(sx, sy);
@@ -1120,7 +1120,7 @@ module assembly(e = 0) {
     translate([0, (f ? -1 : 1)*e*60, 0]) latch_button_world(f, open_angle > 0);
   }
   if (door_tunnel) {
-    color(c_wall) translate([0, -e*150, 0]) tunnel_body_world();
+    color(c_trim) translate([0, -e*150, 0]) tunnel_body_world();   // green: the grey goes to the corners
     color(c_roof) translate([0, -e*150, e*120]) tunnel_roof_world();
   } else color(c_trim) translate([0, -hy - e*150, door_z]) rotate([90, 0, 0]) door_surround(step = !landing_on);
   color(c_trim) translate([0, -idp/2 + e*80, door_z]) rotate([-90, 0, 0]) door_inner_ring();

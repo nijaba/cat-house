@@ -21,6 +21,9 @@ FORCE = ['brim_type', 'brim_width', 'enable_support', 'support_type', 'wall_loop
 FORCE_FILAMENT = ['activate_air_filtration', 'during_print_exhaust_fan_speed', 'complete_print_exhaust_fan_speed']
 # printer settings we change: the H2D's cooling filter (it has no "air filtration" of its own)
 MACHINE_SET = {'cooling_filter_enabled': '1'}
+# filament colour shown in Bambu Studio, by project file: white roof, grey walls, green trim
+COLOURS = [('_roof', '#FFFFFF'), ('_walls', '#A7ABAD'), ('_trim', '#3F7D4E'), ('_tunnel_body', '#3F7D4E'),
+           ('_test_coupons', '#FFFFFF')]
 # parts with little contact with the plate for their height: a wider brim, set on the part itself
 BRIM = {'ridge_front.stl': 8, 'ridge_back.stl': 8, 'ridge_pair.stl': 8, 'hinge_cap.stl': 8, 'leg.stl': 6}
 OBJECT_SUPPORT = [('enable_support', '1'), ('support_type', 'tree(auto)'), ('support_threshold_angle', '30'),
@@ -80,6 +83,9 @@ def fix(path):
             fils = cfg.get('filament_settings_id') or []
             f = [diff_keys(cfg, flatten('filament', n)) if n in index('filament') else '' for n in fils]
             f = [';'.join(sorted(set(filter(None, x.split(';'))) | {k for k in FORCE_FILAMENT if k in cfg})) for x in f]
+            for key, colour in COLOURS:
+                if key in os.path.basename(path) and 'filament_colour' in cfg:
+                    cfg['filament_colour'] = [colour] * len(cfg['filament_colour'])
             for k, v in MACHINE_SET.items():
                 if k in cfg:
                     cfg[k] = v

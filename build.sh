@@ -40,7 +40,7 @@ if [[ "$what" == png || "$what" == all ]]; then
   # single-part views from the exported STL (needs ./build.sh stl first)
   if [[ -f stl/corner_fl.stl ]]; then
     v="$(mktemp -d)/view.scad"
-    echo "color(\"#F3E2B3\") import(\"$PWD/stl/corner_fl.stl\");" > "$v"
+    echo "color(\"#A7ABAD\") import(\"$PWD/stl/corner_fl.stl\");" > "$v"
     "$OS" -o renders/corner_fl_outside.png --imgsize=1200,1100 --camera=-110,-110,160,70,0,325,1000 "${common[@]}" "$v"
     "$OS" -o renders/corner_fl_inside.png --imgsize=1200,1100 --camera=-110,-110,160,62,0,140,1000 "${common[@]}" "$v"
   fi
