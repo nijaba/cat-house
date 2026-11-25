@@ -13,7 +13,7 @@
 
 /* [What to render] */
 // assembly, exploded, layout, or one printable part
-part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, seam_cap, door_surround, door_inner_ring, tunnel_body, tunnel_roof, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
+part = "assembly"; // [assembly, exploded, layout, corner_fl, corner_fr, corner_bl, corner_br, roof_fl, roof_fr, roof_bl, roof_br, ridge_front, ridge_back, ridge_saddle, ridge_pair, seam_cap, door_surround, door_inner_ring, tunnel_body, tunnel_roof, leg, center_leg, bowtie_key, fence_house_cleat, fence_post_cleat, fence_standoff, tree_plate, support_bracket, landing, latch_keeper, latch_button, window_retainer, hatch_frame, hatch_flap]
 // Optional mount on one eave (long side) wall, so the door in the front gable stays reachable from the
 // tree or fence. Anything but "none" adds bolt holes to the two corner modules on that side, drops the
 // windows there and shortens the roof overhang on that side.
@@ -473,7 +473,9 @@ module module_cuts(sx, sy) {
   }
   // escape hatch: opening, flat pad for the frame, frame bolts
   if (hatch && sy > 0 && sx * hatch_x > 0) {
-    translate([hx0, hy - wt - 1, hatch_z0]) cube([hatch_w, wt + 20, hatch_h]);
+    // opening with 45 degree top corners, hidden behind the frame, so its top bridges 98 mm instead of 140
+    translate([0, hy + 19, 0]) rotate([90, 0, 0]) linear_extrude(wt + 20)
+      polygon([[hx0, hatch_z0], [hx1, hatch_z0], [hx1, hz1 - 21], [hx1 - 21, hz1], [hx0 + 21, hz1], [hx0, hz1 - 21]]);
     translate([hf[0] - 1, hy + 0.01, hatch_z0 - 13]) cube([hf[1] - hf[0] + 2, 12, hz1 + 23 - (hatch_z0 - 13)]);
     for (b = hatch_bolts) translate([b[0], hy - wt - 1, b[1]]) rotate([-90, 0, 0]) cylinder(d = m4, h = wt + 10, $fn = 16);
   }
@@ -813,7 +815,10 @@ module tunnel_body_world() scale([entry_sx, 1, 1]) {
           translate([tun_end, yo, zf]) cube([L, tun_t, 200]);                         // front wall
           translate([tun_end, yo, zf]) cube([2*tun_t, yb - yo, 200]);                 // closed end, thick enough for a door bolt
           // lintel over the mouth: stops near-horizontal rain skimming under the roof to the doorway
-          translate([tun_run - 8, yo, tun_lintel_z]) cube([8, yb - yo, 200]);
+          // with 45 degree haunches at the walls, so its underside bridges 80 mm instead of 150
+          translate([tun_run - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(8)
+            polygon([[yo, tun_lintel_z - 35], [yo + tun_t, tun_lintel_z - 35], [yo + tun_t + 35, tun_lintel_z],
+                     [yb - tun_t - 35, tun_lintel_z], [yb - tun_t, tun_lintel_z - 35], [yb, tun_lintel_z - 35], [yb, 400], [yo, 400]]);
           // round boss that fills the siding cut-out round the door and carries the bolts
           intersection() {
             translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out, h = relief + 0.01, $fn = 120);
@@ -1072,6 +1077,8 @@ module print_part(p) {
   if (p == "ridge_front") ridge_print(-1);
   if (p == "ridge_back") ridge_print(1);
   if (p == "ridge_saddle") ridge_print(-1, true);
+  // both ridge caps as one object with a fixed gap, so their supports and brims can't collide on the plate
+  if (p == "ridge_pair") { ridge_print(-1); translate([0, 100, 0]) ridge_print(1); }
   if (p == "seam_cap") seam_cap_print(eave_of(mount_sx));
   if (p == "door_surround") door_surround(step = !landing_on);
   if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -tun_floor_z]) tunnel_body_world();

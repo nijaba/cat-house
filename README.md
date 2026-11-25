@@ -172,7 +172,12 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
 - Nozzle 260 °C, bed 100 °C, door closed, chamber heating on. Keep the cooling fan low (10–30 %) except on
   bridges.
 - 5 mm brim on the corner modules and roof panels: ASA warps on large flat parts
-- Supports off. Overhangs are 45° or steeper; the door top and the strap channel are short bridges.
+- Supports off for the corner modules, roof panels, tunnel and mount parts. Their overhangs are 45° or
+  steeper, and the openings bridge at most about 100 mm.
+- **Supports on (tree, auto, 30°) for the ridge caps, the latch keepers and the escape-hatch flap.** The
+  ridge caps' hinge knuckles stick out from the cap, the keeper has a hook, and the flap has its hinge
+  barrel. The `trim1` and `trim2` project files already have supports switched on. In the generic project
+  files, switch them on for those parts.
 - Dry the filament first (4 h at 65 °C) if the spool has been open in Florida humidity.
 
 ## Test print first
@@ -198,17 +203,19 @@ the project files come from `tools/flatten_profiles.py`.
 
 These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls, 15 %
 gyroid, 5 top and bottom layers, Bambu ASA, textured PEI plate. There is one project file per colour, so a
-plate never changes filament part-way through. Trim has an 8 mm brim for the ridge caps, which print
-standing on end. (The other project files in `release/` are still set up for 0.4 mm.)
+plate never changes filament part-way through. Trim is split in three, so the parts that need supports
+print apart from the others; the white parts together are 0.83 kg, 1 spool. (The other project files in `release/` are still set up for 0.4 mm.)
 
 | Order | File | Plates | ASA | Time |
 |---|---|---|---|---|
 | 1 | `cat_cottage_H2D_test_coupons.3mf` (any colour) | 1 | 0.11 kg | ≈ 2.6 h |
 | 2 | `cat_cottage_H2D_on_legs_tunnel_walls.3mf` (cream): 4 corner modules, then the tunnel body | 5 | 3.36 kg → **4 spools** | ≈ 55 h |
 | 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf` (sage): 4 roof panels, then the tunnel roof | 5 | 1.89 kg → 2 spools | ≈ 34 h |
-| 4 | `cat_cottage_H2D_on_legs_tunnel_trim.3mf` (white): ridge, seam caps, legs, keys, latches, window retainers, hatch, inner door ring | 3 | 0.75 kg → 1 spool | ≈ 14 h |
+| 4 | `cat_cottage_H2D_trim1_ridge_caps.3mf` (white): both ridge caps as one object, standing on end, with tree supports and an 8 mm brim | 1 | 0.29 kg | ≈ 6 h |
+| 5 | `cat_cottage_H2D_trim2_supported.3mf` (white): latch keepers, hatch frame, hatch flap, with supports | 2 | 0.19 kg | ≈ 3 h |
+| 6 | `cat_cottage_H2D_trim3_small.3mf` (white): ridge saddle, seam caps, legs, keys, latch buttons, window retainers, inner door ring | 2 | 0.35 kg | ≈ 6.5 h |
 
-In all: about 6.1 kg (7 spools: 4 cream, 2 sage, 1 white) and about 105 h. That's a third faster than with
+In all: about 6.2 kg (7 spools: 4 cream, 2 sage, 1 white) and about 106 h. That's a third faster than with
 a 0.4 mm nozzle, but uses about 1.3 kg more ASA: with 0.62 mm lines, 4 walls fill the 5 mm walls almost
 solid. 3 walls would save only 0.4 kg and leave the cream with no margin.
 
