@@ -175,6 +175,42 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
 - Supports off. Overhangs are 45° or steeper; the door top and the strap channel are short bridges.
 - Dry the filament first (4 h at 65 °C) if the spool has been open in Florida humidity.
 
+## Test print first
+
+Before the big parts, print `release/cat_cottage_H2D_test_coupons.3mf`. It's one plate: about 100 g and
+4 h with the settings above. It holds small pieces cut from the real parts, in their real print
+orientation, so they show whether the joints fit on your printer and filament:
+
+| Pieces | Check | If it's off, change in `cat_house.scad` |
+|---|---|---|
+| `seam_front`, `seam_back`, `seam_cap_slice` | Push the two upstands together and slide the cap over them. Bolt through all three with an M4 × 20. The upstands should meet flat, and the cap should slide on firmly without rocking. | `gap` (seam clearance, now 0.15 per side), `seam_cap_cl` (0.4) |
+| `hinge_panel`, `hinge_cap` | Mesh the knuckles and push an M4 rod or a long M4 bolt through. It should swing freely, and the stop ears should land at about 120°. | `hinge_gap` (0.6), `hinge_pin` (4.5 hole) |
+| `key_left`, `key_right`, `bowtie_key` | Press the key into both pockets: a firm push, no hammer, no wobble. | the 0.15 offsets on the pockets and key (`bowtie2d` lines) |
+| `latch_button`, `latch_keeper` | Turn the button on a #8 screw: it should turn with a little friction and hold its position. | |
+
+If something is too tight or too loose, measure the gap with a feeler gauge or calipers, change the value,
+and rebuild the parts that use it with `./build.sh stl`.
+
+The coupons' STLs are in `stl/test/`, and `tools/test_coupons.scad` makes them. The slicer profiles behind
+the project files come from `tools/flatten_profiles.py`.
+
+## Print order: on legs, three colours, with the entrance tunnel
+
+One project file per colour, so a plate never changes filament part-way through. The slicer settings are
+the ones above. Trim has an 8 mm brim for the ridge caps, which print standing on end.
+
+| Order | File | Plates | ASA | Time |
+|---|---|---|---|---|
+| 1 | `cat_cottage_H2D_test_coupons.3mf` (any colour) | 1 | 0.10 kg | ≈ 4 h |
+| 2 | `cat_cottage_H2D_on_legs_tunnel_walls.3mf` (cream): 4 corner modules, then the tunnel body | 5 | 2.66 kg → 3 spools | ≈ 79 h |
+| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf` (sage): 4 roof panels, then the tunnel roof | 5 | 1.44 kg → 2 spools | ≈ 53 h |
+| 4 | `cat_cottage_H2D_on_legs_tunnel_trim.3mf` (white): ridge, seam caps, legs, keys, latches, window retainers, hatch, inner door ring | 3 | 0.63 kg → 1 spool | ≈ 22 h |
+
+In all: about 4.8 kg and 158 h. Print the front-left corner first, and check it for warping and for the
+fit of its seam flanges before printing the other three. With only the cream spools on hand, the corners
+can start while the other colours are on their way. Start each corner on a spool with at least 650 g left,
+or let the AMS switch to a second spool.
+
 ## Hardware (all stainless steel, A2/304 or better A4/316)
 
 Stainless only: zinc-plated steel rusts and stains within a season near the coast.
