@@ -1146,7 +1146,7 @@ module center_leg() difference() {
   }
 }
 
-module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) offset(delta = 0.2) bowtie2d();   // was -0.15: the test print slid with 0.8 mm play
+module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) bowtie2d();   // drawn size: -0.15 slid with 0.8 mm play, +0.2 held the halves 1 mm apart (2026-11-25)
 
 // =====================================================================
 //  Mount rails (mount frame: wall face at y = 0, outward +y; placed with mount_xf)
