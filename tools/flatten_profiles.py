@@ -49,6 +49,7 @@ def main():
     f = flatten('filament', FILAMENT, index('filament'))
     for d in (m, p, f):
         d['from'] = 'system'   # the CLI rejects "user" profiles it can't match to a printer
+    m['cooling_filter_enabled'] = '1'   # the H2D's cooling filter: on for ASA
     json.dump(m, open(os.path.join(out, 'machine.json'), 'w'), indent=1)
     json.dump({**p, **HOUSE}, open(os.path.join(out, 'process.json'), 'w'), indent=1)
     json.dump({**p, **STRONG}, open(os.path.join(out, 'process_strong.json'), 'w'), indent=1)

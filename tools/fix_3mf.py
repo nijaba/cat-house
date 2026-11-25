@@ -15,6 +15,14 @@ SKIP = {'name', 'from', 'inherits', 'setting_id', 'instantiation', 'version', 'c
         'compatible_printers_condition', 'renamed_from', 'type', 'description', 'filament_id',
         'print_settings_id', 'filament_settings_id', 'printer_settings_id'}
 NEEDS_SUPPORT = {'ridge_front.stl', 'ridge_back.stl', 'ridge_pair.stl', 'hinge_cap.stl', 'latch_keeper.stl', 'hatch_flap.stl'}
+# settings Bambu's built-in profile may leave to the app's own defaults: always record them as ours
+FORCE = ['brim_type', 'brim_width', 'enable_support', 'support_type', 'wall_loops', 'sparse_infill_density',
+         'sparse_infill_pattern', 'top_shell_layers', 'bottom_shell_layers']
+FORCE_FILAMENT = ['activate_air_filtration', 'during_print_exhaust_fan_speed', 'complete_print_exhaust_fan_speed']
+# printer settings we change: the H2D's cooling filter (it has no "air filtration" of its own)
+MACHINE_SET = {'cooling_filter_enabled': '1'}
+# parts with little contact with the plate for their height: a wider brim, set on the part itself
+BRIM = {'ridge_front.stl': 8, 'ridge_back.stl': 8, 'ridge_pair.stl': 8, 'hinge_cap.stl': 8, 'leg.stl': 6}
 OBJECT_SUPPORT = [('enable_support', '1'), ('support_type', 'tree(auto)'), ('support_threshold_angle', '30'),
                   ('support_on_build_plate_only', '0')]
 
@@ -68,8 +76,13 @@ def fix(path):
             if cfg['print_settings_id'] not in index('process'):   # an older export renamed the profile
                 cfg['print_settings_id'] = cfg['print_settings_id'].rsplit(' ', 1)[0]
             p = diff_keys(cfg, flatten('process', cfg['print_settings_id']))
+            p = ';'.join(sorted(set(filter(None, p.split(';'))) | {k for k in FORCE if k in cfg}))
             fils = cfg.get('filament_settings_id') or []
             f = [diff_keys(cfg, flatten('filament', n)) if n in index('filament') else '' for n in fils]
+            f = [';'.join(sorted(set(filter(None, x.split(';'))) | {k for k in FORCE_FILAMENT if k in cfg})) for x in f]
+            for k, v in MACHINE_SET.items():
+                if k in cfg:
+                    cfg[k] = v
             m = diff_keys(cfg, flatten('machine', cfg['printer_settings_id']))
             cfg['different_settings_to_system'] = [p] + f + [m]
             data = json.dumps(cfg, indent=4).encode()
@@ -81,15 +94,21 @@ def fix(path):
             def add(m):
                 block = m.group(0)
                 name = re.search(r'<metadata key="name" value="([^"]+)"', block).group(1)
-                if name not in NEEDS_SUPPORT or 'key="enable_support"' in block:
+                kv = []
+                if name in NEEDS_SUPPORT and 'key="enable_support"' not in block:
+                    kv += OBJECT_SUPPORT
+                if name in BRIM and 'key="brim_width"' not in block:
+                    kv += [('brim_type', 'outer_only'), ('brim_width', str(BRIM[name]))]
+                if not kv:
                     return block
-                extra = ''.join(f'\n    <metadata key="{k}" value="{v}"/>' for k, v in OBJECT_SUPPORT)
+                extra = ''.join(f'\n    <metadata key="{k}" value="{v}"/>' for k, v in kv)
                 return re.sub(r'(<metadata key="name" value="[^"]+"/>)', r'\1' + extra, block, count=1)
 
             text, n = re.subn(r'<object id="\d+">.*?</object>', add, text, flags=re.S)
             hits = len(re.findall(r'<metadata key="enable_support" value="1"/>', text))
-            if hits:
-                print(f"    supports switched on for {hits} object(s)")
+            brims = len(re.findall(r'<metadata key="brim_width" value="\d+"/>', text))
+            if hits or brims:
+                print(f"    per-object: supports on {hits}, wider brim {brims}")
             data = text.encode()
         out.append((info, data))
     tmp = path + '.tmp'

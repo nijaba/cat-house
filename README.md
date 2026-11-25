@@ -171,7 +171,13 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
 - 4 walls, 5 top and 5 bottom layers, 15–20 % gyroid infill
 - Nozzle 260 °C, bed 100 °C, door closed, chamber heating on. Keep the cooling fan low (10–30 %) except on
   bridges.
-- 5 mm brim on the corner modules and roof panels: ASA warps on large flat parts
+- 5 mm outer brim on every part, because ASA warps. The project files give the parts with little contact
+  with the plate a wider one: 8 mm for the ridge caps (they stand on end on a 6 mm strip), and 6 mm for the
+  legs (a 28 mm foot under a 60 mm leg).
+- **Cooling filter on** (printer settings). ASA gives off styrene, so keep the door closed and let the
+  printer filter the air. On the H2D this printer setting is the one that counts; the filament's "air
+  filtration" option (on in Bambu ASA's profile, exhaust fan 70 %) applies to printers that support it.
+  The project files have both switched on.
 - Supports off for the corner modules, roof panels, tunnel and mount parts. Their overhangs are 45° or
   steeper, and the openings bridge at most about 100 mm.
 - **Supports on (tree, auto, 30°) for the ridge caps, the latch keepers and the escape-hatch flap.** The
