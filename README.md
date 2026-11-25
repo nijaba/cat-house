@@ -212,7 +212,8 @@ and rebuild the parts that use it with `./build.sh stl`.
 | Hinge | Wouldn't mesh: the fixed slope's gable screw nearest the ridge put its pad under the ridge cap's knuckles. The full roof had the same clash. | That screw is gone (the fixed slope keeps 8). Also, the stop ears were landing at about 109°, before the lid's 111° balance point, so `hinge_stop` 126 → 134: the lid now rests open at about 118°. |
 | Floor key | Flush, but sliding with 0.8 mm of play. Made 0.35 mm wider per side, it then held the halves 1 mm apart: the dovetail's 16° sides turn each 0.1 mm of width into about 0.5 mm along the seam. | The key is now at its drawn size, halfway between the two (the pockets are unchanged). `release/cat_cottage_H2D_test_key.3mf` prints one key in about 12 minutes to check. |
 
-Second test print: the seam cap and hinge passed. `release/cat_cottage_H2D_test_coupons_retest.3mf` reprints just the changed pieces: seam-cap slice, hinge
+Second test print: the seam cap and hinge passed. Third: the key at its drawn size fits flush, with the halves
+closed and no play. **All joints pass.** `release/cat_cottage_H2D_test_coupons_retest.3mf` reprints just the changed pieces: seam-cap slice, hinge
 panel, hinge cap and key. That's about 80 g and 2 h, using the first print's seam edges and floor
 pockets.
 
