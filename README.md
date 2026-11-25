@@ -204,6 +204,18 @@ orientation, so they show whether the joints fit on your printer and filament:
 If something is too tight or too loose, measure the gap with a feeler gauge or calipers, change the value,
 and rebuild the parts that use it with `./build.sh stl`.
 
+**First test print (2026-11-25, 0.6 mm nozzle):** print quality was good, and three things changed:
+
+| Check | Result | Change |
+|---|---|---|
+| Seam cap | 0.8 mm of side-to-side play: too loose | `seam_cap_cl` 0.4 → 0.15 mm per side |
+| Hinge | Wouldn't mesh: the fixed slope's gable screw nearest the ridge put its pad under the ridge cap's knuckles. The full roof had the same clash. | That screw is gone (the fixed slope keeps 8). Also, the stop ears were landing at about 109°, before the lid's 111° balance point, so `hinge_stop` 126 → 134: the lid now rests open at about 118°. |
+| Floor key | Flush, but sliding with 0.8 mm of play | The key is now 0.35 mm wider per side (the pockets are unchanged) |
+
+`release/cat_cottage_H2D_test_coupons_retest.3mf` reprints just the changed pieces: seam-cap slice, hinge
+panel, hinge cap and key. That's about 80 g and 2 h, using the first print's seam edges and floor
+pockets.
+
 The coupons' STLs are in `stl/test/`, and `tools/test_coupons.scad` makes them. The slicer profiles behind
 the project files come from `tools/flatten_profiles.py`. After exporting project files from the command
 line, run `python3 -I tools/fix_3mf.py release/*.3mf`. It records which settings differ from Bambu's
@@ -315,8 +327,8 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
    seam's upstand, push the front and back panels together, slide the seam cap over the rib from the eave
    end, and bolt cap and seam together (3 × M4 × 20). Carry the bead on past the seam's top end to the
    panels' ridge edge, so the short plain stretch under the ridge cap is sealed too. Wipe off the excess.
-   The right slope is fixed: set it so its eave overhangs evenly and drive its 10 roofing
-   screws through the bosses into the pilot holes (3 into each gable top, 2 into the eave corbels per panel).
+   The right slope is fixed: set it so its eave overhangs evenly and drive its 8 roofing
+   screws through the bosses into the pilot holes (2 into each gable top, 2 into the eave corbels per panel).
    Snug them so the EPDM washers just compress; don't crush them. The left slope is the lid: set it in
    place, but don't screw it down.
 9. **Ridge and hinge.** Lay the two ridge caps along the peak so their knuckles mesh with the knuckles on
@@ -374,8 +386,8 @@ The lid is sealed the same way as the fixed roof, with no gap that faces the rai
   50 mm at the eave). The EPDM foam under it closes the joint, and the latches keep it compressed.
 - **Holes.** The lid has no storm-screw holes any more: the hinge and the two latches hold it. The only holes
   through the lid are the four keeper screws (same bosses and EPDM washers as the other roof screws) and the
-  six ridge-cap bolts under the cap. The fixed slope keeps its 10 roofing screws, 3 into each gable top and
-  2 into the eave per panel: it carries the hinge and is what holds the roof on. The pilot holes under the
+  six ridge-cap bolts under the cap. The fixed slope keeps 8 roofing screws, 2 into each gable top and 2 into
+  the eave per panel (the gable screw nearest the ridge was dropped: it sat under the hinge knuckles): it carries the hinge and is what holds the roof on. The pilot holes under the
   lid stay in the walls, hidden, in case you ever want to screw the lid down for a storm. The turn-button pivots sit under the gable overhang, with
   rubber washers.
 - **Hinge.** The knuckles sit on top of the fixed slope. Rain runs round them, and nothing under them

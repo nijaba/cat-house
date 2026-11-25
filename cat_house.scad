@@ -79,7 +79,7 @@ hinge_r = 5;         // knuckle radius
 hinge_pin = 4.5;     // hole for a 4 mm stainless rod or M4 threaded rod
 hinge_seg = 18;      // knuckle length
 hinge_gap = 0.6;
-hinge_stop = 126;    // stop-ear design angle; on the shingles it lands at about 120 degrees, past the ~111 degree balance point
+hinge_stop = 134;    // stop-ear design angle: the lid comes to rest at about 118 degrees, past its ~111 degree balance point (126 stopped it at ~109; 2026-11-25)
 latch_x = 150;       // keeper position from the centre line (on the lid side)
 latch_pivot_x = 115; // turn-button pivot
 latch_pivot_z = 204.5; // the tongue presses the keeper down 1.5 mm, compressing the foam seal under the lid
@@ -561,7 +561,7 @@ module panel_local(v0, v1, front, e, holes = true) {
 
 // Seam cap (slope frame): an inverted U that slips over the two upstands of a standing seam and is held by
 // the seam's own bolts. With a silicone bead between the upstands that makes two seals in a row.
-seam_cap_cl = 0.4;
+seam_cap_cl = 0.15;   // was 0.4: the test print measured 0.8 mm of play in total (2026-11-25)
 seam_cap_wall = 2;
 function seam_cap_zb() = roof_t + shingle_t + 0.6;   // walls stop just above the shingles
 module seam_profile(Lsh) polygon([[0, roof_t], [0, roof_t + 2], [1, roof_t + 2], [6, roof_t + seam_h], [Lsh - 2, roof_t + seam_h], [Lsh - 2, roof_t]]);
@@ -602,14 +602,15 @@ module roof_panel(sx, sy, holes = true) {
         translate([-350, -330, 100]) cube([350 - (is_lid ? 4 : 0), 660, 300]);
       }
       // screw pads on the fixed slope only: the lid is held by its hinge and latches, so it has no storm screws
-      if (!is_lid) for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5)
+      // (not the gable screw nearest the ridge on the hinge slope: its pad would sit under the ridge cap's knuckles)
+      if (!is_lid) for (p = roof_screws_left) if (p[1] > v0 + 5 && p[1] < v1 - 5 && !(is_hinge && abs(p[0]) < 50))
         screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
       if (is_hinge) slope_frame(e) panel_knuckles(v0, v1);
       // weather rib under the ridge cap: wind-driven rain can't creep past it to the ridge gap
       if (is_hinge) slope_frame(e) translate([u_ax() + rib_u - 1.5, v0, roof_t - 0.1]) cube([3, v1 - v0, 2.1]);
       if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, roof_t - 0.2]) cylinder(d = 16, h = shingle_t + 0.8);
     }
-    if (holes && !is_lid) for (p = roof_screws_left) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
+    if (holes && !is_lid) for (p = roof_screws_left) if (!(is_hinge && abs(p[0]) < 50)) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
     if (holes) if (!is_hinge) for (v = ridge_hole_vs(front)) slope_frame(e) translate([u_ridge_e(e), v, -1]) cylinder(d = m4, h = roof_t + 20, $fn = 16);
     if (is_hinge) slope_frame(e) translate([u_ax(), 0, w_ax]) rotate([90, 0, 0]) cylinder(d = hinge_pin, h = 1200, center = true, $fn = 20);
     if (holes) if (is_lid) for (p = keeper_screws(front)) screw_xf(p) translate([0, 0, -1]) cylinder(d = screw_clear, h = roof_t + shingle_t + 5, $fn = 16);
@@ -1145,7 +1146,7 @@ module center_leg() difference() {
   }
 }
 
-module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) offset(delta = -0.15) bowtie2d();
+module bowtie_key() linear_extrude(slab_t + rib_h - 0.2) offset(delta = 0.2) bowtie2d();   // was -0.15: the test print slid with 0.8 mm play
 
 // =====================================================================
 //  Mount rails (mount frame: wall face at y = 0, outward +y; placed with mount_xf)
