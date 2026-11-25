@@ -167,7 +167,7 @@ Pick light colours, because a white or pale roof runs much cooler than a dark on
 
 Starting settings for Bambu Studio (generic ASA profile on the H2D):
 
-- Nozzle 0.4 mm at 0.20 mm layers, or **0.6 mm at 0.28 mm for the corners and roof panels** (much faster)
+- Nozzle 0.4 mm at 0.20 mm layers, or **0.6 mm at 0.30 mm** (a third faster; the test coupons and the print-order files below use 0.6)
 - 4 walls, 5 top and 5 bottom layers, 15–20 % gyroid infill
 - Nozzle 260 °C, bed 100 °C, door closed, chamber heating on. Keep the cooling fan low (10–30 %) except on
   bridges.
@@ -177,8 +177,8 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
 
 ## Test print first
 
-Before the big parts, print `release/cat_cottage_H2D_test_coupons.3mf`. It's one plate: about 100 g and
-4 h with the settings above. It holds small pieces cut from the real parts, in their real print
+Before the big parts, print `release/cat_cottage_H2D_test_coupons.3mf` with the nozzle you'll use for the
+house. It's one plate: about 110 g and 2.6 h with a 0.6 mm nozzle. It holds small pieces cut from the real parts, in their real print
 orientation, so they show whether the joints fit on your printer and filament:
 
 | Pieces | Check | If it's off, change in `cat_house.scad` |
@@ -196,20 +196,26 @@ the project files come from `tools/flatten_profiles.py`.
 
 ## Print order: on legs, three colours, with the entrance tunnel
 
-One project file per colour, so a plate never changes filament part-way through. The slicer settings are
-the ones above. Trim has an 8 mm brim for the ridge caps, which print standing on end.
+These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls, 15 %
+gyroid, 5 top and bottom layers, Bambu ASA, textured PEI plate. There is one project file per colour, so a
+plate never changes filament part-way through. Trim has an 8 mm brim for the ridge caps, which print
+standing on end. (The other project files in `release/` are still set up for 0.4 mm.)
 
 | Order | File | Plates | ASA | Time |
 |---|---|---|---|---|
-| 1 | `cat_cottage_H2D_test_coupons.3mf` (any colour) | 1 | 0.10 kg | ≈ 4 h |
-| 2 | `cat_cottage_H2D_on_legs_tunnel_walls.3mf` (cream): 4 corner modules, then the tunnel body | 5 | 2.66 kg → 3 spools | ≈ 79 h |
-| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf` (sage): 4 roof panels, then the tunnel roof | 5 | 1.44 kg → 2 spools | ≈ 53 h |
-| 4 | `cat_cottage_H2D_on_legs_tunnel_trim.3mf` (white): ridge, seam caps, legs, keys, latches, window retainers, hatch, inner door ring | 3 | 0.63 kg → 1 spool | ≈ 22 h |
+| 1 | `cat_cottage_H2D_test_coupons.3mf` (any colour) | 1 | 0.11 kg | ≈ 2.6 h |
+| 2 | `cat_cottage_H2D_on_legs_tunnel_walls.3mf` (cream): 4 corner modules, then the tunnel body | 5 | 3.36 kg → **4 spools** | ≈ 55 h |
+| 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf` (sage): 4 roof panels, then the tunnel roof | 5 | 1.89 kg → 2 spools | ≈ 34 h |
+| 4 | `cat_cottage_H2D_on_legs_tunnel_trim.3mf` (white): ridge, seam caps, legs, keys, latches, window retainers, hatch, inner door ring | 3 | 0.75 kg → 1 spool | ≈ 14 h |
 
-In all: about 4.8 kg and 158 h. Print the front-left corner first, and check it for warping and for the
-fit of its seam flanges before printing the other three. With only the cream spools on hand, the corners
-can start while the other colours are on their way. Start each corner on a spool with at least 650 g left,
-or let the AMS switch to a second spool.
+In all: about 6.1 kg (7 spools: 4 cream, 2 sage, 1 white) and about 105 h. That's a third faster than with
+a 0.4 mm nozzle, but uses about 1.3 kg more ASA: with 0.62 mm lines, 4 walls fill the 5 mm walls almost
+solid. 3 walls would save only 0.4 kg and leave the cream with no margin.
+
+- Print the front-left corner first, and check it for warping and for the fit of its seam flanges before
+  printing the other three.
+- Each corner takes 670–760 g: start it on a full spool, or let the AMS switch to a second spool of the
+  same colour.
 
 ## Hardware (all stainless steel, A2/304 or better A4/316)
 

@@ -1,15 +1,17 @@
 """Flatten Bambu Studio's system profiles (which inherit from each other) into the three standalone files the
 Bambu Studio command line needs, with this project's print settings applied.
 
-Usage: python3 -I tools/flatten_profiles.py [out_dir]   (default tools/slicer, git-ignored)
+Usage: python3 -I tools/flatten_profiles.py [out_dir] [nozzle]   (defaults tools/slicer and 0.4; git-ignored)
+       python3 -I tools/flatten_profiles.py tools/slicer06 0.6
 Writes machine.json, process.json (house parts), process_strong.json (support brackets) and asa.json.
 """
 import json, os, sys
 
 BBL = '/Applications/BambuStudio.app/Contents/Resources/profiles/BBL'
-MACHINE = 'Bambu Lab H2D 0.4 nozzle'
-PROCESS = '0.20mm Standard @BBL H2D'
-FILAMENT = 'Bambu ASA @BBL H2D 0.4 nozzle'
+NOZZLE = sys.argv[2] if len(sys.argv) > 2 else '0.4'
+MACHINE = f'Bambu Lab H2D {NOZZLE} nozzle'
+PROCESS = {'0.4': '0.20mm Standard @BBL H2D', '0.6': '0.30mm Standard @BBL H2D 0.6 nozzle'}[NOZZLE]
+FILAMENT = f'Bambu ASA @BBL H2D {NOZZLE} nozzle'
 
 # the house: 4 walls, 15 % gyroid, 5 top and bottom layers, 5 mm brim
 HOUSE = {'wall_loops': '4', 'sparse_infill_density': '15%', 'sparse_infill_pattern': 'gyroid',
