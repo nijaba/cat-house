@@ -94,7 +94,7 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 | `build.sh` | Exports every STL to `stl/` and renders the previews in `renders/`. Run `./build.sh` (about 2 minutes). |
 | `stl/` | One STL per part with the default settings, already in print orientation. |
 | `renders/` | The preview images, including `plate_layout.png`, which shows how the parts fit on the build plates. |
-| `release/` | Ready-made Bambu Studio project files: per colour for the on-legs build with the tunnel (0.6 mm nozzle), generic ones (0.4 mm), and the test prints. |
+| `release/` | Ready-made Bambu Studio project files: per colour for the on-legs build with the tunnel, generic ones per build, and the test prints. All are set up for the 0.6 mm nozzle. |
 | `STRUCTURAL.md`, `RAIN.md` | Strength checks for a 20 kg load, and the driven-rain check. |
 | `tools/` | The rain test, the test-print coupons, and the scripts that build the slicer profiles and fix the project files. |
 
@@ -116,7 +116,7 @@ otherwise. The `stl/` folder holds every variant; pick the tables that match you
 | `corner_fl` | 1 | 239 × 236 × 320 | floor down (with the tunnel on a wall: `corner_fl_away`, see below) |
 | `corner_bl` | 1 | 239 × 225 × 320 | floor down; carries the escape-hatch opening |
 | `roof_fl`, `roof_bl` | 1 each | 311 × 272 × 26 | shingles up; the lid slope (no screw pads) |
-| `ridge_front`, `ridge_back` | 1 each | 72 × 57 × 272 | **standing on end**, built-in lattices under the knuckles, 8 mm brim; or both as one object, `ridge_pair` (72 × 157 × 272) |
+| `ridge_front`, `ridge_back` | 1 each | 72 × 57 × 272 | **standing on end**, built-in lattices under the knuckles, 10 mm brim; or both as one object, `ridge_pair` (72 × 157 × 272) |
 | `ridge_saddle` | 1 | 55 × 50 × 25 | as exported |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
@@ -213,13 +213,15 @@ lighter of the two.
 
 Starting settings for Bambu Studio (generic ASA profile on the H2D):
 
-- Nozzle 0.4 mm at 0.20 mm layers, or **0.6 mm at 0.30 mm** (a third faster; the test coupons and the print-order files below use 0.6)
+- Nozzle 0.4 mm at 0.20 mm layers, or **0.6 mm at 0.30 mm** (a third faster; every project file in `release/` uses 0.6)
 - 4 walls, 5 top and 5 bottom layers, 15–20 % gyroid infill
 - Nozzle 260 °C, bed 100 °C, door closed, chamber heating on. Keep the cooling fan low (10–30 %) except on
   bridges.
-- 5 mm outer brim on every part, because ASA warps. The project files give the parts with little contact
-  with the plate a wider one: 8 mm for the ridge caps (they stand on end on a 6 mm strip), and 6 mm for the
-  legs (a 28 mm foot under a 60 mm leg).
+- 5 mm outer brim on every part, because ASA warps. **Brim rule:** a part taller than 100 mm whose first
+  layer covers less than 40 % of its footprint gets 8 mm, and less than 15 % gets 10 mm. That's the on-legs
+  landing (291 mm tall on 12 %: two pads, the keel and the outriggers' feet) and the ridge caps (272 mm on 8 %)
+  at 10 mm, and the ramp (263 mm on 38 %) at 8 mm. The legs keep 6 mm. The project files set these on the
+  parts themselves (`BRIM` in `tools/fix_3mf.py`).
 - **Cooling filter on** (printer settings). ASA gives off styrene, so keep the door closed and let the
   printer filter the air. On the H2D this printer setting is the one that counts; the filament's "air
   filtration" option (on in Bambu ASA's profile, exhaust fan 70 %) applies to printers that support it.
@@ -228,6 +230,7 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
   - thin combs under the corner modules' window heads (70 mm), the escape-hatch top (98 mm) and the half
     door top on each front corner (35 mm, free at the seam);
   - a comb under the entrance tunnel's lintel (80 mm), on the ramp and on the mounted tunnel bodies;
+  - outriggers that steady the on-legs landing, which stands on its narrow keel;
   - small lattices under the ridge caps' hinge knuckles and stop ears.
   Each stops one 0.30 mm layer short of the surface it holds and 1 mm from the sides, so it doesn't fuse, and
   stands on small tabs. After printing, snip the tabs with flush cutters and lift or twist the comb out. Bambu
@@ -295,7 +298,8 @@ test piece.
 These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls (3 for the corners), 15 %
 gyroid, 5 top and bottom layers, Bambu ASA, textured PEI plate. There is one project file per colour, so a
 plate never changes filament part-way through. None of them needs slicer supports: the supports are built
-into the parts (see Material and print settings), so leave supports off. (The other project files in `release/` are still set up for 0.4 mm.)
+into the parts (see Material and print settings), so leave supports off. The generic files (`on_legs`, `mounted`, `entrance_tunnel`, `printed_brackets`) use the same 0.6 mm profile
+(the brackets with 6 walls and 40 % infill).
 
 | Order | File | Colour | Plates | ASA | Time |
 |---|---|---|---|---|---|
@@ -303,8 +307,8 @@ into the parts (see Material and print settings), so leave supports off. (The ot
 | 1b | `cat_cottage_H2D_test_breakaway.3mf`: a 70 mm head on a built-in comb, to check the supports snap off cleanly | grey | 1 | 16 g | ≈ 35 min |
 | 2 | `cat_cottage_H2D_on_legs_walls.3mf`: 4 corner modules, **3 walls**, with built-in combs under the window heads, the hatch top and the door top | grey | 4 | 2.62 kg | ≈ 46 h |
 | 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf`: 4 roof panels, then both tunnel roofs | white | 6 | 2.01 kg | ≈ 36 h |
-| 4 | `cat_cottage_H2D_tunnel_body.3mf`: the on-legs tunnel's landing and ramp extension (comb under the lintel) | green | 2 | 1.29 kg | ≈ 23 h |
-| 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps standing on end, with built-in lattices under the knuckles and an 8 mm brim | green | 1 | 0.22 kg | ≈ 5.2 h |
+| 4 | `cat_cottage_H2D_tunnel_body.3mf`: the on-legs tunnel's landing (with outriggers, 10 mm brim) and ramp extension (comb under the lintel, 8 mm brim) | green | 2 | 1.36 kg | ≈ 24.5 h |
+| 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps standing on end, with built-in lattices under the knuckles and a 10 mm brim | green | 1 | 0.22 kg | ≈ 5.2 h |
 | 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap (they no longer need supports; the name stays) | green | 2 | 0.19 kg | ≈ 3 h |
 | 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, wide-foot legs, keys, latch buttons, window retainers, inner door ring | green | 3 | 0.48 kg | ≈ 8.6 h |
 
@@ -312,15 +316,19 @@ into the parts (see Material and print settings), so leave supports off. (The ot
 |---|---|---|---|
 | White: roof, tunnel roofs, test pieces | 2.1 kg | 4 | ≈ 1.9 kg |
 | Grey: 4 corner modules, breakaway test | 2.65 kg | 3 | ≈ 0.35 kg |
-| Green: trim and tunnel | 2.2 kg | 3 | ≈ 0.8 kg |
+| Green: trim and tunnel | 2.25 kg | 3 | ≈ 0.75 kg |
 
-In all: about 6.9 kg and about 126 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
+In all: about 7.0 kg and about 127 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
 lines that's a 1.9 mm shell each side, slightly more than the 4 × 0.42 mm the strength checks assumed, and
 it keeps the grey within 3 spools. The other parts keep 4 walls.
 
 - Print the front-left corner first, and check it for warping and for the fit of its seam flanges before
   printing the other three.
 - After each corner, snip the combs' tabs with flush cutters and twist the combs out (window, hatch, door).
+- The landing prints standing on its keel, two 40 mm pads under a body 164 mm wide and 290 mm tall, so it has
+  breakaway outriggers: triangular ribs that stand on the bed 25 mm outside each wall and climb the belly's 45°
+  faces (three on the outer side, two on the house side, clear of the round boss). Unlike the combs they're
+  joined to the belly by tabs every 15 mm, so they hold it steady; snip the tabs and lift the ribs off.
 - Each corner takes 640–680 g. Three spools hold four corners only with the AMS switching to the next grey
   spool part-way through, so keep two grey spools loaded with auto-refill on.
 

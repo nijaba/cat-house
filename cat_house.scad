@@ -1340,6 +1340,23 @@ module bk_comb(x0, x1, prof, ys, zs) {
   if (bk_tabs) for (x = xs) translate([x, ys - 1, zs[0] - bk_tab_h - 0.2]) cube([bk_t, 2, bk_tab_h + 0.21]);
 }
 
+// On legs, the landing prints standing on its keel (two 40 mm pads under a body 164 mm wide and 290 tall).
+// Breakaway outriggers steady it: on each side, triangular ribs from the bed 25 mm outside the wall up the
+// belly's 45 degree face, joined to it by snip-off tabs every 15 mm (unlike the combs, they must hold).
+bk_rig_t = 2.4;      // outrigger rib thickness: four 0.6 mm lines
+bk_rig_out = 25;     // how far the ribs stand out past the walls on the bed
+module tun_outriggers() let(yo = tun_yo(), yb = tun_yb(), yc = (yo + yb)/2, d = (yb - yo)/2, zg = zb - leg_h,
+                            gs = bk_gap*sqrt(2), xs = [tun_end + 15, (tun_end + tun_land_x1)/2, tun_land_x1 - 15])
+  // (no middle rib on the house side: the round boss comes down to 12 mm there)
+  for (x = xs, side = [-1, 1]) if (!(side > 0 && x == xs[1])) let(za = tun_walk_z(x) - tun_floor_t - d,   // the belly's apex at this x
+                                   ya = yc + side*22, yw = yc + side*(d - 1), yf = yc + side*(d + bk_rig_out)) {
+    translate([x - bk_rig_t/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(bk_rig_t)
+      polygon([[yf, zg], [ya, zg], [ya, za + 22 - gs], [yw, za + d - 1 - gs]]);
+    // tabs across the gap, every 15 mm up the face
+    if (bk_tabs) for (t = [0 : 15 : d - 23]) let(y = ya + side*t, zf = za + abs(y - yc) - gs/2)
+      translate([x - bk_rig_t/2, y - 1, zf - 1]) cube([bk_rig_t, 2, 2]);
+  }
+
 // under the lintel's flat (80 mm between its 45 degree haunches), standing on the walking surface walk(x)
 module tun_lintel_comb(walk) scale([entry_sx, 1, 1]) let(yo = tun_yo(), yb = tun_yb(), xa = tun_run - 8 + 0.3, xb = tun_run - 0.3,
     xm = (xa + xb)/2, ya = yo + tun_t + 35 + bk_side, yc = yb - tun_t - 35 - bk_side, top = tun_lintel_z - bk_gap,
@@ -1461,6 +1478,7 @@ module print_part(p) {
   if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -(tun_ground ? zb - leg_h : tun_floor_z)]) {
     tunnel_body_world();
     if (print_supports && !tun_ground) tun_lintel_comb(function(x) tun_floor_z + tun_floor_t);
+    if (print_supports && tun_ground) scale([entry_sx, 1, 1]) tun_outriggers();
   }
   if (p == "tunnel_roof") translate([entry_sx > 0 ? -(tun_end - 2) : tun_run + 14, tun_wi + 2*tun_t + 20, 0]) scale([entry_sx, 1, 1]) tunnel_roof_local();
   if (p == "tunnel_ramp") translate([-(tun_land_x1 - 15), -tun_yo(), -(zb - leg_h)]) {

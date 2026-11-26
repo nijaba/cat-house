@@ -29,8 +29,11 @@ MACHINE_SET = {'cooling_filter_enabled': '1'}
 # filament colour shown in Bambu Studio, by project file: white roof, grey walls, green trim
 COLOURS = [('_roof', '#FFFFFF'), ('_walls', '#A7ABAD'), ('_trim', '#3F7D4E'), ('_tunnel_body', '#3F7D4E'),
            ('_test_coupons', '#FFFFFF'), ('_test_breakaway', '#A7ABAD')]
-# parts with little contact with the plate for their height: a wider brim, set on the part itself
-BRIM = {'ridge_front.stl': 8, 'ridge_back.stl': 8, 'ridge_pair.stl': 8, 'hinge_cap.stl': 8, 'leg.stl': 6}
+# Brim rule (ASA): every part gets the project's 5 mm outer brim against warping. A part taller than 100 mm whose
+# first layer covers less than 40 % of its footprint gets 8 mm, and less than 15 % gets 10 mm, set on the part
+# itself. Measured 2026-11-26: landing (tunnel_body) 291 mm tall on 12 %, ridge caps 272 on 8 %, ramp 263 on 38 %.
+BRIM = {'ridge_front.stl': 10, 'ridge_back.stl': 10, 'ridge_pair.stl': 10, 'tunnel_body.stl': 10, 'tunnel_ramp.stl': 8,
+        'hinge_cap.stl': 8, 'leg.stl': 6}
 OBJECT_SUPPORT = [('enable_support', '1'), ('support_type', 'tree(auto)'), ('support_threshold_angle', '30'),
                   ('support_on_build_plate_only', '0')]
 
@@ -85,6 +88,10 @@ def fix(path):
             cfg = json.loads(data)
             if not names & NEEDS_SUPPORT:   # supports are built into the parts: none from the slicer
                 cfg['enable_support'] = '0'
+            # the command line records the extruders' nozzle as 0.4 whatever the profile; Bambu Studio sees the
+            # mismatch with the printer and reloads its default settings (2 walls, 3 shells, grid...), so match it
+            if cfg.get('nozzle_diameter'):
+                cfg['extruder_nozzle_diameter'] = list(cfg['nozzle_diameter'])
             if cfg['print_settings_id'] not in index('process'):   # an older export renamed the profile
                 cfg['print_settings_id'] = cfg['print_settings_id'].rsplit(' ', 1)[0]
             p = diff_keys(cfg, flatten('process', cfg['print_settings_id']))
@@ -114,7 +121,8 @@ def fix(path):
                     block = re.sub(r'\n\s*<metadata key="(%s)" value="[^"]*"/>' % '|'.join(SUPPORT_KEYS), '', block)
                 elif 'key="enable_support"' not in block:
                     kv += OBJECT_SUPPORT
-                if name in BRIM and 'key="brim_width"' not in block:
+                if name in BRIM:   # (replacing any brim an older version of this script set)
+                    block = re.sub(r'\n\s*<metadata key="(brim_type|brim_width)" value="[^"]*"/>', '', block)
                     kv += [('brim_type', 'outer_only'), ('brim_width', str(BRIM[name]))]
                 if not kv:
                     return block

@@ -3,7 +3,9 @@ position and setting. Each object is matched by its name (corner_fl.stl -> stl/c
 stl/test/<name>). Bambu stores a mesh centred on its bounding box, so a part whose bounding box changed is
 reported and left alone (re-export that project instead).
 
-Usage: python3 -I tools/swap_meshes.py release/cat_cottage_H2D_on_legs_walls.3mf [...]
+Usage: python3 -I tools/swap_meshes.py [--grow name.stl=old.stl ...] release/<file>.3mf [...]
+  --grow lets a part's bounding box change: old.stl is the part as it was when the project was made, and the
+  part's old geometry stays exactly where it was on the plate while the new parts of it extend around it.
 Then run tools/fix_3mf.py on the same files.
 """
 import os, re, struct, sys, zipfile
@@ -57,7 +59,7 @@ def swap(path):
              for m in re.finditer(r'<object id="(\d+)">(.*?)</object>', ms, re.S)}
     comp = {m.group(1): m.group(2).lstrip('/') for m in re.finditer(
         r'<object id="(\d+)"[^>]*>\s*<components>\s*<component p:path="([^"]+)"', top)}
-    new_files, counts = {}, {}
+    new_files, counts, grow_shift = {}, {}, {}
     for oid, name in names.items():
         if oid not in comp:
             continue
@@ -70,6 +72,20 @@ def swap(path):
         tris = read_stl(stl)
         nb = bbox([p for t in tris for p in t])
         ob = bbox(ov)
+        if name in GROW:
+            rb = bbox([p for t in read_stl(GROW[name]) for p in t])
+            if any(abs((rb[i][1] - rb[i][0]) - (ob[i][1] - ob[i][0])) > 0.02 for i in range(3)):
+                print(f'  {name}: the reference STL does not match the project mesh; left as it was')
+                continue
+            # shift the mesh's origin with the bounding-box centre, and the component offset by the same amount
+            shift = [(nb[i][0] + nb[i][1]) / 2 - (rb[i][0] + rb[i][1]) / 2 for i in range(3)]
+            centre = [(rb[i][0] + rb[i][1]) / 2 - (ob[i][0] + ob[i][1]) / 2 + shift[i] for i in range(3)]
+            body, n = mesh_xml(tris, centre)
+            new_files[comp[oid]] = re.sub(r'<vertices>.*</triangles>', lambda _: body, old, flags=re.S).encode()
+            counts[oid] = n
+            grow_shift[oid] = shift
+            print(f'  {name}: {len(re.findall("<triangle ", old))} -> {n} triangles, grown by {[round(v, 2) for v in shift]} (centre)')
+            continue
         if any(abs((nb[i][1] - nb[i][0]) - (ob[i][1] - ob[i][0])) > 0.02 for i in range(3)):
             print(f'  {name}: bounding box changed {[round(b[1] - b[0], 2) for b in ob]} -> {[round(b[1] - b[0], 2) for b in nb]}; left as it was')
             continue
@@ -86,6 +102,18 @@ def swap(path):
         return m.group(0)
     ms = re.sub(r'<object id="(\d+)">.*?</object>', fix_count, ms, flags=re.S)
     new_files['Metadata/model_settings.config'] = ms.encode()
+    # grown parts: move the component by the centre shift so the old geometry stays put
+    def fix_comp(m):
+        oid = m.group(1)
+        if oid not in grow_shift:
+            return m.group(0)
+        t = list(map(float, m.group(3).split()))
+        if t[:9] != [1, 0, 0, 0, 1, 0, 0, 0, 1]:
+            raise SystemExit(f'object {oid}: rotated component, not handled')
+        t[9:12] = [t[9 + i] + grow_shift[oid][i] for i in range(3)]
+        return m.group(0).replace(m.group(3), ' '.join(f'{v:g}' for v in t))
+    top = re.sub(r'<object id="(\d+)"[^>]*>\s*<components>\s*<component p:path="([^"]+)"[^>]*transform="([^"]+)"', fix_comp, top)
+    new_files['3D/3dmodel.model'] = top.encode()
     tmp = path + '.tmp'
     with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as w:
         for info, data in items:
@@ -93,6 +121,12 @@ def swap(path):
     os.replace(tmp, path)
 
 
-for p in sys.argv[1:]:
+GROW = {}
+args = sys.argv[1:]
+while args and args[0] == '--grow':
+    k, v = args[1].split('=', 1)
+    GROW[k] = v
+    args = args[2:]
+for p in args:
     print(os.path.basename(p))
     swap(p)
