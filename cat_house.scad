@@ -102,6 +102,13 @@ peek_window = true;
 peek_all = true;     // true: glaze every window (2 when mounted, 4 on legs); false: only the front one on the lid side
 pane_alpha = 0.45;   // preview only: pane transparency
 pane_t = 2;          // 2 mm UV-stable polycarbonate, cut to (win_w + 7) x (win_h + 7)
+print_supports = true; // breakaway combs under the window heads, hatch top and door top, printed with the corners
+bk_gap = 0.3;       // air gap between a comb and the surface it holds: one 0.30 mm layer
+bk_t = 1.2;         // rib and spine thickness: two 0.6 mm lines
+bk_pitch = 7;       // rib spacing: the surface bridges this far between ribs
+bk_side = 1;        // clearance from the sides of the opening, so the slicer keeps the outlines apart
+bk_tab_h = 0.6;     // tabs the comb stands on: two layers, snipped off afterwards
+bk_tabs = true;     // false only for the clearance check
 open_angle = 0;      // preview only: show the lid opened by this many degrees
 hatch_open_angle = 0; // preview only: show the escape flap opened by this many degrees
 
@@ -450,6 +457,15 @@ module module_cuts(sx, sy) {
     translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out + 2, h = relief + 8, $fn = 120);
     // clear the inner flange where the inner ring sits
     translate([0, -idp/2 + 0.01, door_z]) rotate([-90, 0, 0]) cylinder(r = R_out + 2, h = flange_d + 1, $fn = 120);
+    // 45 degree undersides where the seam flange and (left modules) the seam batten resume above the door,
+    // so neither starts as a flat overhang at the seam
+    let(ct = door_z + R_out + 2) {
+      translate([-gap - flange_t - 1, 0, 0]) rotate([90, 0, 90]) linear_extrude(2*(gap + flange_t + 1))
+        polygon([[-idp/2 - 0.6, ct - 1], [-idp/2 + flange_d + 1.5, ct - 1], [-idp/2 + flange_d + 1.5, ct + flange_d + 1.5],
+                 [-idp/2 - 0.6, ct - 0.6]]);
+      if (sx < 0) translate([0, -hy + 0.01, 0]) rotate([90, 0, 0]) linear_extrude(relief + 1)
+        polygon([[0, ct - 1], [seam_cover + 1, ct - 1], [seam_cover + 1, ct + seam_cover + 1], [0, ct]]);
+    }
   }
   if (sy > 0) face_xf(1) for (ac = [-75, 75], i = [0:4]) louvre(ac - 20, 40, vz0 + i*6.5, 4);
   face_xf(sx > 0 ? 2 : 3) for (ac = [-hy/2, hy/2], i = [0:2]) louvre(ac - 30, 60, 151 + i*6.5, 4);
@@ -483,7 +499,7 @@ module module_cuts(sx, sy) {
   }
   // escape hatch: opening, flat pad for the frame, frame bolts
   if (hatch && sy > 0 && sx * hatch_x > 0) {
-    // opening with 45 degree top corners, hidden behind the frame, so its top bridges 98 mm instead of 140
+    // opening with 45 degree top corners, hidden behind the frame: its 98 mm top stands on a breakaway comb (print_supports)
     translate([0, hy + 19, 0]) rotate([90, 0, 0]) linear_extrude(wt + 20)
       polygon([[hx0, hatch_z0], [hx1, hatch_z0], [hx1, hz1 - 21], [hx1 - 21, hz1], [hx0 + 21, hz1], [hx0, hz1 - 21]]);
     translate([hf[0] - 1, hy + 0.01, hatch_z0 - 13]) cube([hf[1] - hf[0] + 2, 12, hz1 + 23 - (hatch_z0 - 13)]);
@@ -830,13 +846,13 @@ module tunnel_body_world() if (tun_ground) tunnel_landing_world(); else scale([e
           translate([tun_end, yo, zg]) cube([L, tun_t, H]);                           // front wall
           translate([tun_end, yo, zg]) cube([2*tun_t, yb - yo, H]);                   // closed end, thick enough for a door bolt
           // lintel over the mouth: stops near-horizontal rain skimming under the roof to the doorway
-          // with 45 degree haunches at the walls, so its underside bridges 80 mm instead of 150
+          // with 45 degree haunches at the walls; the 80 mm flat between them stands on a breakaway comb when printed
           translate([tun_run - 8, 0, 0]) rotate([90, 0, 90]) linear_extrude(8)
             polygon([[yo, tun_lintel_z - 35], [yo + tun_t, tun_lintel_z - 35], [yo + tun_t + 35, tun_lintel_z],
                      [yb - tun_t - 35, tun_lintel_z], [yb - tun_t, tun_lintel_z - 35], [yb, tun_lintel_z - 35], [yb, 400], [yo, 400]]);
           // round boss that fills the siding cut-out round the door and carries the bolts
           intersection() {
-            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out, h = relief + 0.01, $fn = 120);
+            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r1 = R_out, r2 = R_out - relief, h = relief + 0.01, $fn = 120);   // 45 degree rim: no ledge at its bottom
             translate([tun_end, -hy - 10, zf]) cube([L, 20, 300]);
           }
         }
@@ -844,8 +860,8 @@ module tunnel_body_world() if (tun_ground) tunnel_landing_world(); else scale([e
       }
       // screw tabs for the roof, with 45 degree gussets so the body prints without support
       for (t = tun_tabs) hull() {
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10.5 : t[1] - 7, -6]) cube([14, t[1] < -tun_wi/2 ? 17.5 : 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 11.5 : t[1] + 7, -26]) cube([14, t[1] < -tun_wi/2 ? 3.5 : 2, 1]);
       }
     }
     // the doorway, open to the top so the back wall needs no bridge
@@ -905,7 +921,8 @@ module tun_ramp_floor(x0, x1, yo, yb) {
   // walking surface, 6 mm thick under the landing; under the ramp its underside falls at 45 degrees (not the
   // ramp's 30), so it prints over itself without supports
   translate([0, yb, 0]) rotate([90, 0, 0]) linear_extrude(yb - yo)
-    polygon(concat(pts, [for (i = [n : -1 : 0]) [pts[i][0], max(zg, pts[i][1] - tun_floor_t)]]));
+    // (where its underside would come within 3 mm of the ground it drops to the ground, so nothing hovers just above the bed)
+    polygon(concat(pts, [for (i = [n : -1 : 0]) [pts[i][0], pts[i][1] - tun_floor_t < zg + 3 ? zg : pts[i][1] - tun_floor_t]]));
   // grip ridges across the ramp, every 25 mm along it
   // (in 26 mm segments with 8 mm gaps, so water runs down the ramp instead of pooling behind them)
   for (x = [tun_step_x + 15 : 25 : x1 - 5], y = [yo + tun_t + 4 : 34 : yb - tun_t - 26]) if (x > x0 && tun_walk_z(x) > zg + 5)
@@ -957,6 +974,9 @@ module tun_window_trim(xc, zc, w = 80, h = 80, c = 25) let(yo = tun_yo()) differ
   translate([0, yo + 2, 0]) rotate([90, 0, 0]) linear_extrude(10)
     polygon([[xc - w/2, zc - h/2], [xc + w/2, zc - h/2], [xc + w/2, zc + h/2 - c], [xc + w/2 - c, zc + h/2],
              [xc - w/2 + c, zc + h/2], [xc - w/2, zc + h/2 - c]]);
+  // 45 degree underside on the bottom bar, so it doesn't start as a 3 mm ledge
+  let(zt = zc - h/2 - 8) translate([xc - w/2 - 10, 0, 0]) rotate([90, 0, 90]) linear_extrude(w + 20)
+    polygon([[yo - 3.1, zt - 0.1], [yo - 3.1, zt + 3.1], [yo + 0.01, zt - 0.1]]);
 }
 // on legs: base frame under the walls, so the piers spread their load on soft ground
 module tun_base_frame(x0, x1) let(zg = zb - leg_h, yo = tun_yo(), yb = tun_yb()) {
@@ -1013,7 +1033,7 @@ module tunnel_landing_world() scale([entry_sx, 1, 1]) {
           translate([x0, yo, zf]) cube([L, tun_t, 200]);                              // front wall
           translate([x0, yo, zf]) cube([2*tun_t, yb - yo, 200]);                      // closed end
           intersection() {
-            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r = R_out, h = relief + 0.01, $fn = 120);
+            translate([0, -hy - 0.01, door_z]) rotate([90, 0, 0]) cylinder(r1 = R_out, r2 = R_out - relief, h = relief + 0.01, $fn = 120);   // 45 degree rim: no ledge at its bottom
             translate([x0, -hy - 10, zf - 40]) cube([L, 20, 340]);
           }
         }
@@ -1022,8 +1042,8 @@ module tunnel_landing_world() scale([entry_sx, 1, 1]) {
       tun_slope_belly(x0, x1, tan(tun_land_tilt));
       tun_keel(x0 + 2, x1 - 2);
       for (t = tun_tabs) if (t[0] < 0) hull() {
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10.5 : t[1] - 7, -6]) cube([14, t[1] < -tun_wi/2 ? 17.5 : 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 11.5 : t[1] + 7, -26]) cube([14, t[1] < -tun_wi/2 ? 3.5 : 2, 1]);
       }
     }
     intersection() {
@@ -1075,15 +1095,23 @@ module tunnel_ramp_world() scale([entry_sx, 1, 1]) {
         }
       }
       // splice plates that slide inside the landing section's walls
-      for (y = [yb - 2*tun_t - 0.3, yo + tun_t + 0.3]) translate([x0 - 15, y, tun_floor_z + tun_floor_t + 10]) cube([17, tun_t, 100]);
+      // (each tongue is joined to its ramp wall over x0..x0 + 15, and its free end has a 45 degree underside)
+      for (y = [yb - 2*tun_t - 0.3, yo + tun_t + 0.3]) let(z0 = tun_floor_z + tun_floor_t + 4, z1 = tun_floor_z + tun_floor_t + 110) {
+        translate([0, y + tun_t, 0]) rotate([90, 0, 0]) linear_extrude(tun_t)
+          polygon([[x0, z0], [x0 + 15, z0], [x0 + 15, z1], [x0 - 15, z1], [x0 - 15, z0 + 15]]);
+        translate([x0, y > (yo + yb)/2 ? yb - tun_t - 0.31 : yo + tun_t - 0.01, z0]) cube([15, 0.32, z1 - z0]);
+        // 45 degree gusset under the joined part, from the wall to the plate's inner face
+        let(yw = y > (yo + yb)/2 ? yb - tun_t + 0.01 : yo + tun_t - 0.01, d = y > (yo + yb)/2 ? -4.32 : 4.32)
+          translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(15) polygon([[yw, z0], [yw + d, z0], [yw, z0 - abs(d)]]);
+      }
       // tabs for the door section's roof (over the top of the ramp) and for its own roof
       for (t = tun_tabs) if (t[0] > 0) hull() {
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
-        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10.5 : t[1] - 7, -6]) cube([14, t[1] < -tun_wi/2 ? 17.5 : 16, 6 - 0.01]);
+        tun_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 11.5 : t[1] + 7, -26]) cube([14, t[1] < -tun_wi/2 ? 3.5 : 2, 1]);
       }
       for (t = tun_ramp_tabs) hull() {
-        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 9 : t[1] - 7, -6]) cube([14, 16, 6 - 0.01]);
-        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10 : t[1] + 7, -26]) cube([14, 2, 1]);
+        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 10.5 : t[1] - 7, -6]) cube([14, t[1] < -tun_wi/2 ? 17.5 : 16, 6 - 0.01]);
+        tun_ramp_plane() translate([t[0] - 7, t[1] < -tun_wi/2 ? t[1] - 11.5 : t[1] + 7, -26]) cube([14, t[1] < -tun_wi/2 ? 3.5 : 2, 1]);
       }
     }
     for (y = [yb - 2*tun_t - 1.3, yo + tun_t - 0.7], z = [70, 150]) translate([x0 - 8, y, z]) rotate([-90, 0, 0]) cylinder(d = m4, h = tun_t + 2, $fn = 16);
@@ -1290,7 +1318,71 @@ module landing_print() translate([entry_sx > 0 ? -landing_x0 : landing_x_end, -h
 // =====================================================================
 //  Printable parts (print orientation)
 // =====================================================================
-module corner_print(sx, sy) translate([0, 0, -zb]) corner(sx, sy);
+module corner_print(sx, sy) translate([0, 0, -zb]) {
+  corner(sx, sy);
+  if (print_supports) breakaway(sx, sy);
+}
+
+// ---------------------------------------------------------------------
+//  Breakaway supports, printed with the corner modules and snapped off afterwards.
+//  ASA bridges about 40 mm cleanly; the window heads (70 mm), the hatch top (98 mm) and the half door top
+//  (35 mm, free at the seam) need holding up. Each support is a comb: thin ribs across the wall every
+//  bk_pitch, tied by a spine along the span. It stops bk_gap short of the surface it holds (one 0.30 mm
+//  layer, so it doesn't fuse), keeps bk_side away from the sides, and stands on small tabs (bk_tab_h tall)
+//  that a flush cutter snips.
+// ---------------------------------------------------------------------
+// ribs at x0..x1 (every bk_pitch), each the (y, z) polygon prof; spine at y = ys from zs[0] to zs[1]
+module bk_comb(x0, x1, prof, ys, zs) {
+  n = max(1, round((x1 - x0)/bk_pitch));
+  xs = [for (i = [0:n]) x0 + (x1 - x0 - bk_t)*i/n];
+  for (x = xs) translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(bk_t) polygon(prof);
+  translate([x0, ys - bk_t/2, zs[0]]) cube([x1 - x0, bk_t, zs[1] - zs[0]]);
+  if (bk_tabs) for (x = xs) translate([x, ys - 1, zs[0] - bk_tab_h - 0.2]) cube([bk_t, 2, bk_tab_h + 0.21]);
+}
+
+// under the lintel's flat (80 mm between its 45 degree haunches), standing on the walking surface walk(x)
+module tun_lintel_comb(walk) scale([entry_sx, 1, 1]) let(yo = tun_yo(), yb = tun_yb(), xa = tun_run - 8 + 0.3, xb = tun_run - 0.3,
+    xm = (xa + xb)/2, ya = yo + tun_t + 35 + bk_side, yc = yb - tun_t - 35 - bk_side, top = tun_lintel_z - bk_gap,
+    n = max(1, round((yc - ya)/bk_pitch))) {
+  for (i = [0:n]) let(y = ya + (yc - ya - bk_t)*i/n) {
+    translate([0, y + bk_t, 0]) rotate([90, 0, 0]) linear_extrude(bk_t)
+      polygon([[xa, walk(xa) + bk_tab_h], [xb, walk(xb) + bk_tab_h], [xb, top], [xa, top]]);
+    if (bk_tabs) translate([xm - 1, y, min(walk(xm - 1), walk(xm + 1)) - 0.2]) cube([2, bk_t, bk_tab_h + 0.2 + abs(walk(xm - 1) - walk(xm + 1))]);
+  }
+  translate([xm - bk_t/2, ya, max(walk(xm - bk_t/2), walk(xm + bk_t/2)) + bk_tab_h]) cube([bk_t, yc - ya, top - max(walk(xm - bk_t/2), walk(xm + bk_t/2)) - bk_tab_h]);
+}
+
+module breakaway(sx, sy) {
+  zb0 = bk_tab_h;   // combs start this far above the surface they stand on
+  // window heads: through the wall core (head at the top of the opening) and the pane pocket (4 mm higher)
+  if (peek_on(sx, sy)) face_xf(sx < 0 ? 3 : 2) let(ac = peek_ac(sx, sy), z0 = win_zc - win_h/2, z1 = win_zc + win_h/2)
+    bk_comb(ac - win_w/2 + bk_side, ac + win_w/2 - bk_side,
+            [[-wt + 0.3, z0 + zb0], [-0.5, z0 + zb0], [-0.5, z1 - bk_gap], [-wt + pane_t - bk_side, z1 - bk_gap],
+             [-wt + pane_t - bk_side, z1 + 4 - bk_gap], [-wt + 0.3, z1 + 4 - bk_gap]],
+            -wt + pane_t + (wt - pane_t)/2, [z0 + zb0, z1 - bk_gap]);
+  // escape hatch: under the flat top between the 45 degree corners, through the core and the frame pad
+  if (hatch && sy > 0 && sx * hatch_x > 0)
+    bk_comb(hx0 + 21 + bk_side, hx1 - 21 - bk_side,
+            [[hy - wt + 0.3, hatch_z0 + zb0], [hy, hatch_z0 + zb0], [hy + relief - 0.5, hatch_z0 + zb0 + 3],
+             [hy + relief - 0.5, hz1 - bk_gap], [hy - wt + 0.3, hz1 - bk_gap]],
+            hy - wt/2, [hatch_z0 + zb0, hz1 - bk_gap]);
+  // door: the flat top of the clipped teardrop, door_r + 4 above its centre, half of it in each front corner
+  if (sy < 0) let(r = door_r + 4, xe = r*(sqrt(2) - 1), zt = door_z + r - bk_gap,
+                  zbot = function(x) door_z - sqrt(r*r - x*x) + zb0)
+    scale([sx, 1, 1]) {
+      n = max(1, round((xe - 1 - gap - 0.3)/bk_pitch));
+      xs = [for (i = [0:n]) gap + 0.3 + (xe - 1 - gap - 0.3 - bk_t)*i/n];
+      for (x = xs) let(z0 = zbot(x + bk_t)) {
+        translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(bk_t)
+          polygon([[-hy - relief + 0.5, z0 + 3], [-hy, z0], [-idp/2 - 0.3, z0], [-idp/2 - 0.3, zt], [-hy - relief + 0.5, zt]]);
+        if (bk_tabs) translate([x, -hy + wt/2 - 1, zbot(x) - zb0 - 0.2]) cube([bk_t, 2, z0 - zbot(x) + zb0 + 0.21]);
+      }
+      // spine along the core's mid-plane, its foot following the round bottom of the door
+      translate([0, -hy + wt/2 + bk_t/2, 0]) rotate([90, 0, 0]) linear_extrude(bk_t)
+        polygon(concat([[gap + 0.3, zt], [xe - 1, zt]],
+                       [for (i = [0:12]) let(x = xe - 1 - (xe - 1 - gap - 0.3)*i/12) [x, zbot(x)]]));
+    }
+}
 
 module roof_print(sx, sy) {
   v0 = sy < 0 ? yf : ysplit + gap;
@@ -1308,11 +1400,38 @@ module ridge_print(sy, saddle = false) {
   v1 = saddle ? ysplit + 25 : (sy < 0 ? ysplit - gap : yb);
   eh = eave_of(hinge_sx);
   if (hinge_on && !saddle) {
-    // stood on its end: the profile extrudes straight up, so the knuckles and stop ears need no support
-    translate([hinge_sx > 0 ? 345 : 0, 30, -v0]) rotate([90, 0, 0])
-      if (hinge_sx > 0) unslope_right(eh) ridge_cap(sy, saddle); else unslope_left(eh) ridge_cap(sy, saddle);
+    // stood on its end: the profile extrudes straight up; the knuckles and stop ears get breakaway lattices
+    ridge_standing(sy);
+    if (print_supports) knuckle_combs(sy, v0, v1);
   } else
     translate([0, v1 - v0, ridge_t]) rotate([180, 0, 0]) translate([-u0, -v0, -t0]) unslope_left(e) ridge_cap(sy, saddle);
+}
+
+module ridge_standing(sy) let(v0 = sy < 0 ? yf : ysplit + gap, eh = eave_of(hinge_sx))
+  translate([hinge_sx > 0 ? 345 : 0, 30, -v0]) rotate([90, 0, 0])
+    if (hinge_sx > 0) unslope_right(eh) ridge_cap(sy); else unslope_left(eh) ridge_cap(sy);
+
+// Breakaway supports under the cap's knuckles (stood on end, each knuckle and its stop ear overhang the cap's
+// profile). In each gap below a knuckle: a lattice the knuckle's shape, kept bk_side clear of the cap's profile
+// (where the fixed knuckles' notch is and where it isn't), bk_gap below the knuckle and above the one under it.
+module bk_lattice2d() for (i = [-60 : 3.5 : 60]) {
+  translate([i, -1000]) square([bk_t, 2000]);
+  translate([-1000, i]) square([2000, bk_t]);
+}
+module knuckle_combs(sy, v0, v1) let(segs = hinge_segs(v0, v1), caps = [for (sg = segs) if (sg[2] == 1) sg], zend = (segs[0][0] - v0)/2)
+  for (k = [0 : len(caps) - 1]) let(sg = caps[k], zl = k == 0 ? 0 : caps[k - 1][1] - v0 + bk_gap, zh = sg[0] - v0 - bk_gap,
+                                     zk = (sg[0] + sg[1])/2 - v0, zp = sg[0] - v0 - hinge_gap - hinge_seg/2)
+    translate([0, 0, zl]) linear_extrude(zh - zl) {
+      intersection() { knuckle_area(sy, zk, zp, zend); bk_lattice2d(); }
+      // a ring round the outline ties the lattice into one piece
+      difference() { knuckle_area(sy, zk, zp, zend); offset(delta = -bk_t) knuckle_area(sy, zk, zp, zend); }
+    }
+module knuckle_area(sy, zk, zp, zend) difference() {
+  projection(cut = true) translate([0, 0, -zk]) ridge_standing(sy);
+  offset(r = bk_side) union() {
+    projection(cut = true) translate([0, 0, -zp]) ridge_standing(sy);
+    projection(cut = true) translate([0, 0, -zend]) ridge_standing(sy);
+  }
 }
 
 module rail_print(which) {
@@ -1339,9 +1458,15 @@ module print_part(p) {
   if (p == "ridge_pair") { ridge_print(-1); translate([0, 100, 0]) ridge_print(1); }
   if (p == "seam_cap") seam_cap_print(eave_of(mount_sx));
   if (p == "door_surround") door_surround(step = !landing_on);
-  if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -(tun_ground ? zb - leg_h : tun_floor_z)]) tunnel_body_world();
+  if (p == "tunnel_body") translate([entry_sx > 0 ? -tun_end : tun_run, -tun_yo(), -(tun_ground ? zb - leg_h : tun_floor_z)]) {
+    tunnel_body_world();
+    if (print_supports && !tun_ground) tun_lintel_comb(function(x) tun_floor_z + tun_floor_t);
+  }
   if (p == "tunnel_roof") translate([entry_sx > 0 ? -(tun_end - 2) : tun_run + 14, tun_wi + 2*tun_t + 20, 0]) scale([entry_sx, 1, 1]) tunnel_roof_local();
-  if (p == "tunnel_ramp") translate([-(tun_land_x1 - 15), -tun_yo(), -(zb - leg_h)]) tunnel_ramp_world();
+  if (p == "tunnel_ramp") translate([-(tun_land_x1 - 15), -tun_yo(), -(zb - leg_h)]) {
+    tunnel_ramp_world();
+    if (print_supports) tun_lintel_comb(function(x) tun_walk_z(x));
+  }
   if (p == "tunnel_ramp_roof") translate([0, tun_wi + 2*tun_t + 20, 0]) tunnel_ramp_roof_local();
   if (p == "door_inner_ring") door_inner_ring();
   if (p == "leg") leg();

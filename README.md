@@ -116,14 +116,14 @@ otherwise. The `stl/` folder holds every variant; pick the tables that match you
 | `corner_fl` | 1 | 239 × 236 × 320 | floor down (with the tunnel on a wall: `corner_fl_away`, see below) |
 | `corner_bl` | 1 | 239 × 225 × 320 | floor down; carries the escape-hatch opening |
 | `roof_fl`, `roof_bl` | 1 each | 311 × 272 × 26 | shingles up; the lid slope (no screw pads) |
-| `ridge_front`, `ridge_back` | 1 each | 72 × 57 × 272 | **standing on end**, tree supports, 8 mm brim; or both as one object, `ridge_pair` (72 × 157 × 272) |
+| `ridge_front`, `ridge_back` | 1 each | 72 × 57 × 272 | **standing on end**, built-in lattices under the knuckles, 8 mm brim; or both as one object, `ridge_pair` (72 × 157 × 272) |
 | `ridge_saddle` | 1 | 55 × 50 × 25 | as exported |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
-| `latch_keeper` | 2 | 36 × 34 × 12 | flat, supports on |
+| `latch_keeper` | 2 | 36 × 34 × 12 | flat |
 | `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
 | `hatch_frame` | 1 | 170 × 174 × 43 | wall side down, hood and cheeks up |
-| `hatch_flap` | 1 | 157 × 164 × 12 | inside face down, supports on |
+| `hatch_flap` | 1 | 157 × 164 × 12 | inside face down |
 
 ### On legs
 
@@ -224,12 +224,19 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
   printer filter the air. On the H2D this printer setting is the one that counts; the filament's "air
   filtration" option (on in Bambu ASA's profile, exhaust fan 70 %) applies to printers that support it.
   The project files have both switched on.
-- Supports off for the corner modules, roof panels, tunnel and mount parts. Their overhangs are 45° or
-  steeper, and the openings bridge at most about 100 mm.
-- **Supports on (tree, auto, 30°) for the ridge caps, the latch keepers and the escape-hatch flap.** The
-  ridge caps' hinge knuckles stick out from the cap, the keeper has a hook, and the flap has its hinge
-  barrel. Every project file in `release/` already switches supports on for exactly those parts. If you
-  slice the STLs yourself, switch them on for those parts only.
+- **No slicer supports.** The supports are built into the parts and print with them:
+  - thin combs under the corner modules' window heads (70 mm), the escape-hatch top (98 mm) and the half
+    door top on each front corner (35 mm, free at the seam);
+  - a comb under the entrance tunnel's lintel (80 mm), on the ramp and on the mounted tunnel bodies;
+  - small lattices under the ridge caps' hinge knuckles and stop ears.
+  Each stops one 0.30 mm layer short of the surface it holds and 1 mm from the sides, so it doesn't fuse, and
+  stands on small tabs. After printing, snip the tabs with flush cutters and lift or twist the comb out. Bambu
+  Studio still shades those surfaces red in its overhang preview; that's expected, leave supports off.
+- **Design rule for every part:** a flat underside may bridge at most 40 mm, which is Bambu's figure for ASA
+  (community tests see sag start at about 40 mm), and any flat with a free end longer than about 3 mm needs
+  holding up. Where a surface can be reshaped to 45° without hurting the design it is; otherwise it gets a
+  breakaway comb. `print_supports = false` in `cat_house.scad` leaves the combs out, for another slicer's own
+  supports.
 - Dry the filament first (4 h at 65 °C) if the spool has been open in Florida humidity.
 
 ## Test print first
@@ -261,42 +268,58 @@ closed and no play. **All joints pass.** `release/cat_cottage_H2D_test_coupons_r
 panel, hinge cap and key. That's about 80 g and 2 h, using the first print's seam edges and floor
 pockets.
 
+**Breakaway supports (2026-11-26):** before the first corner, print `release/cat_cottage_H2D_test_breakaway.3mf`
+(16 g, about 35 minutes, grey, supports off). It's a 70 mm opening whose head stands on the same comb as the
+window heads. Snip the tabs, then twist the comb out.
+
+| Check | If it's off, change in `cat_house.scad` |
+|---|---|
+| The comb comes away by hand, without tearing the head | fused: `bk_gap` 0.3 → 0.4 (and check the slicer's layer height is 0.30) |
+| The head's underside is flat between the comb's lines, sagging no more than about 0.5 mm | sagging: `bk_pitch` 7 → 5 |
+| The comb's ends didn't stick to the sides of the opening | stuck: `bk_side` 1 → 1.5 |
+| The comb stood up straight to the top | wobbled: tell me, the spine can be doubled |
+
 The coupons' STLs are in `stl/test/`, and `tools/test_coupons.scad` makes them. The slicer profiles behind
 the project files come from `tools/flatten_profiles.py`. After exporting project files from the command
 line, run `python3 -I tools/fix_3mf.py release/*.3mf`. It records which settings differ from Bambu's
-built-in profile, which Bambu Studio needs in order to keep them, and switches supports on for the parts
-that need them.
+built-in profile, which Bambu Studio needs in order to keep them, and keeps slicer supports off (only the
+hinge coupon, which predates the built-in supports, gets them). After changing a part, `./build.sh stl` and
+then `python3 -I tools/swap_meshes.py release/<file>.3mf` put the new mesh into a project file without moving
+anything on its plates; run `fix_3mf.py` on it afterwards. `tools/breakaway_test.scad` makes the breakaway
+test piece.
 
 ## Print order: on legs, three colours, with the entrance tunnel
 
 These files are set up for a **0.6 mm nozzle**: "0.30mm Standard @BBL H2D 0.6 nozzle", 4 walls (3 for the corners), 15 %
 gyroid, 5 top and bottom layers, Bambu ASA, textured PEI plate. There is one project file per colour, so a
-plate never changes filament part-way through. Trim is split in three, so the parts that need supports
-print apart from the others. (The other project files in `release/` are still set up for 0.4 mm.)
+plate never changes filament part-way through. None of them needs slicer supports: the supports are built
+into the parts (see Material and print settings), so leave supports off. (The other project files in `release/` are still set up for 0.4 mm.)
 
 | Order | File | Colour | Plates | ASA | Time |
 |---|---|---|---|---|---|
 | 1 | `cat_cottage_H2D_test_coupons.3mf` | white | 1 | 0.12 kg | ≈ 2.7 h |
-| 2 | `cat_cottage_H2D_on_legs_walls.3mf`: 4 corner modules, **3 walls** | grey | 4 | 2.52 kg | ≈ 44 h |
+| 1b | `cat_cottage_H2D_test_breakaway.3mf`: a 70 mm head on a built-in comb, to check the supports snap off cleanly | grey | 1 | 16 g | ≈ 35 min |
+| 2 | `cat_cottage_H2D_on_legs_walls.3mf`: 4 corner modules, **3 walls**, with built-in combs under the window heads, the hatch top and the door top | grey | 4 | 2.62 kg | ≈ 46 h |
 | 3 | `cat_cottage_H2D_on_legs_tunnel_roof.3mf`: 4 roof panels, then both tunnel roofs | white | 6 | 2.01 kg | ≈ 36 h |
-| 4 | `cat_cottage_H2D_tunnel_body.3mf`: the on-legs tunnel's landing and ramp extension | green | 2 | 1.26 kg | ≈ 23 h |
-| 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps as one object, standing on end, with tree supports and an 8 mm brim | green | 1 | 0.29 kg | ≈ 6 h |
-| 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap, with supports | green | 2 | 0.19 kg | ≈ 3 h |
+| 4 | `cat_cottage_H2D_tunnel_body.3mf`: the on-legs tunnel's landing and ramp extension (comb under the lintel) | green | 2 | 1.29 kg | ≈ 23 h |
+| 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps standing on end, with built-in lattices under the knuckles and an 8 mm brim | green | 1 | 0.22 kg | ≈ 5.2 h |
+| 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap (they no longer need supports; the name stays) | green | 2 | 0.19 kg | ≈ 3 h |
 | 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, wide-foot legs, keys, latch buttons, window retainers, inner door ring | green | 3 | 0.48 kg | ≈ 8.6 h |
 
 | Colour | Needed | Spools on hand | Spare |
 |---|---|---|---|
 | White: roof, tunnel roofs, test pieces | 2.1 kg | 4 | ≈ 1.9 kg |
-| Grey: 4 corner modules | 2.5 kg | 3 | ≈ 0.5 kg |
+| Grey: 4 corner modules, breakaway test | 2.65 kg | 3 | ≈ 0.35 kg |
 | Green: trim and tunnel | 2.2 kg | 3 | ≈ 0.8 kg |
 
-In all: about 6.9 kg and about 122 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
+In all: about 6.9 kg and about 126 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
 lines that's a 1.9 mm shell each side, slightly more than the 4 × 0.42 mm the strength checks assumed, and
 it keeps the grey within 3 spools. The other parts keep 4 walls.
 
 - Print the front-left corner first, and check it for warping and for the fit of its seam flanges before
   printing the other three.
-- Each corner takes 600–670 g. Three spools hold four corners only with the AMS switching to the next grey
+- After each corner, snip the combs' tabs with flush cutters and twist the combs out (window, hatch, door).
+- Each corner takes 640–680 g. Three spools hold four corners only with the AMS switching to the next grey
   spool part-way through, so keep two grey spools loaded with auto-refill on.
 
 ## Hardware (all stainless steel, A2/304 or better A4/316)

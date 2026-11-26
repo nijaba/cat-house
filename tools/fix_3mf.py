@@ -3,8 +3,11 @@
 The command line writes every setting into Metadata/project_settings.config, but leaves
 "different_settings_to_system" empty. Bambu Studio reads that list to know which values differ from its
 built-in profile, so it silently reloads the plain profile (no supports, 2 walls, ...). This script fills in
-the list by comparing with the built-in profiles. It also switches supports on per object for the parts that
-need them, whatever the project's global setting.
+the list by comparing with the built-in profiles.
+
+Supports are built into the parts (breakaway combs and lattices in cat_house.scad), so slicer supports stay off.
+Only the hinge test coupon, which predates them, still gets slicer supports; any per-object support switched on
+by an older version of this script is removed from the other parts.
 
 Usage: python3 -I tools/fix_3mf.py release/*.3mf
 """
@@ -14,7 +17,9 @@ BBL = '/Applications/BambuStudio.app/Contents/Resources/profiles/BBL'
 SKIP = {'name', 'from', 'inherits', 'setting_id', 'instantiation', 'version', 'compatible_printers',
         'compatible_printers_condition', 'renamed_from', 'type', 'description', 'filament_id',
         'print_settings_id', 'filament_settings_id', 'printer_settings_id'}
-NEEDS_SUPPORT = {'ridge_front.stl', 'ridge_back.stl', 'ridge_pair.stl', 'hinge_cap.stl', 'latch_keeper.stl', 'hatch_flap.stl'}
+NEEDS_SUPPORT = {'hinge_cap.stl'}
+SUPPORT_KEYS = ('enable_support', 'support_type', 'support_threshold_angle', 'support_on_build_plate_only',
+                'support_critical_regions_only')
 # settings Bambu's built-in profile may leave to the app's own defaults: always record them as ours
 FORCE = ['brim_type', 'brim_width', 'enable_support', 'support_type', 'wall_loops', 'sparse_infill_density',
          'sparse_infill_pattern', 'top_shell_layers', 'bottom_shell_layers']
@@ -23,7 +28,7 @@ FORCE_FILAMENT = ['activate_air_filtration', 'during_print_exhaust_fan_speed', '
 MACHINE_SET = {'cooling_filter_enabled': '1'}
 # filament colour shown in Bambu Studio, by project file: white roof, grey walls, green trim
 COLOURS = [('_roof', '#FFFFFF'), ('_walls', '#A7ABAD'), ('_trim', '#3F7D4E'), ('_tunnel_body', '#3F7D4E'),
-           ('_test_coupons', '#FFFFFF')]
+           ('_test_coupons', '#FFFFFF'), ('_test_breakaway', '#A7ABAD')]
 # parts with little contact with the plate for their height: a wider brim, set on the part itself
 BRIM = {'ridge_front.stl': 8, 'ridge_back.stl': 8, 'ridge_pair.stl': 8, 'hinge_cap.stl': 8, 'leg.stl': 6}
 OBJECT_SUPPORT = [('enable_support', '1'), ('support_type', 'tree(auto)'), ('support_threshold_angle', '30'),
@@ -73,9 +78,13 @@ def fix(path):
     items = [(i, z.read(i.filename)) for i in z.infolist()]
     z.close()
     out = []
+    names = set(re.findall(r'<metadata key="name" value="([^"]+\.stl)"/>',
+                           next(d for i, d in items if i.filename == 'Metadata/model_settings.config').decode()))
     for info, data in items:
         if info.filename == 'Metadata/project_settings.config':
             cfg = json.loads(data)
+            if not names & NEEDS_SUPPORT:   # supports are built into the parts: none from the slicer
+                cfg['enable_support'] = '0'
             if cfg['print_settings_id'] not in index('process'):   # an older export renamed the profile
                 cfg['print_settings_id'] = cfg['print_settings_id'].rsplit(' ', 1)[0]
             p = diff_keys(cfg, flatten('process', cfg['print_settings_id']))
@@ -101,7 +110,9 @@ def fix(path):
                 block = m.group(0)
                 name = re.search(r'<metadata key="name" value="([^"]+)"', block).group(1)
                 kv = []
-                if name in NEEDS_SUPPORT and 'key="enable_support"' not in block:
+                if name not in NEEDS_SUPPORT:   # drop slicer supports an older version of this script switched on
+                    block = re.sub(r'\n\s*<metadata key="(%s)" value="[^"]*"/>' % '|'.join(SUPPORT_KEYS), '', block)
+                elif 'key="enable_support"' not in block:
                     kv += OBJECT_SUPPORT
                 if name in BRIM and 'key="brim_width"' not in block:
                     kv += [('brim_type', 'outer_only'), ('brim_width', str(BRIM[name]))]
