@@ -3,8 +3,8 @@
 A parametric outdoor cat house in plain OpenSCAD, sized for a cat of about 5 kg. It looks like a small
 cottage, with lap siding, board-and-batten gables, shuttered windows, a fish-scale shingle roof, and a
 round entrance with a hood and step. It is built for Florida weather: UV, heat, humidity and
-hurricane-season rain. Every part fits a **Bambu Lab H2D** on a single nozzle (325 × 320 × 325 mm), and
-none needs supports.
+hurricane-season rain. Every part fits a **Bambu Lab H2D** on a single nozzle (325 × 320 × 325 mm). Only
+three need supports: the ridge caps, the latch keepers and the escape-hatch flap.
 
 ![Front](renders/assembly_front.png)
 
@@ -34,15 +34,19 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 ## How it is built
 
 - **Four corner modules.** Each prints upright and carries a quarter of the floor, half a front or back
-  wall with half its gable, and half a side wall. They are 239 × 236 × 317 mm. At each seam, inner flanges
+  wall with half its gable, and half a side wall. They are up to 239 × 236 × 320 mm. At each seam, inner flanges
   bolt together. A printed batten covers the outside joint so rain can't run into it, and two bowtie
   (dovetail) keys lock the floor across each seam.
 - **Four roof panels.** Each prints flat, with the shingles on top. The front and back panels on each
-  slope bolt together along a standing seam. Each panel screws down into the gable walls and into corbels
-  under the eaves.
+  slope bolt together along a standing seam, under a printed seam cap. The fixed slope screws down into the
+  gable walls and into corbels under the eaves. The other slope is a hinged lid held by two turn-button
+  latches.
 - **Ridge cap (two pieces) and a saddle** over the joint between them.
 - **Door surround** (hood, step and keystone) and an **inner ring**, which clamp the wall between them.
-- **Four tapered corner legs and a centre leg.** They hold the floor 60 mm off the ground.
+- **Four legs and a centre leg**, with wide 84 mm feet for sand or soil. They hold the floor 60 mm off the
+  ground.
+- **Optional entrance tunnel** with a corner, which keeps wind-driven rain off the cushion (see
+  [Entrance tunnel](#entrance-tunnel-optional)).
 - **Optional mount**, chosen with `mount = "none" | "tree" | "fence"`. It goes on a long (eave) wall,
   the right one by default (`mount_side = "right" | "left"`). That leaves the door in the front gable, on
   the side next to the post or trunk, so a cat coming along the fence or down the tree can reach it.
@@ -64,6 +68,9 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
     a wall or fence board. Slots drain it and give paws some grip, and gussets underneath carry a landing
     cat. It bolts through the front wall with 3 × M5. With the ledge fitted, print `door_surround_mount`,
     which has no separate step.
+  - **Mount on the left wall** (`mount_side = "left"`): the lid is then the right slope, and everything is
+    mirrored. Export the house parts with `-D 'mount="fence"' -D 'mount_side="left"'` (either mount type
+    gives the same house parts), including the roof panels, ridge caps and latch parts.
 
 ### Weather details
 
@@ -87,6 +94,9 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 | `build.sh` | Exports every STL to `stl/` and renders the previews in `renders/`. Run `./build.sh` (about 2 minutes). |
 | `stl/` | One STL per part with the default settings, already in print orientation. |
 | `renders/` | The preview images, including `plate_layout.png`, which shows how the parts fit on the build plates. |
+| `release/` | Ready-made Bambu Studio project files: per colour for the on-legs build with the tunnel (0.6 mm nozzle), generic ones (0.4 mm), and the test prints. |
+| `STRUCTURAL.md`, `RAIN.md` | Strength checks for a 20 kg load, and the driven-rain check. |
+| `tools/` | The rain test, the test-print coupons, and the scripts that build the slicer profiles and fix the project files. |
 
 To export one part from the command line:
 
@@ -96,60 +106,94 @@ To export one part from the command line:
 
 ## Parts list
 
-| STL | Qty | Size (mm) | Orientation |
+Sizes are as printed (mm), from the exported STLs. Print each part as exported unless the table says
+otherwise. The `stl/` folder holds every variant; pick the tables that match your build.
+
+### Every build
+
+| STL | Qty | Size | Orientation and notes |
 |---|---|---|---|
-| `corner_fl`, `corner_fr` (or `corner_fr_mount`) | 1 each | 239 × 236 × 320 | as exported: floor down |
-| `corner_bl`, `corner_br` (or `corner_br_mount`) | 1 each | 239 × 225 × 320 | as exported: floor down |
-| `roof_fl`, `roof_bl`, `roof_fr`, `roof_br` (or `roof_fr_mount`, `roof_br_mount`, 275 long) | 1 each | 315 × 272 × 20 | as exported: shingles up |
-| `ridge_front`, `ridge_back` | 1 each | 80 × 57 × 272 | as exported: **standing on end** (the hinge knuckles print upright); use an 8 mm brim |
-| `ridge_saddle` | 1 | 63 × 50 × 39 | as exported |
-| `seam_cap` (mounted: 1 `seam_cap` + 1 `seam_cap_mount`, 230 long) | 2 | 271 × 13 × 19 | as exported: top down, open side up |
-| `door_surround` | 1 | Ø216 × 50 | as exported: flange down, hood up |
+| `corner_fl` | 1 | 239 × 236 × 320 | floor down (with the tunnel on a wall: `corner_fl_away`, see below) |
+| `corner_bl` | 1 | 239 × 225 × 320 | floor down; carries the escape-hatch opening |
+| `roof_fl`, `roof_bl` | 1 each | 311 × 272 × 26 | shingles up; the lid slope (no screw pads) |
+| `ridge_front`, `ridge_back` | 1 each | 72 × 57 × 272 | **standing on end**, tree supports, 8 mm brim; or both as one object, `ridge_pair` (72 × 157 × 272) |
+| `ridge_saddle` | 1 | 55 × 50 × 25 | as exported |
 | `door_inner_ring` | 1 | Ø208 × 4 | flat |
-| `leg` | 4 | Ø84 × 60 | foot down (wide foot for sand; `leg_foot_d = 0` for the original narrow one) |
-| `center_leg` | 1 | Ø100 × 60 | as exported: plate down (its 84 mm foot widens at 45°) |
 | `bowtie_key` | 4 | 50 × 30 × 13 | flat |
-| `latch_keeper` | 2 | 36 × 34 × 12 | flat |
+| `latch_keeper` | 2 | 36 × 34 × 12 | flat, supports on |
 | `latch_button` | 2 | 30 × 18 × 9 | flat, grip up |
-| `window_retainer` | 2 mounted, 4 on legs (one per window) | 90 × 110 × 3 | flat |
-| `hatch_frame` | 1 | 170 × 174 × 43 | as exported: wall side down, hood and cheeks up |
-| `hatch_flap` | 1 | 157 × 164 × 12 | as exported: inside face down |
-| `fence_house_cleat`, `fence_standoff` | 1 each | 300 long | as exported (either mount) |
-| `fence_post_cleat` | 1 | 300 × 58 × 26 | as exported (fence mount) |
-| `tree_plate` | 1 | 300 × 308 × 51 | as exported: trunk side down (tree mount) |
-| `landing` | 1 | 246 × 101 × 48 | as exported: walking surface down (any mount) |
-| `support_bracket` | 2 | 200 × 300 × 36 | as exported: web down (optional, replaces the steel brackets; 6 walls, 40 % infill) |
-| `door_surround_mount` | 1 | Ø216 × 50 | replaces `door_surround` when the landing is fitted |
-| `tunnel_body_mount`, `tunnel_roof` (or the `_away` pair) | 1 each | 240 × 161 × 178, 256 × 176 × 16 | mounted houses: as exported, floor down; shingles up (optional entrance tunnel, replaces the door surround) |
-| `tunnel_body`, `tunnel_ramp`, `tunnel_roof`, `tunnel_ramp_roof` | 1 each | 180 × 164 × 291, 225 × 163 × 263, 256 × 176 × 16, 173 × 176 × 9 | houses on legs: the landing and the ramp down to the ground; as exported, legs and ramp foot down / shingles up |
-| `landing_away`, `corner_fl_away` | 1 each | 292 × 101 × 58, 239 × 236 × 320 | replace `landing` and `corner_fl` when the tunnel faces away from a wall |
+| `hatch_frame` | 1 | 170 × 174 × 43 | wall side down, hood and cheeks up |
+| `hatch_flap` | 1 | 157 × 164 × 12 | inside face down, supports on |
+
+### On legs
+
+| STL | Qty | Size | Orientation and notes |
+|---|---|---|---|
+| `corner_fr`, `corner_br` | 1 each | 227 × 236 × 320, 227 × 225 × 320 | floor down; windows on both sides |
+| `roof_fr`, `roof_br` | 1 each | 315 × 272 × 26 | shingles up; the fixed slope, with the hinge knuckles |
+| `seam_cap` | 2 | 270 × 13 × 19 | top down, open side up |
+| `leg` | 4 | Ø84 × 60 | wide foot down (`leg_foot_d = 0` for the original narrow foot), 6 mm brim |
+| `center_leg` | 1 | Ø100 × 60 | plate down; its 84 mm foot widens at 45° |
+| `window_retainer` | 4 | 90 × 110 × 3 | flat, one per window |
+| `door_surround` | 1 | Ø216 × 50 | flange down, hood up; not with the tunnel |
+
+### Mounted (post, tree or wall)
+
+| STL | Qty | Size | Orientation and notes |
+|---|---|---|---|
+| `corner_fr_mount`, `corner_br_mount` | 1 each | 224 × 236 × 320, 224 × 225 × 320 | floor down; pads and bolt holes for the cleat, no windows |
+| `roof_fr_mount`, `roof_br_mount` | 1 each | 275 × 272 × 26 | shingles up; 15 mm eave so the roof clears the post |
+| `seam_cap`, `seam_cap_mount` | 1 each | 270 × 13 × 19, 229 × 13 × 19 | top down, open side up |
+| `window_retainer` | 2 | 90 × 110 × 3 | flat, one per window |
+| `fence_house_cleat`, `fence_standoff` | 1 each | 300 × 68 × 30, 300 × 44 × 30 | as exported |
+| `fence_post_cleat` | 1 | 300 × 58 × 26 | post, fence or wall |
+| `tree_plate` | 1 | 300 × 308 × 51 | trunk side down; instead of `fence_post_cleat` for a tree |
+| `landing` | 1 | 241 × 101 × 51 | walking surface down |
+| `door_surround_mount` | 1 | Ø216 × 50 | flange down; no step, the landing replaces it; not with the tunnel |
+| `support_bracket` | 2 | 200 × 300 × 36 | optional, instead of steel shelf brackets: web down, 6 walls, 40 % infill |
+
+### Entrance tunnel (optional, replaces the door surround)
+
+| Build | STL | Qty | Size | Orientation and notes |
+|---|---|---|---|---|
+| On legs | `tunnel_body` | 1 | 180 × 164 × 291 | the landing; keel legs down |
+| | `tunnel_ramp` | 1 | 225 × 163 × 263 | the ramp; ramp foot down |
+| | `tunnel_roof` | 1 | 256 × 176 × 16 | shingles up |
+| | `tunnel_ramp_roof` | 1 | 173 × 176 × 9 | shingles up |
+| Mounted on a post or tree | `tunnel_body_mount` | 1 | 240 × 161 × 178 | floor down |
+| | `tunnel_roof` | 1 | 256 × 176 × 16 | shingles up |
+| Mounted on a wall | `tunnel_body_away`, `tunnel_roof_away` | 1 each | 240 × 161 × 178, 256 × 176 × 16 | the tunnel on the free side of the door |
+| | `landing_away` | 1 | 292 × 101 × 58 | instead of `landing`: runs past the corner as a porch |
+| | `corner_fl_away` | 1 | 239 × 236 × 320 | instead of `corner_fl`: has the landing's bolt holes |
 
 See `renders/plate_layout.png` for how the parts fit on the plates.
 
 ### How much ASA to buy
 
-These weights come from slicing every STL in Bambu Studio 2.x (re-sliced 2026-11-23 with all current parts). The settings were the H2D 0.4 mm nozzle,
+These weights come from slicing every STL in Bambu Studio 2.x (re-sliced 2026-11-26 with all current parts). The settings were the H2D 0.4 mm nozzle,
 "0.20mm Standard @BBL H2D" with 4 walls, 5 top and 5 bottom layers, 15 % gyroid infill and a 5 mm brim, and
 Bambu ASA on the textured PEI plate. Times are for that profile; a 0.6 mm nozzle on the big parts roughly
 halves them.
 
 | Build | Filament | Print time | Buy (1 kg spools, one colour) |
 |---|---|---|---|
-| On its legs (no mount) | 4.3 kg | ≈ 147 h | **5 spools** |
+| On its legs (no mount) | 4.4 kg | ≈ 150 h | **5 spools** |
 | Fence mount + landing ledge | 4.6 kg | ≈ 154 h | **5 spools** (6 to be safe) |
 | Tree mount + landing ledge | 5.2 kg | ≈ 175 h | **6 spools** |
 | Printed support brackets (optional, 2; 6 walls, 40 % infill) | +0.51 kg | +≈ 21 h | add 1 spool |
-| Entrance tunnel (optional, body + roof) | +0.59 kg | +≈ 18 h | add 1 spool (the wall layout's longer landing adds 40 g) |
+| Entrance tunnel on legs (landing, ramp and both roofs, less the door surround) | +1.24 kg | +≈ 45 h | add 2 spools |
+| Entrance tunnel, mounted (body and roof, less the door surround) | +0.47 kg | +≈ 14 h | add 1 spool (the wall layout's longer landing adds 40 g) |
 
 Splitting the colours the way the renders show takes more spools, because each colour has its own leftover:
 
 | Colour | Parts | On legs | Fence + ledge | Tree + ledge |
 |---|---|---|---|---|
-| Walls (grey) | 4 corner modules | 2.24 kg → 3 spools | 2.26 kg → 3 spools | 2.26 kg → 3 spools |
-| Roof (white) | 4 roof panels | 1.27 kg → 2 spools | 1.19 kg → 2 spools | 1.19 kg → 2 spools |
-| Trim (green) | ridge, seam caps, door, keys, latches, windows, hatch, legs, ledge, mount | 0.76 kg → 1 spool | 1.13 kg → 2 spools | 1.70 kg → 2 spools |
+| Walls (grey) | 4 corner modules | 2.25 kg → 3 spools | 2.26 kg → 3 spools | 2.26 kg → 3 spools |
+| Roof (white) | 4 roof panels | 1.26 kg → 2 spools | 1.18 kg → 2 spools | 1.18 kg → 2 spools |
+| Trim (green) | ridge, seam caps, door, keys, latches, windows, hatch, legs, ledge, mount | 0.86 kg → 1 spool | 1.13 kg → 2 spools | 1.70 kg → 2 spools |
 
-With the tunnel, its body (0.42 kg) is printed in the trim colour and its roof (0.18 kg) with the roof.
+With the tunnel, its walls are printed in the trim colour and its roofs with the roof: on legs 1.08 kg trim and
+0.27 kg roof, mounted 0.42 kg trim and 0.17 kg roof. On legs that means a 2nd trim spool.
 
 The heaviest single prints are the tree plate (about 680 g, 25 h) and the back-right corner module
 (about 610 g, 17.5 h), so start each of them on a spool with at least 750 g left. With the AMS's auto-refill, a second spool of the same ASA takes over if the first
@@ -184,8 +228,8 @@ Starting settings for Bambu Studio (generic ASA profile on the H2D):
   steeper, and the openings bridge at most about 100 mm.
 - **Supports on (tree, auto, 30°) for the ridge caps, the latch keepers and the escape-hatch flap.** The
   ridge caps' hinge knuckles stick out from the cap, the keeper has a hook, and the flap has its hinge
-  barrel. The `trim1` and `trim2` project files already have supports switched on. In the generic project
-  files, switch them on for those parts.
+  barrel. Every project file in `release/` already switches supports on for exactly those parts. If you
+  slice the STLs yourself, switch them on for those parts only.
 - Dry the filament first (4 h at 65 °C) if the spool has been open in Florida humidity.
 
 ## Test print first
@@ -196,10 +240,10 @@ orientation, so they show whether the joints fit on your printer and filament:
 
 | Pieces | Check | If it's off, change in `cat_house.scad` |
 |---|---|---|
-| `seam_front`, `seam_back`, `seam_cap_slice` | Push the two upstands together and slide the cap over them. Bolt through all three with an M4 × 20. The upstands should meet flat, and the cap should slide on firmly without rocking. | `gap` (seam clearance, now 0.15 per side), `seam_cap_cl` (0.4) |
-| `hinge_panel`, `hinge_cap` | Mesh the knuckles and push an M4 rod or a long M4 bolt through. It should swing freely, and the stop ears should land at about 120°. | `hinge_gap` (0.6), `hinge_pin` (4.5 hole) |
-| `key_left`, `key_right`, `bowtie_key` | Press the key into both pockets: a firm push, no hammer, no wobble. | the 0.15 offsets on the pockets and key (`bowtie2d` lines) |
-| `latch_button`, `latch_keeper` | Turn the button on a #8 screw: it should turn with a little friction and hold its position. | |
+| `seam_front`, `seam_back`, `seam_cap_slice` | Push the two upstands together and slide the cap over them. Bolt through all three with an M4 × 20. The upstands should meet flat, and the cap should slide on firmly without rocking. | `gap` (seam clearance, 0.15 per side), `seam_cap_cl` (now 0.15) |
+| `hinge_panel`, `hinge_cap` | Mesh the knuckles and push an M4 rod or a long M4 bolt through. It should swing freely, and the stop ears should land at about 118°. | `hinge_gap` (0.6), `hinge_pin` (4.5 hole), `hinge_stop` (134) |
+| `key_left`, `key_right`, `bowtie_key` | Press the key into both pockets: the two halves should close with no gap and no play. | the pockets' 0.15 offset and the key's size (`bowtie_key`, now drawn size) |
+| `latch_button`, `latch_keeper` | Bolt the button on an M4 with a washer and nyloc nut: it should turn with a little friction and hold its position. | |
 
 If something is too tight or too loose, measure the gap with a feeler gauge or calipers, change the value,
 and rebuild the parts that use it with `./build.sh stl`.
@@ -257,51 +301,78 @@ it keeps the grey within 3 spools. The other parts keep 4 walls.
 
 ## Hardware (all stainless steel, A2/304 or better A4/316)
 
-Stainless only: zinc-plated steel rusts and stains within a season near the coast.
+Stainless only: zinc-plated steel rusts and stains within a season near the coast. "Roofing screws" are
+#8 × 1" (4.2 × 25 mm) pan-head self-tapping screws with bonded EPDM washers.
+
+### Every build
 
 | Qty | Part | Where |
 |---|---|---|
 | 15 | M4 × 20 button head + 2 washers + nyloc nut | Corner-module seams (3 per side seam, 3 front, 6 back) |
-| 6 | M4 × 25 button head + washers + nyloc nut | Door surround and inner ring |
 | 6 | M4 × 20 button head + washers + nyloc nut | Standing seams and their caps (3 per slope) |
 | 4 | M4 × 16 button head + washers + nyloc nut | Ridge caps to the lid slope |
 | 2 | M4 × 20 button head + washers + nyloc nut | Saddle, ridge caps and lid at the centre joint |
 | 2 | M4 stainless threaded rod, 265 mm (or 4 mm stainless rod), + 4 acorn nuts + 4 washers | Hinge pins, one per ridge cap |
-| 2 | M4 × 20 button head + washer + nyloc nut | Turn-button pivots (head inside the house) |
-| 10 | #8 × 1" (4.2 × 25 mm) pan-head self-tapping screws with **bonded EPDM washers** (roofing screws) | Fixed slope to gables (6) and eave corbels (4) |
-| 4 | #8 × 1" roofing screws with EPDM washers | Latch keepers to the lid (2 each) |
-| (10) | #8 × 1" roofing screws, as above | Optional: screw the lid down too for hurricane season (drill out the bosses first) |
-| 8 (16 on legs) | M3 × 12 pan head + nut | Window retainers, 4 per window |
+| 2 | M4 × 20 button head + rubber washer + nyloc nut | Turn-button pivots (head inside the house) |
+| 8 | Roofing screws | Fixed slope: 2 into each gable top, 2 into the eave corbels per panel |
+| 4 | Roofing screws | Latch keepers to the lid (2 each) |
+| 6 | M4 × 25 button head + washers + nyloc nut | Door surround and inner ring (with the tunnel, 4 of them hold the tunnel instead) |
 | 4 | M4 × 20 countersunk + washer + nyloc nut | Escape-hatch frame (heads flush in the frame, nuts inside) |
 | 1 | M4 stainless threaded rod, 175 mm, + 2 acorn nuts | Escape-hatch hinge pin |
 | 4 | 6 × 3 mm neodymium disc magnets (8 × 3 mm if wind lifts the flap) | Escape-hatch catch, glued into the pockets |
 | 0.6 m | Closed-cell foam tape, about 1.5 mm thick | Escape-hatch gasket, round the opening on the frame |
-| 2 (4 on legs) | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
-| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 78 mm | Tunnel windows (on-legs tunnel) |
 | 2 m | Closed-cell EPDM foam tape, 10 × 3 mm, self-adhesive | Seal under the lid (gable rafters and eave plate) |
-| | Clear neutral-cure outdoor silicone | Window pane beads and standing seams |
-| 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket in the foot); not needed when mounted |
-| 4 | M6 × 20 flat head + M6 nut | Centre leg; not needed when mounted |
-| | Outdoor CA glue or epoxy | Bowtie keys (optional, they are a snug press fit) |
+| | Clear neutral-cure outdoor silicone | Window panes, standing seams, ridge-cap leg on the lid |
+| | Outdoor CA glue or epoxy | Bowtie keys (optional, they are a press fit) |
 
-Either mount: 16 × M5 × 20 button head + washers + nyloc nut (house cleat and standoff), and **2 steel
-shelf brackets, 12 × 8 in (305 × 200 mm), heavy duty, each rated for at least 45 kg**, in stainless or
-hot-dip galvanised steel. They bolt to the floor with 4 × M6 × 25 flat head + washers + nuts through the
-centre-leg holes. Drill each bracket arm 6.5 mm at 216 and 276 mm from the inside face of its upright.
+### On legs
 
-With the printed brackets instead: 4 × M6 × 35 flat head + washers + nuts through the arms and floor
-(no drilling, the holes are printed). Tree mount: use M5 × 40 for the uprights instead of M5 × 35. Add a
-washer under every screw head on the plastic.
+| Qty | Part | Where |
+|---|---|---|
+| 4 | M6 × 70 flat (countersunk) head + M6 nut | Corner legs (the nut sits in the hex pocket under the foot) |
+| 4 | M6 × 20 flat head + M6 nut | Centre leg |
+| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
+| 16 | M3 × 12 pan head + nut | Window retainers, 4 per window |
 
-Fence mount: 4 × #10 × 1½" stainless countersunk screws for the mount cleat, 6 × #10 × 2" for the bracket
-uprights, and 4 × #10 × 3" (5 × 80 mm) stainless wood screws as lock screws. Use large (25 mm) fender
-washers inside the house.
+### Mounted
 
-Tree mount: 6 × M5 × 35 + nuts for the bracket uprights (the nuts sit in pockets on the trunk side), and
-4 × #10 × 2¼" stainless screws as lock screws into the plate. Add three 25 mm UV-resistant ratchet straps
-with stainless hardware, or stainless worm-drive hose clamps chained to the trunk's circumference.
+| Qty | Part | Where |
+|---|---|---|
+| 16 | M5 × 20 button head + washers + nyloc nut | House cleat and standoff |
+| 3 | M5 × 20 button head + washers + nyloc nut | Landing ledge (heads inside the house) |
+| 2 | 2 mm UV-stabilised clear polycarbonate, cut to 77 × 97 mm | Window panes |
+| 8 | M3 × 12 pan head + nut | Window retainers, 4 per window |
+| 4 | 25 mm fender washers | Under the lock-screw heads, inside the house |
 
-Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the house).
+- **Brackets, required.** Either 2 steel shelf brackets, 12 × 8 in (305 × 200 mm), heavy duty, each rated for
+  at least 45 kg, in stainless or hot-dip galvanised steel. They bolt to the floor with 4 × M6 × 25 flat
+  head + washers + nuts through the centre-leg holes. Drill each bracket arm 6.5 mm at 216 and 276 mm from
+  the inside face of its upright.
+- **Or the printed brackets.** These take 4 × M6 × 35 flat head + washers + nuts through the arms and floor
+  (the holes are printed). Add a washer under every screw head on the plastic.
+- **Fence, post or wall.**
+  - Mount cleat: 4 × #10 × 1½" stainless countersunk screws.
+  - Bracket uprights: 6 × #10 × 2".
+  - Lock screws: 4 × #10 × 3" (5 × 80 mm) stainless wood screws.
+- **Tree.**
+  - Bracket uprights: 6 × M5 × 35 + nuts, or M5 × 40 with printed brackets. The nuts sit in pockets on the
+    trunk side.
+  - Lock screws into the plate: 4 × #10 × 2¼" stainless screws.
+  - Straps: three 25 mm UV-resistant ratchet straps with stainless hardware, or stainless worm-drive hose
+    clamps chained round the trunk.
+
+### Entrance tunnel (optional)
+
+| Qty | Part | Where |
+|---|---|---|
+| 4 | of the door's M4 × 25 bolts (listed above) | The tunnel's round boss and the inner ring, through the wall |
+| 4 | Roofing screws | Tunnel roof onto its tabs |
+| 0.3 m | EPDM foam tape, 10 × 3 mm (from the roll above) | On the tunnel roof's upstand against the wall |
+| | Silicone | Round the back of the tunnel's boss |
+| *On legs, also:* | | |
+| 4 | M4 × 16 button head + washers + nyloc nut | Splice plates: ramp extension into the landing |
+| 4 | Roofing screws | The ramp's own roof |
+| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 78 mm | Tunnel windows, set in silicone |
 
 ## Assembly
 
@@ -311,7 +382,7 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
    glue if you like.
 3. **Seams.** Bolt the inner flanges with M4 × 20 bolts: 3 per side seam, 3 at the front (below and above
    the door), and 6 at the back. Tighten them evenly so the battens close the outside gaps.
-4. **Legs (skip when mounted).** Drop the M6 × 70 countersunk bolts through the floor at the corners into the tapered legs,
+4. **Legs (skip when mounted).** Drop the M6 × 70 countersunk bolts through the floor at the corners into the legs,
    with the nut in the hex pocket under each foot. Bolt the centre leg under the middle of the floor with
    4 × M6 × 20.
 5. **Windows.** For each window, run a thin bead of silicone round the pocket on the inside, press
@@ -367,14 +438,11 @@ Landing ledge: 3 × M5 × 20 button head + washers + nyloc nut (heads inside the
 ![Roof open](renders/roof_open.png)
 
 Turn both buttons up and lift the left eave. The whole left slope, with the ridge caps, swings up on the
-hinge just below the ridge. Stop ears on the knuckles land on the fixed slope at about 120°, a little past
-the balance point (about 111°), so the lid stays open on its own while you swap the cushion. It opens away
+hinge just below the ridge. Stop ears on the knuckles land on the fixed slope at about 118°, past the
+balance point (about 111°), so the lid stays open on its own while you swap the cushion. It opens away
 from the mount, so a post or tree is not in the way. To close it, lower the lid and turn the buttons flat.
 The lid's ridge edge stops 4 mm short of the fixed slope so it clears as it swings; the ridge cap covers
 that gap when closed.
-
-For hurricane season, drill out the 10 blind bosses on the lid (4.8 mm) and drive the optional roofing
-screws into them as well.
 
 ### Keeping the opening roof watertight
 
@@ -424,7 +492,7 @@ the mouth, turns and reaches the door. Rain driven by the wind can't follow the 
   4. Stick EPDM foam tape on the roof's back upstand.
   5. Screw the roof onto the four tabs with 4 roofing screws (#8 × 1", EPDM washers).
 - **Printing.** Both parts print without supports. The doorway in the body's back wall is open to the top,
-  so it needs no bridge. Only the 150 mm lintel over the mouth is bridged.
+  so it needs no bridge. The lintel over the mouth has 45° haunches, so it bridges only 80 mm.
 - **Roof latch.** The tunnel's closed end stops 25 mm short of the front latch button, and its roof overhangs
   only 2 mm there, so the button's grip (21–45 mm from the tunnel) can still be turned. With the wall layout
   (`tun_dir = "away"`) the tunnel runs under the latch: you reach over the tunnel roof and about 7 cm under
@@ -517,12 +585,6 @@ Without looking in at all: a small battery presence sensor (a mmWave sensor that
 a PIR motion sensor) can be stuck under the ridge on the inside of the fixed slope. Pick one that runs on
 batteries and talks to your phone. Nothing in the house needs to change for that.
 
-If the mount is on the left wall (`mount_side = "left"`), the lid is the right slope instead. Export the
-roof panels, ridge caps and latch parts with the same settings; the latch parts come out mirrored.
-
-For a mount on the left wall, set `mount_side = "left"` and export `corner_fl`, `corner_bl`, `roof_fl`,
-`roof_bl`, `landing` and `door_surround` with `-D 'mount="fence"' -D 'mount_side="left"'`. Either mount
-type gives the same house parts.
 
 ## Strength
 

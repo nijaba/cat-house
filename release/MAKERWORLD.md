@@ -29,7 +29,7 @@ on 2026-11-20.
 
 ## 2. Files to upload
 
-- **Raw files:** every STL in `stl/` (40 files), `cat_house.scad`, and the README as the printing guide
+- **Raw files:** every STL in `stl/` (44 files, plus the test pieces in `stl/test/`), `cat_house.scad`, and the README as the printing guide
   (paste its key sections into the description).
 - **Print profile 1 — "On legs":** `release/cat_cottage_H2D_on_legs.3mf`, 12 plates on the H2D with a
   0.4 mm nozzle, 0.20 mm layers, Bambu ASA, the textured PEI plate, 4 walls, 15 % gyroid and a 5 mm brim.
