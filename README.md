@@ -279,6 +279,8 @@ window heads. Snip the tabs, then twist the comb out.
 | The comb's ends didn't stick to the sides of the opening | stuck: `bk_side` 1 → 1.5 |
 | The comb stood up straight to the top | wobbled: tell me, the spine can be doubled |
 
+First print (2026-11-26, 0.6 mm nozzle): the comb came off clean. No change needed.
+
 The coupons' STLs are in `stl/test/`, and `tools/test_coupons.scad` makes them. The slicer profiles behind
 the project files come from `tools/flatten_profiles.py`. After exporting project files from the command
 line, run `python3 -I tools/fix_3mf.py release/*.3mf`. It records which settings differ from Bambu's
