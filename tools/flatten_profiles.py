@@ -3,7 +3,8 @@ Bambu Studio command line needs, with this project's print settings applied.
 
 Usage: python3 -I tools/flatten_profiles.py [out_dir] [nozzle]   (defaults tools/slicer and 0.4; git-ignored)
        python3 -I tools/flatten_profiles.py tools/slicer06 0.6
-Writes machine.json, process.json (house parts), process_strong.json (support brackets) and asa.json.
+Writes machine.json, process.json (house parts), process_strong.json (support brackets), asa.json, and
+asa_cf.json (ASA-CF, for the pane-cutting guides).
 """
 import json, os, sys
 
@@ -12,6 +13,7 @@ NOZZLE = sys.argv[2] if len(sys.argv) > 2 else '0.4'
 MACHINE = f'Bambu Lab H2D {NOZZLE} nozzle'
 PROCESS = {'0.4': '0.20mm Standard @BBL H2D', '0.6': '0.30mm Standard @BBL H2D 0.6 nozzle'}[NOZZLE]
 FILAMENT = f'Bambu ASA @BBL H2D {NOZZLE} nozzle'
+FILAMENT_CF = f'Bambu ASA-CF @BBL H2D {NOZZLE} nozzle'
 
 # the house: 4 walls, 15 % gyroid, 5 top and bottom layers, 5 mm brim
 HOUSE = {'wall_loops': '4', 'sparse_infill_density': '15%', 'sparse_infill_pattern': 'gyroid',
@@ -47,13 +49,15 @@ def main():
     m = flatten('machine', MACHINE, index('machine'))
     p = flatten('process', PROCESS, index('process'))
     f = flatten('filament', FILAMENT, index('filament'))
-    for d in (m, p, f):
+    fcf = flatten('filament', FILAMENT_CF, index('filament'))
+    for d in (m, p, f, fcf):
         d['from'] = 'system'   # the CLI rejects "user" profiles it can't match to a printer
     m['cooling_filter_enabled'] = '1'   # the H2D's cooling filter: on for ASA
     json.dump(m, open(os.path.join(out, 'machine.json'), 'w'), indent=1)
     json.dump({**p, **HOUSE}, open(os.path.join(out, 'process.json'), 'w'), indent=1)
     json.dump({**p, **STRONG}, open(os.path.join(out, 'process_strong.json'), 'w'), indent=1)
     json.dump(f, open(os.path.join(out, 'asa.json'), 'w'), indent=1)
+    json.dump(fcf, open(os.path.join(out, 'asa_cf.json'), 'w'), indent=1)
     print('wrote profiles to', out)
 
 

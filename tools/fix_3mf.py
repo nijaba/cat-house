@@ -26,9 +26,9 @@ FORCE = ['brim_type', 'brim_width', 'enable_support', 'support_type', 'wall_loop
 FORCE_FILAMENT = ['activate_air_filtration', 'during_print_exhaust_fan_speed', 'complete_print_exhaust_fan_speed']
 # printer settings we change: the H2D's cooling filter (it has no "air filtration" of its own)
 MACHINE_SET = {'cooling_filter_enabled': '1'}
-# filament colour shown in Bambu Studio, by project file: white roof, grey walls, green trim
+# filament colour shown in Bambu Studio, by project file: white roof, grey walls, green trim, black ASA-CF pane guides
 COLOURS = [('_roof', '#FFFFFF'), ('_walls', '#A7ABAD'), ('_trim', '#3F7D4E'), ('_tunnel_body', '#3F7D4E'),
-           ('_test_coupons', '#FFFFFF'), ('_test_breakaway', '#A7ABAD')]
+           ('_test_coupons', '#FFFFFF'), ('_test_breakaway', '#A7ABAD'), ('_pane_jig', '#000000')]
 # Brim rule (ASA): every part gets the project's 5 mm outer brim against warping. A part taller than 100 mm whose
 # first layer covers less than 40 % of its footprint gets 8 mm, and less than 15 % gets 10 mm, set on the part
 # itself. Measured 2026-11-26: landing (tunnel_body) 291 mm tall on 12 %, ridge caps 272 on 8 %, ramp 263 on 38 %.

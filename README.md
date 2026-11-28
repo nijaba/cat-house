@@ -96,7 +96,7 @@ for a 45 cm bed, set `pitch = 25` and `eave_ov = 35` so the corner modules and r
 | `renders/` | The preview images, including `plate_layout.png`, which shows how the parts fit on the build plates. |
 | `release/` | Ready-made Bambu Studio project files: per colour for the on-legs build with the tunnel, generic ones per build, and the test prints. All are set up for the 0.6 mm nozzle. |
 | `STRUCTURAL.md`, `RAIN.md` | Strength checks for a 20 kg load, and the driven-rain check. |
-| `tools/` | The rain test, the test-print coupons, and the scripts that build the slicer profiles and fix the project files. |
+| `tools/` | The rain test, the test-print coupons, the pane-cutting guides (`pane_jig.scad`, STLs in `stl/jig/`), and the scripts that build the slicer profiles and fix the project files. |
 
 To export one part from the command line:
 
@@ -311,6 +311,7 @@ into the parts (see Material and print settings), so leave supports off. The gen
 | 5 | `cat_cottage_H2D_trim1_ridge_caps.3mf`: both ridge caps standing on end, with built-in lattices under the knuckles and a 10 mm brim | green | 1 | 0.22 kg | ≈ 5.2 h |
 | 6 | `cat_cottage_H2D_trim2_supported.3mf`: latch keepers, hatch frame, hatch flap (they no longer need supports; the name stays) | green | 2 | 0.19 kg | ≈ 3 h |
 | 7 | `cat_cottage_H2D_trim3_small.3mf`: ridge saddle, seam caps, wide-foot legs, keys, latch buttons, window retainers, inner door ring | green | 3 | 0.48 kg | ≈ 8.6 h |
+| 8 | `cat_cottage_H2D_pane_jig.3mf`: guides for cutting the polycarbonate panes (see Cutting the window panes), in **ASA-CF**: needs a hardened nozzle | black ASA-CF | 1 | 0.11 kg | ≈ 2.4 h |
 
 | Colour | Needed | Spools on hand | Spare |
 |---|---|---|---|
@@ -318,7 +319,7 @@ into the parts (see Material and print settings), so leave supports off. The gen
 | Grey: 4 corner modules, breakaway test | 2.65 kg | 3 | ≈ 0.35 kg |
 | Green: trim and tunnel | 2.25 kg | 3 | ≈ 0.75 kg |
 
-In all: about 7.0 kg and about 127 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
+In all: about 7.0 kg of ASA and 0.1 kg of ASA-CF, and about 130 h. The corner modules print with 3 walls instead of 4. With 0.62 mm
 lines that's a 1.9 mm shell each side, slightly more than the 4 × 0.42 mm the strength checks assumed, and
 it keeps the grey within 3 spools. The other parts keep 4 walls.
 
@@ -418,20 +419,39 @@ Every pocket is a plain rectangle, so the panes need no corners trimmed.
 | 4 house windows (2 when mounted) | 77 × 97 mm, 97 upright | 78 × 98 mm | 70 × 90 mm |
 | 4 tunnel windows (on legs) | 78 × 88 mm, 88 upright | 78.6 × 88.6 mm | 70 × 80 mm |
 
-**Layout.** Cut three strips across the sheet's 305 mm width, then cut the strips into panes. This uses
-282 mm of the sheet and leaves a spare piece about 325 × 305 mm for re-cuts.
+**Layout.** Cut four strips across the sheet's 305 mm width, then cut the strips into panes. This uses
+370 mm of the sheet and leaves a spare piece about 235 × 305 mm for re-cuts.
 
 | Strip | Width | Cut into |
 |---|---|---|
 | A | 97 mm | 3 house panes, 77 mm each |
-| B | 88 mm | 3 tunnel panes, 78 mm each |
-| C | 97 mm | 1 house pane (77 mm) and 1 piece 78 mm long, trimmed from 97 to 88 mm for the last tunnel pane |
+| B | 88 mm | 3 tunnel panes |
+| C | 88 mm | 1 tunnel pane |
+| D | 97 mm | 1 house pane |
 
-**Before cutting.** Leave the protective film on both sides and mark the lines on the film with a fine
-pen. Cut strips first, then panes, and make a test cut on the spare end to check your method.
+**Cutting guides** (`release/cat_cottage_H2D_pane_jig.3mf`, ASA-CF, 106 g, about 2.4 h; model in
+`tools/pane_jig.scad`). ASA-CF is stiffer than ASA and shrinks about half as much, so the guides stay straight
+and come out closer to size. Carbon fibre wears out brass nozzles: print it with a hardened steel one. Three printed guides set the cut line, so nothing needs marking:
+
+| Guide | Cut line from the edge | Use |
+|---|---|---|
+| `strip97` | 97 mm | Strips A and D, across the sheet |
+| `strip88` | 88 mm | Strips B and C, across the sheet |
+| `pane77` | 77 mm | Panes from the end of each strip. The tunnel panes come out 77 × 88 mm; their pockets are 78.6 mm wide over a 70 mm opening, so they still overlap it by 3.5 mm each side. |
+
+Lay the guide on the piece you are keeping, with its two lips hooked over the sheet's edge (or the end
+of the strip) and pressed against it. Hold or clamp it there and run the knife along the guide's far edge,
+marked "cut this edge", on the waste side. Each new strip starts from the edge the last cut left. ASA-CF
+shrinks a little as it cools, so the guides can print up to about 0.3 mm narrower and the panes come out a
+little loose in their pockets, never tight. Check a guide with calipers before the first cut. An ultrasonic
+blade warms the guide's edge where it rubs: keep light, steady passes so the edge doesn't soften.
+
+**Before cutting.** Leave the protective film on both sides. Without the guides, mark the lines on the
+film with a fine pen. Cut strips first, then panes, and make a test cut on the spare end to check your
+method.
 
 **Ways to cut.**
-- **Score and snap** (cleanest by hand). Clamp a steel straightedge on the line. Score it 6–8 times with a
+- **Score and snap** (cleanest by hand). Clamp a steel straightedge (or a guide) on the line. Score it 6–8 times with a
   plastic-scoring knife or a sharp utility knife, then score the same line lightly twice from the other
   side. Line the score up with a table edge, clamp the sheet down and snap it with one quick press.
 - **Ultrasonic knife.** Take 2–3 passes of about 1 mm each along a clamped straightedge, without
