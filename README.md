@@ -407,6 +407,45 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | 4 | Roofing screws | The ramp's own roof |
 | 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 88 mm (88 upright) | Tunnel windows, set in silicone |
 
+## Cutting the window panes
+
+All the panes come from one 12 × 24 in (305 × 610 mm) polycarbonate sheet. The pockets are drawn for
+2 mm sheet; 0.093 in (2.4 mm) sheet also fits, sitting 0.4 mm proud, and the silicone bead covers that.
+Every pocket is a plain rectangle, so the panes need no corners trimmed.
+
+| Panes | Size | Pocket | Opening |
+|---|---|---|---|
+| 4 house windows (2 when mounted) | 77 × 97 mm, 97 upright | 78 × 98 mm | 70 × 90 mm |
+| 4 tunnel windows (on legs) | 78 × 88 mm, 88 upright | 78.6 × 88.6 mm | 70 × 80 mm |
+
+**Layout.** Cut three strips across the sheet's 305 mm width, then cut the strips into panes. This uses
+282 mm of the sheet and leaves a spare piece about 325 × 305 mm for re-cuts.
+
+| Strip | Width | Cut into |
+|---|---|---|
+| A | 97 mm | 3 house panes, 77 mm each |
+| B | 88 mm | 3 tunnel panes, 78 mm each |
+| C | 97 mm | 1 house pane (77 mm) and 1 piece 78 mm long, trimmed from 97 to 88 mm for the last tunnel pane |
+
+**Before cutting.** Leave the protective film on both sides and mark the lines on the film with a fine
+pen. Cut strips first, then panes, and make a test cut on the spare end to check your method.
+
+**Ways to cut.**
+- **Score and snap** (cleanest by hand). Clamp a steel straightedge on the line. Score it 6–8 times with a
+  plastic-scoring knife or a sharp utility knife, then score the same line lightly twice from the other
+  side. Line the score up with a table edge, clamp the sheet down and snap it with one quick press.
+- **Ultrasonic knife.** Take 2–3 passes of about 1 mm each along a clamped straightedge, without
+  pushing, or one or two passes to half the depth and then snap it as above. The blade melts its way through
+  and leaves a small raised lip on both edges, which must come off (see below). Peel the film back a few
+  millimetres along the line so it doesn't gum the blade, work with ventilation (hot polycarbonate
+  fumes), and let the blade cool between strips.
+- **Saw.** A fine-tooth plywood or plastic blade on a jigsaw or table saw, at a slow feed, with the sheet
+  backed by scrap wood so it doesn't chatter or crack.
+
+**Finishing.** File or sand the edges with 220 grit to remove burrs and any melt lip; with 0.3–0.5 mm of
+clearance, a burr stops the pane going in. Test-fit each pane in its pocket, and peel the film only just
+before setting it in silicone.
+
 ## Assembly
 
 1. **Test-fit.** Stand the four corner modules on a flat surface, push them together and check that the
