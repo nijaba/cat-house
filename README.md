@@ -405,7 +405,7 @@ Stainless only: zinc-plated steel rusts and stains within a season near the coas
 | *On legs, also:* | | |
 | 4 | M4 × 16 button head + washers + nyloc nut | Splice plates: ramp extension into the landing |
 | 4 | Roofing screws | The ramp's own roof |
-| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 78 mm | Tunnel windows, set in silicone |
+| 4 | 2 mm UV-stabilised clear polycarbonate, cut to 78 × 88 mm (88 upright) | Tunnel windows, set in silicone |
 
 ## Assembly
 
@@ -550,7 +550,7 @@ at the door, and turns the same corner.
     roof (`tunnel_ramp_roof`) covers the rest of the ramp, sloping down under the house's eave, and tucks
     under the main roof.
 - **Cottage look.** The outer wall has the same horizontal siding grooves as the house, and four clear
-  windows with raised trim frames: 78 × 78 mm panes of 2 mm polycarbonate in pockets on the inside, sealed
+  windows with raised trim frames: 78 × 88 mm panes (88 upright) of 2 mm polycarbonate in pockets on the inside, sealed
   with silicone. The cat can see out, and the tunnel is light inside. `tun_windows = false` or
   `tun_siding = false` leaves them out.
 - **Drainage.**

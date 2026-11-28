@@ -141,7 +141,7 @@ tun_ramp_end = 300;             // on legs: the ramp extension's mouth (x)
 tun_ramp_ax = 20;               // on legs: the extension's roof slope, steeper so it passes under the house's eave
 tun_skirt = "arches";          // [arches, lattice, big_arch] on legs: how the wall below the walking surface is opened
 tun_siding = true;              // siding grooves and window trim on the tunnel's outer wall, to match the house
-tun_windows = tun_ground;       // clear 2 mm polycarbonate windows in the outer wall (panes 88 x 88 mm); on by default for the on-legs tunnel
+tun_windows = tun_ground;       // clear 2 mm polycarbonate windows in the outer wall (on legs: 70 x 80 openings, panes 78 wide x 88 tall); on by default for the on-legs tunnel
 tun_lintel_z = 155; // underside of the lintel over the mouth (mouth clear height = this - door_sill - tun_floor_t)
 
 /* [Legs and floor] */
