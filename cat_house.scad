@@ -299,10 +299,12 @@ module teardrop2d(r) intersection() {
   translate([-2*r, -2*r]) square([4*r, 3*r]);
 }
 
-// slanted louvre slot through a wall (outside opening lower than inside)
+// slanted louvre slot through a wall (outside opening lower than inside). The slats slope at about 56 degrees,
+// steeper than 45, because their thin undersides sagged at 45 degrees on the first corners (2026-11-27).
+louvre_k = 1.5;  // rise per mm of depth: tan of the slats' angle from horizontal
 module louvre(a0, w, z0, h)
-  multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, -1, 1, 0], [0, 0, 0, 1]])
-    translate([a0, -wt - 3, z0]) cube([w, wt + relief + 6, h]);
+  multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, -louvre_k, 1, 0], [0, 0, 0, 1]])
+    translate([a0, -wt - 1, z0]) cube([w, wt + relief + 4, h]);
 
 module bowtie2d() polygon([[-25, -15], [0, -8], [25, -15], [25, 15], [0, 8], [-25, 15]]);
 
@@ -375,11 +377,12 @@ module window(ac) {
   translate([ac, 0, 0]) prism_a(win_w + 24, [[0, zt - 5], [5, zt], [5, zt + 3], [0, zt + 8]]);
   // sill: top slopes away from the wall
   translate([ac, 0, 0]) prism_a(win_w + 20, [[0, zs - 7], [7, zs], [0, zs + 3]]);
-  // shutters with louvre grooves
+  // shutters with louvre grooves; each groove's top slopes at 45 degrees so it prints without sagging
   for (s = [-1, 1]) translate([ac + s*(win_w/2 + 6 + 3 + 14) - 14, 0, win_zc - win_h/2])
     difference() {
       cube([28, 2.5, win_h]);
-      for (gz = [6 : 7 : win_h - 8]) translate([3, 1.5, gz]) cube([22, 2, 2]);
+      for (gz = [6 : 7 : win_h - 8]) translate([14, 0, 0])
+        prism_a(22, [[1.5, gz], [3.5, gz], [3.5, gz + 3], [1.5, gz + 1]]);
     }
 }
 
@@ -467,8 +470,8 @@ module module_cuts(sx, sy) {
         polygon([[0, ct - 1], [seam_cover + 1, ct - 1], [seam_cover + 1, ct + seam_cover + 1], [0, ct]]);
     }
   }
-  if (sy > 0) face_xf(1) for (ac = [-75, 75], i = [0:4]) louvre(ac - 20, 40, vz0 + i*6.5, 4);
-  face_xf(sx > 0 ? 2 : 3) for (ac = [-hy/2, hy/2], i = [0:2]) louvre(ac - 30, 60, 151 + i*6.5, 4);
+  if (sy > 0) face_xf(1) for (ac = [-75, 75], i = [0:4]) louvre(ac - 20, 40, vz0 + i*6.5, 3.5);
+  face_xf(sx > 0 ? 2 : 3) for (ac = [-hy/2, hy/2], i = [0:2]) louvre(ac - 30, 60, 151 + i*6.5, 3.5);
   // floor drains
   for (p = drain_pts(sx, sy)) translate([p[0], p[1], zb - 1]) cylinder(d = drain_d, h = slab_t + 2, $fn = 16);
   // bowtie key pockets
